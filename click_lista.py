@@ -11,11 +11,11 @@ def on_treeview_click(event):
     item_text = tree.item(item, "text")  # Obtener el texto del ítem
     print(f"Se hizo clic en la fila: {item_text}")  # Imprimir el texto del ítem
 
-root = tk.Tk()
+root = tk.Tk()      
 root.title("Ejemplo Treeview")
 
 tree = ttk.Treeview(root)
-tree["columns"] = ("columna1", "columna2")
+tree["columns"] = ("columna1", "columna2")  
 tree.heading("#0", text="Nombre")
 tree.heading("columna1", text="Columna 1")
 tree.heading("columna2", text="Columna 2")
