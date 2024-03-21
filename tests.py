@@ -1,36 +1,36 @@
 import tkinter as tk
+from tkinter import ttk
 
-class PlaceholderEntry(tk.Entry):
-    def __init__(self, master=None, placeholder="", *args, **kwargs):
-        super().__init__(master, *args, **kwargs)
-        self.placeholder = placeholder
-        self.placeholder_color = 'grey'
-        self.default_fg_color = self['fg']
+class Main:
+    def __init__(self, master):
+        self.ventana_principal = master
+        self.ventana_principal.title("Ejemplo de Treeview con heading clickeable")
 
-        self.bind("<FocusIn>", self.focus_in)
-        self.bind("<FocusOut>", self.focus_out)
+        # Creamos un Frame para contener el Treeview y el botón
+        self.frame = ttk.Frame(self.ventana_principal)
+        self.frame.pack(fill='both', expand=True)
 
-        self.put_placeholder()
+        # Creamos un Treeview
+        self.tree = ttk.Treeview(self.frame)
+        self.tree.pack(fill='both', expand=True)
 
-    def put_placeholder(self):
-        self.insert(0, self.placeholder)
-        self['fg'] = self.placeholder_color
+        # Configuramos los headings
+        self.tree["columns"] = ("name", "age")
+        self.tree.heading("#0", text="Cliente")
 
-    def focus_in(self, *args):
-        if self['fg'] == self.placeholder_color:
-            self.delete(0, "end")
-            self['fg'] = self.default_fg_color
+        # Agregamos algunos datos de ejemplo
+        self.tree.insert("", "end", text="Cliente 1", values=("John", 30))
+        self.tree.insert("", "end", text="Cliente 2", values=("Alice", 25))
+        self.tree.insert("", "end", text="Cliente 3", values=("Bob", 40))
 
-    def focus_out(self, *args):
-        if not self.get():
-            self.put_placeholder()
-            self['fg'] = self.placeholder_color
+        # Creamos un botón encima del encabezado
+        self.heading_button = tk.Button(self.frame, text="Cliente", command=self.on_heading_click)
+        self.heading_button.pack(side="top", fill="x")
 
-# Ejemplo de uso
-root = tk.Tk()
-root.title("Placeholder Entry")
+    def on_heading_click(self):
+        print("Heading clickeado")
 
-placeholder_entry = PlaceholderEntry(root, placeholder="Ingrese su texto aquí...")
-placeholder_entry.pack(padx=10, pady=10)
-
-root.mainloop()
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = Main(root)
+    root.mainloop()
