@@ -1,33 +1,55 @@
 import tkinter as tk
-from tkinter import ttk
 
-root = tk.Tk()
+def seleccionar_elemento(event):
+    elemento_seleccionado = event.widget.cget("text")
+    etiqueta.config(text=f"Elemento seleccionado: {elemento_seleccionado}")
 
-# Creamos un estilo personalizado para el Treeview con líneas de rejilla visibles
-style = ttk.Style()
-style.configure("Treeview", rowheight=25, font=("Arial", 10), bd=1, relief=tk.SOLID)
+# Crear la ventana principal
+ventana = tk.Tk()
+ventana.geometry("300x200")
 
-# Creamos un estilo personalizado para las líneas de rejilla
-style.map("Treeview", foreground=[('!selected', 'gray')], background=[('!selected', 'gray')])
+# Crear un Frame
+frame = tk.Frame(ventana, bd=1, relief=tk.SOLID)
+frame.grid(row=0, column=0, sticky='nsew')
 
-# Creamos un Treeview
-tree = ttk.Treeview(root, columns=("columna1", "columna2", "columna3"), selectmode="browse", style="Treeview")
+# Agregar elementos al Frame
+elementos = ["Elemento 1", "Elemento 2", "Elemento 3", "Elemento 4"]
+for elemento in elementos:
+    etiqueta = tk.Label(frame, text=elemento, bd=1, relief=tk.SOLID)
+    etiqueta.grid(row=0, column=0, sticky='nsew')
+    etiqueta.bind("<Button-1>", seleccionar_elemento)
 
-# Añadimos encabezados de columnas
-tree.heading("#0", text="Columna 0")
-tree.heading("#1", text="Columna 1")
-tree.heading("#2", text="Columna 2")
-tree.heading("#3", text="Columna 3")
+# Crear una etiqueta para mostrar el elemento seleccionado
+etiqueta = tk.Label(ventana, text="")
+etiqueta.grid(row=1, column=0, sticky='nsew')
 
-# Añadimos algunos elementos al Treeview
-for i in range(10):
-    tree.insert("", "end", text=f"Item {i}", values=("Valor 1", "Valor 2", "Valor 3"))
+def funciona():
+    print("Funciona")
 
-# Mostramos la rejilla
-tree.grid(row=0, column=0, sticky="nsew")
+def actualizar_texto(opcion):
+    menubutton.config(text=opcion)
 
-# Hacemos que la rejilla se expanda con el tamaño de la ventana
-root.grid_rowconfigure(0, weight=1)
-root.grid_columnconfigure(0, weight=1)
+ventana_principal = tk.Tk()
 
-root.mainloop()
+header = tk.Frame(ventana, bg='red')
+header.grid(row=3, column=0, columnspan=8, sticky='nsew')
+header.columnconfigure(0, weight=1)
+
+opcion_seleccionada = tk.StringVar()  # Variable para almacenar la última opción seleccionada
+opcion_seleccionada.set("Seleccionar")  # Establecer el valor inicial
+
+menubutton = tk.Menubutton(header, textvariable=opcion_seleccionada)
+menubutton.grid(row=4, column=0, sticky='w')  # Alineación a la izquierda
+
+# Crear un Menú y asociarlo al Menubutton
+menu = tk.Menu(menubutton, tearoff=False)
+menubutton.configure(menu=menu)
+
+# Agregar opciones al Menú
+menu.add_command(label="Opción 1", command=lambda: [funciona(), actualizar_texto("Opción 1")])
+menu.add_command(label="Opción 2", command=lambda: [funciona(), actualizar_texto("Opción 2")])
+menu.add_command(label="Opción 3", command=lambda: [funciona(), actualizar_texto("Opción 3")])
+
+
+# Ejecutar la ventana
+ventana.mainloop()

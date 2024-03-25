@@ -4,6 +4,8 @@ from tkinter import ttk
 from tkinter import *
 import sqlite3
 
+def funciona():
+    print("Funciona")
 
 class Main:
     def __init__(self, root):
@@ -13,8 +15,12 @@ class Main:
         
         self.ventana_principal.config(bg ='grey')
         
-        self.info = ttk.Treeview(self.ventana_principal)
-        self.info.grid(row =0 , column = 0 , sticky = 'nsew', columnspan=5)     
+        self.frame_tree = ttk.Frame(self.ventana_principal)
+        self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan=4)
+        self.frame_tree.grid_columnconfigure(0, weight=1)
+        
+        self.info = ttk.Treeview(self.frame_tree,height = 15)
+        self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
         
         self.info["columns"] = ("ultimo_contacto" , "ultima_venta", "Cantidad" , "Porcentaje")
         self.info.heading("#0" , text = "Cliente")
@@ -44,18 +50,45 @@ class Main:
         self.ventana_principal.grid_columnconfigure(6, weight=1)
         #self.ventana_principal.grid_rowconfigure(1, weight=2)
         
-       
+        self.header = Frame(self.ventana_principal , bg = 'red')
+        self.header.grid(row = 0 , column = 0 , columnspan = 8 , sticky = 'nsew')
+        self.header.columnconfigure(0, weight = 1)
         
         
-        
+        menubutton = tk.Menubutton(self.header, text="Seleccionar")
+        menubutton.grid(row = 0 , column = 0 , sticky= W)
 
-        #self.frame = ttk.Frame(self.ventana_principal)
-        #self.frame.grid(row =0 , column = 3)
+        # Crear un Menú y asociarlo al Menubutton
+        menu = tk.Menu(menubutton, tearoff=False)
+        menubutton.configure(menu=menu)
+
+        # Agregar opciones al Menú
+        menu.add_command(label="Opción 1", command= funciona)
+        menu.add_command(label="Opción 2", command= funciona)
+        menu.add_command(label="Opción 3", command= funciona)
+
+
+        self.frame_log = Frame(self.frame_tree , borderwidth = 1 , relief = 'solid')
+        self.frame_log.grid(row = 1, column = 0 , sticky = W+E)
+        self.frame_log.grid_columnconfigure(1, weight=1)
         
+        self.texto_log =Text(self.frame_log)
+        self.texto_log.config(height = 3 , width = 80)
+        self.texto_log.grid(row = 1 , column = 1, rowspan = 2 , sticky = W+E, padx = 5    , pady = 5)
+        
+        self.next_contact = ttk.Button(self.frame_log , text = "Next Contact")
+        self.next_contact.grid(row = 1, column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
+        
+        self.boton_pop_up = ttk.Button(self.frame_log , text = "Pop Up")
+        self.boton_pop_up.grid(row = 2 , column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
+        
+        self.boton_log = ttk.Button(self.frame_log , text = "Log")
+        self.boton_log.grid(row = 1 , column = 7, padx = 2 , pady= 2 , sticky = "nswe" , rowspan = 2)
+       
         # FRAME EMPRESA
         
-        self.frame_empresa =Frame(self.ventana_principal  , borderwidth=2, relief="solid") 
-        self.frame_empresa.grid(row =0 , column = 5 , pady = 0 , sticky="nswe" , columnspan=5) # sticky="nswe" Se expande en todas las driecciones.
+        self.frame_empresa =Frame(self.ventana_principal  , borderwidth=1, relief="solid") 
+        self.frame_empresa.grid(row = 1 , column = 5 , pady = 0 , sticky = "nswe" , columnspan = 5 , rowspan = 2) # sticky="nswe" Se expande en todas las driecciones.
         
         self.frame_empresa.grid_columnconfigure(1, weight=1)
         self.frame_empresa.grid_columnconfigure(0, weight=1)
@@ -119,8 +152,8 @@ class Main:
         
         #FRAME CONTACTO
         
-        self.frame_contacto = ttk.Frame(self.ventana_principal , borderwidth = 2 , relief = 'solid')
-        self.frame_contacto.grid(row = 1 , column = 5  , columnspan=2 , sticky='nsew')
+        self.frame_contacto = ttk.Frame(self.ventana_principal , borderwidth = 1, relief = 'solid')
+        self.frame_contacto.grid(row = 3 , column = 5  , columnspan=2 , rowspan = 2 , sticky='nsew')
         
         self.frame_contacto.grid_columnconfigure(1, weight=1)
         self.frame_contacto.grid_columnconfigure(0, weight=1)
