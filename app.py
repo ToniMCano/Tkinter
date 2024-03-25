@@ -112,7 +112,7 @@ class Main:   # El objeto que creamos en esta clase es la ventana principal del 
             self.db_consulta(query , values)     
             self.mensaje["text"] = f"Producto {self.nombre.get()} creado con éxito"    # Para reenplazar el valor de text se hace como si fuera un diccionario self.mensaje["text"]   
             self.mensaje["fg"] = "green"                                                                       
-            self.nombre.delete(0,END)  ##### Esto vaciará el campo desde el principio hasta el final.
+            self.nombre.delete(0,END)  ##### Esto vaciará el campo desde el principio hasta el final. también se podría hacer con "self.nombre.set('')"
             self.precio.delete(0,END)
             
         elif self.validar_nombre() and self.validar_precio() == False:

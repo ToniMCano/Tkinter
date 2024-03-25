@@ -1,33 +1,57 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import *
+from tkinter import messagebox as MessageBox
+from tkinter import colorchooser as ColorChooser
+from tkinter import filedialog as FileDialog
 
 root = tk.Tk()
+root.title("Editor de Texto")
+root.config(bd = 15)
 
-# Creamos un estilo personalizado para el Treeview con líneas de rejilla visibles
-style = ttk.Style()
-style.configure("Treeview", rowheight=25, font=("Arial", 10), bd=1, relief=tk.SOLID)
+ruta = ""
 
-# Creamos un estilo personalizado para las líneas de rejilla
-style.map("Treeview", foreground=[('!selected', 'gray')], background=[('!selected', 'gray')])
 
-# Creamos un Treeview
-tree = ttk.Treeview(root, columns=("columna1", "columna2", "columna3"), selectmode="browse", style="Treeview")
+def nuevo():
+    mensaje.set("Nuevo Archivo")
+    
+def guardar():
+    mensaje.set("Archivo Guardado con Éxito")
+    
+def guardar_como():
+    mensaje.set(f"Archivo guardado como...")
 
-# Añadimos encabezados de columnas
-tree.heading("#0", text="Columna 0")
-tree.heading("#1", text="Columna 1")
-tree.heading("#2", text="Columna 2")
-tree.heading("#3", text="Columna 3")
+def abrir():
+    ruta = FileDialog.askopenfilename(title = "Abrir fichero" , initialdir = "C:/")
+    
+    mensaje.set(f"Abriendo {ruta}")
+menubar = Menu(root)
+root.config(menu = menubar)
 
-# Añadimos algunos elementos al Treeview
-for i in range(10):
-    tree.insert("", "end", text=f"Item {i}", values=("Valor 1", "Valor 2", "Valor 3"))
+archivo = Menu(menubar , tearoff = 0)
 
-# Mostramos la rejilla
-tree.grid(row=0, column=0, sticky="nsew")
+archivo.add_cascade(label = "Nuevo" , command = nuevo)
+archivo.add_cascade(label = "Abrir" , command = abrir)
+archivo.add_cascade(label = "Guardar" , command = guardar)
+archivo.add_cascade(label = "Guardar Como" , command = guardar_como)
+archivo.add_separator()
+archivo.add_cascade(label = "Salir" , command = root.quit)
 
-# Hacemos que la rejilla se expanda con el tamaño de la ventana
-root.grid_rowconfigure(0, weight=1)
-root.grid_columnconfigure(0, weight=1)
+menubar.add_cascade(label = "Archivo" , menu = archivo )
+
+text = Text(root)
+text.config(padx=5 , pady=5 , font = ("Consolas" , 15))
+text.pack()
+
+mensaje = StringVar()
+
+mensaje.set("Aquí irá el mensaje")
+
+label_mensaje = Label(root, textvariable = mensaje)
+label_mensaje.pack(side="left")
+
 
 root.mainloop()
+
+
+
+
