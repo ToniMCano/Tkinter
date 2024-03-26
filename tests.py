@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkcalendar import Calendar
 
 def seleccionar_elemento(event):
     elemento_seleccionado = event.widget.cget("text")
@@ -29,8 +30,6 @@ def funciona():
 def actualizar_texto(opcion):
     menubutton.config(text=opcion)
 
-ventana_principal = tk.Tk()
-
 header = tk.Frame(ventana, bg='red')
 header.grid(row=3, column=0, columnspan=8, sticky='nsew')
 header.columnconfigure(0, weight=1)
@@ -49,6 +48,51 @@ menubutton.configure(menu=menu)
 menu.add_command(label="Opción 1", command=lambda: [funciona(), actualizar_texto("Opción 1")])
 menu.add_command(label="Opción 2", command=lambda: [funciona(), actualizar_texto("Opción 2")])
 menu.add_command(label="Opción 3", command=lambda: [funciona(), actualizar_texto("Opción 3")])
+
+
+import tkinter as tk
+from tkinter import ttk
+
+def toggle_frame_visibility():
+    if frame.winfo_ismapped():
+        frame.grid_forget()
+    else:
+        frame.grid(row=1, column=0, sticky="ew")
+        frame.lift()  # Elevar el Frame al frente
+        
+        
+
+# Crear la ventana principal
+ventana = tk.Tk()
+ventana.geometry("300x200")
+
+frameboton = ttk.Frame(ventana)
+frameboton.grid(row = 0 , column = 0)
+
+# Crear un botón para mostrar/ocultar el Frame
+boton = ttk.Button(frameboton, text="Mostrar/Ocultar", command=toggle_frame_visibility)
+boton.grid(row=0, column=0, sticky="ew", pady=10)
+
+# Crear un Frame que se mostrará/ocultará
+frame = tk.Frame(ventana, bg = "green")
+
+# Agregar contenido al Frame
+frame_calendar = tk.Frame(frame)
+frame_calendar.grid(row = 0, column = 3)
+
+calendar = Calendar(frame_calendar , selectedmode = "day" , date_pattern = "dd-mm-yyyy")
+calendar.grid(row = 0 , column = 0)
+
+# Configurar el tamaño y la posición del Frame
+ventana.rowconfigure(1, weight=1)
+ventana.columnconfigure(0, weight=1)
+
+
+test = tk.Label(ventana , text = "Se mueve?" , bg = "red")
+test.grid(row=1 , column = 0)
+
+# Ejecutar la ventana
+ventana.mainloop()
 
 
 # Ejecutar la ventana

@@ -11,7 +11,7 @@ class Main:   # El objeto que creamos en esta clase es la ventana principal del 
         self.ventana = root
         self.ventana.title("App de Gestión") # Cambia el título de la ventana.
         self.ventana.resizable(1,1) # Habilita la redimensión , para que no se redimensione (0,0).
-        self.ventana.wm_iconbitmap("recursos/eye_icon.ico")   # Ruta hacia el icono que queremos mostrar.
+        #self.ventana.wm_iconbitmap("recursos/eye.xbm")   # Ruta hacia el icono que queremos mostrar.
         
         frame = LabelFrame(self.ventana , text = "Registrar un Nuevo Producto") 
         frame.grid(column = 0, row = 0, columnspan = 3 , pady = 20)    # Le indicamos donde empieza (column = 0, row = 0) cuanto ocupa (columnspan = 3) y un margen en y (pady = 20)
@@ -49,7 +49,7 @@ class Main:   # El objeto que creamos en esta clase es la ventana principal del 
         # Crear estilos
         
         style = ttk.Style()
-        style.configure("mystyle.Treeview" , highlightthickness = 0 , bd = 0, font = ("Calibri" , 11)) # Modificar la fuente de la tabla
+        style.configure("mystyle.Treeview" , highlightthickness = 2 , bd = 2,  relief = "solid" ,font = ("Calibri" , 11)) # Modificar la fuente de la tabla
         style.configure("mystyle.Treeview.Heading" , font = ("Calibri" , 13 , 'bold'))   # Modificar la fuente de las cabeceras
         style.layout("mystyle.Treeview" , [("mystyle.Treeview.treearea", {'sticky' : 'nswe'})]) # Eliminar los bordes
         
@@ -134,7 +134,8 @@ class Main:   # El objeto que creamos en esta clase es la ventana principal del 
     def eliminar_producto(self):
         producto = self.tabla.item(self.tabla.selection())  # Obtenemos el valor del elemento que esté seleccionado.
         if producto["text"]:
-            self.db_consulta(f"DELETE FROM producto WHERE nombre = '{producto["text"]}'")
+            producto = producto["text"]
+            self.db_consulta(f'DELETE FROM producto WHERE nombre = "{producto}"')
             self.mensaje["text"] = f'Se ha eliminado {producto["text"]} con éxito'
             self.mensaje["fg"] = 'green'
             
