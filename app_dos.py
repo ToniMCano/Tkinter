@@ -16,7 +16,7 @@ class Main:
         self.ventana_principal = root
         self.ventana_principal.title("MyCRM")
         self.ventana_principal.resizable(1,1)
-        
+        self.ventana_principal.geometry('1200x800')
         self.center_window(self.ventana_principal)
         
         # INFO LISTA
@@ -25,36 +25,33 @@ class Main:
         style.configure("mystyle.Treeview.Heading" , font = ("Calibri" , 9 , 'bold'))   # Modificar la fuente de las cabeceras
         style.layout("mystyle.Treeview" , [("mystyle.Treeview.treearea", {'sticky' : 'nswe'})]) # Eliminar los bordes??
         self.frame_tree = ttk.Frame(self.ventana_principal)
-        self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan=4)
+        self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan=3)
         self.frame_tree.grid_columnconfigure(0, weight=1)
         
         self.info = ttk.Treeview(self.frame_tree,height = 15 , style="mystyle.Treeview")
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
         
-        self.info["columns"] = ("ultimo_contacto" , "Días_C" , "ultima_venta", "Días:V", "Cantidad" , "Porcentaje")
+        self.info["columns"] = ("ultimo_contacto" , "Días_C" , "ultima_venta", "Días:V"''', "Cantidad" , "Porcentaje"''')
         self.info.heading("#0" , text = "Cliente")
         self.info.heading("#1" , text  ="Último Contacto")
         self.info.heading("#2" , text = "Días_C")
         self.info.heading("#3" , text = "Ultima Venta")
         self.info.heading("#4" , text = "Días_V")
-        self.info.heading("#5" , text = "Cantidad")
-        self.info.heading("#6" , text = "Porcentaje")
+        #self.info.heading("#5" , text = "Cantidad")
+        #self.info.heading("#6" , text = "Porcentaje")
         
-        self.info.column("#0" , width = 150)
-        self.info.column("#1" , width = 150)
+        self.info.column("#0" , width = 100)
+        self.info.column("#1" , width = 100)
         self.info.column("#2" , width = 35)
-        self.info.column("#3" , width = 150)
+        self.info.column("#3" , width = 100)
         self.info.column("#4" , width = 35)
-        self.info.column("#5" , width = 150)
-        self.info.column("#6" , width = 150)
+        #self.info.column("#5" , width = 150)
+        #self.info.column("#6" , width = 150)
         
         self.info.heading("#0", command = self.on_heading_click)
         
-        
-        
-        
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
-        self.ventana_principal.grid_columnconfigure(6, weight=1)
+        self.ventana_principal.grid_columnconfigure(5, weight=1)
         
         
         #IMAGENES 
@@ -89,7 +86,7 @@ class Main:
         # HEADER
         
         self.header = ttk.Frame(self.ventana_principal)
-        self.header.grid(row = 0 , column = 0 , columnspan = 8 , pady = 5 , padx = 5 , sticky = 'nsew')
+        self.header.grid(row = 0 , column = 0 , columnspan = 6, pady = 5 , padx = 5 , sticky = 'nsew')
         #self.header.columnconfigure(0, weight = 1)
         
         # AÑADIR CONTACTOS
@@ -204,14 +201,14 @@ class Main:
        
         # FRAME EMPRESA
         
-        self.frame_empresa =Frame(self.ventana_principal  , borderwidth=1, relief="solid") 
-        self.frame_empresa.grid(row = 1 , column = 5 , pady = 0 , sticky = "nswe" , columnspan = 5 , rowspan = 2) # sticky="nswe" Se expande en todas las driecciones.
+        self.frame_empresa = tk.Frame(self.ventana_principal  , borderwidth=1, relief="solid") 
+        self.frame_empresa.grid(row = 1 , column = 5 , pady = 0 , sticky = "nswe" , columnspan = 4, rowspan = 2) # sticky="nswe" Se expande en todas las driecciones.
         
         self.frame_empresa.grid_columnconfigure(1, weight=1)
         self.frame_empresa.grid_columnconfigure(0, weight=1)
         
         self.encabezado_empresa = tk.Label(self.frame_empresa, text="Empresa", bg='black', fg='white')
-        self.encabezado_empresa.grid(row = 0 , column = 0 , columnspan = 2  , sticky=W+E)
+        self.encabezado_empresa.grid(row = 0 , column = 0 , columnspan = 3  , sticky=W+E)
         
         self.label_nombre_empreasa = ttk.Label(self.frame_empresa, text = "Empresa" , font = ("Calibri" , 9 , 'bold'))
         self.label_nombre_empreasa.grid(row = 1 , column = 0,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
@@ -392,7 +389,8 @@ class Main:
         entry_new = ttk.Entry(frame)
         entry_new.grid(row = 1 , column = 0)
         self.center_window(frame)
-        frame.minsize(800, 600)    # Establecer un tamaño mínimo de 300x200
+        frame.geometry("400x400")
+        frame.minsize(400, 400)    # Establecer un tamaño mínimo de 300x200
         
 
 
