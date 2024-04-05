@@ -5,8 +5,8 @@ from tkinter import *
 from PIL import Image, ImageTk
 from tkcalendar import Calendar
 import webbrowser
-#from models import Contacto
-#import db
+from models import Employee , Client , Contact , ContactPerson
+import db
 
  
 
@@ -453,8 +453,8 @@ lista_datos = [
 if __name__ == "__main__":
     
     
-    #db.Base.metadata.create_all(db.engine)
-    #usuario = Contacto(name_contact = "campo uno" , last =  "campo dos")
+    db.Base.metadata.create_all(db.engine)
+    #€usuario = Contact(name_contact = "campo uno" , last =  "campo dos")
     #db.session.add(usuario)
     #db.session.commit()
     #db.session.close()
