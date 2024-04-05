@@ -16,7 +16,7 @@ class Main:
         self.ventana_principal = root
         self.ventana_principal.title("MyCRM")
         self.ventana_principal.resizable(1,1)
-        
+        self.ventana_principal.geometry("1200x800")
         self.center_window(self.ventana_principal)
         
         # INFO LISTA
@@ -24,7 +24,8 @@ class Main:
         style.configure("mystyle.Treeview" , highlightthickness = 2 , bd = 0, font = ("Calibri" , 9), bg = "lightgrey" ) # Modificar la fuente de la tabla
         style.configure("mystyle.Treeview.Heading" , font = ("Calibri" , 9 , 'bold'))   # Modificar la fuente de las cabeceras
         style.layout("mystyle.Treeview" , [("mystyle.Treeview.treearea", {'sticky' : 'nswe'})]) # Eliminar los bordes??
-        self.frame_tree = ttk.Frame(self.ventana_principal)
+        
+        self.frame_tree = tk.Frame(self.ventana_principal , bg = "green")
         self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan=4)
         self.frame_tree.grid_columnconfigure(0, weight=1)
         
@@ -187,6 +188,36 @@ class Main:
         self.boton_log = ttk.Button(self.frame_log , text = "Log")
         self.boton_log.grid(row = 1 , column = 7, padx = 2 , pady= 2 , sticky = "nswe" , rowspan = 2)
         
+        #PROCUCTOS
+        
+        self.frame_products = tk.Frame(self.frame_tree, bg="red" ,bd = 1 , relief = 'solid')
+        self.frame_products.grid(row=3, column=0, sticky="nswe")  
+        
+        self.frame_products.grid_rowconfigure(0, weight=1)
+        self.frame_products.grid_columnconfigure(0, weight=1)
+        self.frame_products.grid_columnconfigure(1, weight=1)
+        self.frame_products.grid_columnconfigure(2, weight=1)
+        
+        self.frame_products1 = tk.Frame(self.frame_products ,bd = 1 , relief = 'solid' , width=100 , height=10)
+        self.frame_products1.grid(row = 1 , column = 0 , sticky = W+E)
+
+        self.label_procuct_familily1 = tk.Label(self.frame_products1 , text = "Productos Tipo 1")
+        self.label_procuct_familily1.grid(row = 0, column = 0)
+        self.label_procuct_familily1.bind("<Button-1>" , self.test)
+        
+        self.frame_products2 = tk.Frame(self.frame_products ,bd = 1 , relief = 'solid' , width=100 , height=10)
+        self.frame_products2.grid(row = 1 , column = 1 , sticky = W+E)
+
+        self.label_procuct_familily2 = tk.Label(self.frame_products2 , text = "Productos Tipo 2")
+        self.label_procuct_familily2.grid(row = 0, column = 0)
+        
+        self.frame_products3 = tk.Frame(self.frame_products, bd = 1 , relief = 'solid' , width=100 , height=10)
+        self.frame_products3.grid(row = 1 , column = 2 , sticky = W+E)
+
+        self.label_procuct_familily3 = tk.Label(self.frame_products3 , text = "Productos Tipo 3")
+        self.label_procuct_familily3.grid(row = 0, column = 0)
+
+        
         
         # NÚMERO DE CONTACTOS/ESTADO
         
@@ -211,6 +242,7 @@ class Main:
         self.frame_empresa.grid_columnconfigure(0, weight=1)
         
         self.encabezado_empresa = tk.Label(self.frame_empresa, text="Empresa", bg='black', fg='white')
+        self.encabezado_empresa.config(width=100)
         self.encabezado_empresa.grid(row = 0 , column = 0 , columnspan = 2  , sticky=W+E)
         
         self.label_nombre_empreasa = ttk.Label(self.frame_empresa, text = "Empresa" , font = ("Calibri" , 9 , 'bold'))
@@ -360,7 +392,7 @@ class Main:
         self.margin_bottom_contacto.grid(row = 10 , column = 0 , columnspan = 2 , sticky = W+E)
         
         
-    def center_window(self, window):
+    def center_window(self, window): # Centrar la ventana en la pantalla.
         window.update_idletasks()
         width = window.winfo_width()
         height = window.winfo_height()
@@ -394,7 +426,20 @@ class Main:
         self.center_window(frame)
         frame.minsize(800, 600)    # Establecer un tamaño mínimo de 300x200
         
-
+        
+    def test(self,event):    # Cuando invocas una función con bind, siempre tiene que recibir al menos un argumento por defecto (event) que hace referencia al objeto, bind, aunque desde donde se invoca no se le pasa.
+        texto = StringVar()
+        widget = event.widget  # Capturar el widget que desencadenón el evento.
+        texto.set(widget.cget("text"))  # Capturar el texto del widget.
+        
+        test = Toplevel()
+        test.title("test")
+        test.geometry("800x800")
+        self.center_window(test)
+        
+        Label(test, textvariable=texto).pack()
+        
+    
 
 
 

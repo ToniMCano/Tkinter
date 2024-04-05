@@ -2,7 +2,7 @@ import tkinter as tk
 from tkcalendar import Calendar
 
 def seleccionar_elemento(event):
-    elemento_seleccionado = event.widget.cget("text")
+    elemento_seleccionado = event.widget.cget("text") # recibir el texto, con .bind
     etiqueta.config(text=f"Elemento seleccionado: {elemento_seleccionado}")
 
 # Crear la ventana principal
@@ -14,11 +14,16 @@ frame = tk.Frame(ventana, bd=1, relief=tk.SOLID)
 frame.grid(row=0, column=0, sticky='nsew')
 
 # Agregar elementos al Frame
-elementos = ["Elemento 1", "Elemento 2", "Elemento 3", "Elemento 4"]
-for elemento in elementos:
-    etiqueta = tk.Label(frame, text=elemento, bd=1, relief=tk.SOLID)
-    etiqueta.grid(row=0, column=0, sticky='nsew')
-    etiqueta.bind("<Button-1>", seleccionar_elemento)
+elementos = [["Elemento 1", "Elemento 2", "Elemento 3", "Elemento 4"] ,
+             ["Elemento A1", "Elemento A2", "Elemento A3", "Elemento A4"],
+             ["Elemento B1", "Elemento B2", "Elemento B3", "Elemento B4"]
+            ]      
+     
+for i, elemento in enumerate(elementos):
+    for e, otro in enumerate(elemento):
+        etiqueta = tk.Label(frame, text=otro, bd=1, relief=tk.SOLID)
+        etiqueta.grid(row=i, column=e, sticky='nsew')
+        etiqueta.bind("<Button-1>", seleccionar_elemento) # con bind, se comporta como un botón
 
 # Crear una etiqueta para mostrar el elemento seleccionado
 etiqueta = tk.Label(ventana, text="")

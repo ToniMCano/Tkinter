@@ -133,6 +133,7 @@ class Main:   # El objeto que creamos en esta clase es la ventana principal del 
         
     def eliminar_producto(self):
         producto = self.tabla.item(self.tabla.selection())  # Obtenemos el valor del elemento que esté seleccionado.
+        print(f'{producto} - {type(producto)} -{len(producto)}')
         if producto["text"]:
             producto = producto["text"]
             self.db_consulta(f'DELETE FROM producto WHERE nombre = "{producto}"')
