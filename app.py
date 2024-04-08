@@ -31,23 +31,24 @@ class Main:
         self.info = ttk.Treeview(self.frame_tree,height = 15 , style="mystyle.Treeview")
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
         
-        self.info["columns"] = ("ultimo_contacto" , "Días_C" , "ultima_venta", "Días:V"''', "Cantidad" , "Porcentaje"''')
-        self.info.heading("#0" , text = "Cliente")
-        self.info.heading("#1" , text  ="Último Contacto")
-        self.info.heading("#2" , text = "Días_C")
-        self.info.heading("#3" , text = "Ultima Venta")
-        self.info.heading("#4" , text = "Días_V")
-        #self.info.heading("#5" , text = "Cantidad")
-        #self.info.heading("#6" , text = "Porcentaje")
+        self.info["columns"] = ("Estado" , "ultimo_contacto" , "Días_C" , "ultima_venta", "Días_V", "Cantidad" , "Porcentaje")
+        self.info.heading("#0" , text = "Estado")
+        self.info.heading("#1" , text = "Cliente")
+        self.info.heading("#2" , text  ="Último Contacto")
+        self.info.heading("#3" , text = "Días_C")
+        self.info.heading("#4" , text = "Ultima Venta")
+        self.info.heading("#5" , text = "Días_V")
+        self.info.heading("#6" , text = "Cantidad")
+        self.info.heading("#7" , text = "Porcentaje")
         
-        self.info.column("#0" , width = 100)
-        self.info.column("#1" , width = 100)
-        self.info.column("#2" , width = 35)
-        self.info.column("#3" , width = 100)
-        self.info.column("#4" , width = 35)
-        #self.info.column("#5" , width = 150)
-        #self.info.column("#6" , width = 150)
-        
+        self.info.column("#0" , width = 35)
+        self.info.column("#1" , width = 150)
+        self.info.column("#2" , width = 50)
+        self.info.column("#3" , width = 10)
+        self.info.column("#4" , width = 50)
+        self.info.column("#5" , width = 10)
+        self.info.column("#6" , width = 20)
+        self.info.column("#7" , width = 20)
         self.info.heading("#0", command = self.on_heading_click)
         
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
@@ -82,6 +83,9 @@ class Main:
         self.phone_icon = self.phone_image.resize((12,12))
         self.phone_icon = ImageTk.PhotoImage(self.phone_icon)
         
+        self.cross_image = Image.open("recursos/cross.png")
+        self.cross_image.resize((12,12))
+        self.cross_icon = ImageTk.PhotoImage(self.cross_image)
         
         
         # HEADER
@@ -91,6 +95,11 @@ class Main:
         #self.header.columnconfigure(0, weight = 1)
         
         # AÑADIR CONTACTOS DESDE POOL
+        self.imagen = tk.PhotoImage(file = "recursos/cross.png")
+        
+        self.add_company = tk.Button(self.header , image = self.imagen) 
+        self.add_company.config(height = 47, width = 47)
+        self.add_company.pack(side = 'left' , padx = 5)
         
         self.pool = tk.Button(self.header, text = "Pool")
         self.pool.config(cursor = 'arrow')
@@ -128,6 +137,15 @@ class Main:
         self.menu.add_command(label="Candidate", command= lambda: self.update_selected("Candidate"))
         self.menu.add_command(label="Contact", command= lambda: self.update_selected("Contact"))
 
+        self.combo = ttk.Combobox(self.header ,state = "readonly",values=["Python", "C", "C++", "Java"] )
+        self.combo.current(newindex=0)
+        self.combo.config(background = 'white')
+        self.combo.pack(side='left')
+        self.combo.bind("<<ComboboxSelected>>" , self.test)
+        
+        def test(self, event):
+            item = self.combo.get()
+            print(item)
 
         # CALENDARIO
 
@@ -452,7 +470,9 @@ class Main:
         save_button = ttk.Button(frame_info, text = "Guardar")
         save_button.grid(row = 6 , column = 0 , columnspan = 2 , padx = 20 , pady = 20 , sticky = W+E)
         
-        
+    def test(self, event):
+        item = self.combo.get()
+        print(item)
         
         
     def abrir_enlace(self):
@@ -460,7 +480,7 @@ class Main:
     
 
     def sql3(self):
-        self.db_c
+        pass
         
 lista_datos = [
     ["Empresa 1", "01-01-2023", 50, "15-03-2024", 300, 10],

@@ -84,9 +84,10 @@ class ContactPerson(Base):
     contact_mobile = Column(Integer)
     contact_mail = Column(String , nullable = False)
     client_id = Column(Integer , ForeignKey("client.id_client"))
+    notes = Column(String)
     
     
-    def __init__(self , contact_name , contact_surname , contact_job_title, contact_phone , contact_mobile , contact_mail ,client_id):
+    def __init__(self , contact_name , contact_surname , contact_job_title, contact_phone , contact_mobile , contact_mail ,client_id , notes = ""):
         
         self.contact_name = contact_name
         self.contact_surname = contact_surname
@@ -95,6 +96,7 @@ class ContactPerson(Base):
         self.contact_mobile = contact_mobile
         self.contact_mail = contact_mail
         self.client_id = client_id
+        self.notes = notes
     
         
     def __str__(self):
@@ -107,6 +109,7 @@ class Contact(Base):
     __table_args__ = {"sqlite_autoincrement" : True}
     
     id_contact = Column(Integer , primary_key = True)
+    company_state = Column(String , nullable = False)
     last_contact = Column(String)
     log = Column(String , nullable = False)
     client_id = Column(Integer , ForeignKey("client.id_client"))
@@ -115,7 +118,8 @@ class Contact(Base):
     contact_employee_id = Column(Integer , ForeignKey('employee.id_employee'))
     contact_person_id = Column(Integer , ForeignKey('contact_person.id_person'))
 
-def __init__(self , last_contact , log , client_id , contact_state , contact_counter , contact_employee_id , contact_person_id):
+def __init__(self , last_contact , log , client_id , contact_state , contact_counter , contact_employee_id , contact_person_id , company_state = 'pool'):
+    self.company_state = company_state
     self.last_contact = last_contact
     self.log = log
     self.client_id = client_id
