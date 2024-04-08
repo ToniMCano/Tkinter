@@ -7,8 +7,24 @@ from tkcalendar import Calendar
 import webbrowser
 from models import Employee , Client , Contact , ContactPerson
 import db
-
+import openpyxl
  
+ 
+def nace_list():
+    excel = openpyxl.load_workbook("recursos\\NACE.xlsx")
+
+    nace = excel['Hoja 1']['A']
+
+    lista_nace = []
+
+    for x in nace:
+        valor = x.value.split(" - ")
+        
+        if len(valor[0]) > 1:
+            lista_nace.append( valor[0] + " " + valor[1])
+        
+    return lista_nace
+    
 
 class Main:
     def __init__(self, root):
@@ -28,7 +44,7 @@ class Main:
         self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan=3)
         self.frame_tree.grid_columnconfigure(0, weight=1)
         
-        self.info = ttk.Treeview(self.frame_tree,height = 15 , style="mystyle.Treeview")
+        self.info = ttk.Treeview(self.frame_tree,height = 20 , style="mystyle.Treeview")
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
         
         self.info["columns"] = ("Estado" , "ultimo_contacto" , "Días_C" , "ultima_venta", "Días_V", "Cantidad" , "Porcentaje")
@@ -97,9 +113,9 @@ class Main:
         # AÑADIR CONTACTOS DESDE POOL
         self.imagen = tk.PhotoImage(file = "recursos/cross.png")
         
-        self.add_company = tk.Button(self.header , image = self.imagen) 
-        self.add_company.config(height = 47, width = 47)
-        self.add_company.pack(side = 'left' , padx = 5)
+        self.add_company = tk.Button(self.header , text = 'Add\nCompany' , font = ("Calibri" , 9 ,'bold') , command = self.add_company) 
+        #self.add_company.config(height = 47, width = 47)
+        self.add_company.pack(side = 'left' , padx = 5 , fill = "both" ) 
         
         self.pool = tk.Button(self.header, text = "Pool")
         self.pool.config(cursor = 'arrow')
@@ -110,7 +126,7 @@ class Main:
         self.pop_up.config(cursor = 'arrow')
         self.pop_up.config(height = 2, width = 5)
         self.pop_up.pack(side="right")
-       
+      
         
         # LEAD, CANDIDATE , CONTACT
         
@@ -125,7 +141,6 @@ class Main:
         self._label_icon.grid(row=0,column=0 ) 
         
         self.menu_button = tk.Menubutton(self.frame_menu_button , text = "", image = self.triangle_icon , compound="right",  bg = 'lightgrey' , bd = 1 , relief = "groove")
-        #self.menu_button.config(width=10 , height = 1)
         self.menu_button.grid(row = 0 , column = 1 , sticky = "nswe", padx=1) 
 
         # Crear un Menú y asociarlo al Menubutton
@@ -139,10 +154,11 @@ class Main:
 
         self.combo = ttk.Combobox(self.header ,state = "readonly",values=["Python", "C", "C++", "Java"] )
         self.combo.current(newindex=0)
-        self.combo.config(background = 'white')
+        #self.combo.config(background = 'white')
         self.combo.pack(side='left')
         self.combo.bind("<<ComboboxSelected>>" , self.test)
-        
+
+
         def test(self, event):
             item = self.combo.get()
             print(item)
@@ -151,10 +167,10 @@ class Main:
 
         def toggle_frame_visibility():
             self.frame_container_calendar.config(bg='')
-            if self.frame_container_calendar.winfo_ismapped():
+            if self.frame_container_calendar.winfo_ismapped(): # Comprueba si self.frame_container_calendar es visible, si es visible lo oculta con self.frame_container_calendar.grid_forget()
                 self.frame_container_calendar.grid_forget()
             else:
-                self.frame_container_calendar.grid(row=1, column=0, sticky="nswe") # Si lo pongo en 0 desplaza el contenido que en el mismo nivel
+                self.frame_container_calendar.grid(row=1, column=0) # Si lo pongo en 0 desplaza el contenido que hay en el mismo nivel
                 self.frame_container_calendar.lift()  # Elevar el Frame al frente
         
 
@@ -336,7 +352,7 @@ class Main:
         self.entry_nombre_contacto.insert(0 , "Pepitos")
         self.entry_nombre_contacto.grid(row = 2 , column = 0 ,  padx = 2 , pady = 2 , sticky = W+E)
         
-        self.label_apellido_contacto = ttk.Label(self.contact_frame , text = "Apellido")
+        self.label_apellido_contacto = ttk.Label(self.contact_frame , text = "Apellidos")
         self.label_apellido_contacto.grid(row = 1 , column = 1 , sticky = W+E, padx = 2 , pady = 2) 
         
         self.entry_apellido_contacto = ttk.Entry(self.contact_frame)
@@ -437,7 +453,7 @@ class Main:
         entry_name = ttk.Entry(frame_info)
         entry_name.grid(row = 1 , column = 0 , padx = 5 , sticky = W+E)
         
-        label_surname = ttk.Label(frame_info , text = "Apellido")
+        label_surname = ttk.Label(frame_info , text = "Apellidos")
         label_surname.grid(row = 0 , column = 1 , padx = 5 , sticky = W+E)
         
         entry_surname = ttk.Entry(frame_info)
@@ -470,6 +486,7 @@ class Main:
         save_button = ttk.Button(frame_info, text = "Guardar")
         save_button.grid(row = 6 , column = 0 , columnspan = 2 , padx = 20 , pady = 20 , sticky = W+E)
         
+        
     def test(self, event):
         item = self.combo.get()
         print(item)
@@ -477,6 +494,101 @@ class Main:
         
     def abrir_enlace(self):
          webbrowser.open_new('https://chat.openai.com/c/2220aa72-de48-497a-b191-203933de98d3')
+         
+         
+    def add_company(self):
+            add_company_frame = Toplevel()
+            add_company_frame.title("Add Company")
+            add_company_frame.geometry("500x300")
+            
+            add_company_frame.grid_columnconfigure(0 , weight = 1)
+            
+            company_frame = ttk.Labelframe(add_company_frame , text = 'Empresa')
+            company_frame.grid(row = 0 , column = 0 , columnspan = 4 , padx = 10 , pady = 10 , sticky = W+E)
+            
+            company_frame.grid_columnconfigure(0 , weight = 1)   
+            company_frame.grid_columnconfigure(1 , weight = 1)
+            
+            company_name = ttk.Label(company_frame , text ="Nombre: ")
+            company_name.grid(row =0 , column = 0 , padx = 5 , pady = 5 )
+            
+            entry_comapany_name = ttk.Entry(company_frame)
+            entry_comapany_name.grid(row =0 , column = 1 , columnspan = 5 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            company_nif= ttk.Label(company_frame , text ="N.I.F: ")
+            company_nif.grid(row =0 , column = 6 , padx = 5 , pady = 5)
+            
+            entry_comapany_nif = ttk.Entry(company_frame)
+            entry_comapany_nif.grid(row =0 , column = 7 , padx = 5 , pady = 5)
+            
+            company_activity = ttk.Label(company_frame , text ="Actividad: ")
+            company_activity.grid(row =4 , column = 0 , padx = 5 , pady = 5)
+            
+            self.nace_list_menu = ttk.Combobox(company_frame, state = 'readonly' , values = nace_list())
+            self.nace_list_menu.grid(row =4 , column = 1 ,  columnspan= 3 , padx = 5 , pady = 5 , sticky = W+E)
+            self.nace_list_menu.current(newindex = 0)
+            self.nace_list_menu.bind("<<ComboboxSelected>>" , self.test) # Cambiar la función ######################################
+            
+            
+            company_adress = ttk.Labelframe(add_company_frame , text ="Dirección: ")
+            company_adress.grid(row =1 , column = 0 , columnspan = 4 , padx = 10 , pady = 10 , sticky = W+E)
+            
+            company_street_label = ttk.Label(company_adress, text="Calle: ")
+            company_street_label.grid(row=0, column=0, padx=5, pady=5, columnspan=3, sticky="we")
+
+            company_street = ttk.Entry(company_adress)
+            company_street.grid(row=1, column=0, columnspan=3, padx=5, pady=5, sticky="we")
+
+            company_street_label_number = ttk.Label(company_adress, text="Número: ")
+            company_street_label_number.grid(row=0, column=4, padx=5, pady=5, sticky="we")
+
+            company_street_number = ttk.Entry(company_adress)
+            company_street_number.grid(row=1, column=4, padx=5, pady=5, sticky="we")
+            
+            company_adress.grid_columnconfigure(0 , weight = 1)
+            company_adress.grid_columnconfigure(1 , weight = 1)
+            
+            
+            
+            company_contact = ttk.Labelframe(add_company_frame , text = "Contacto")   
+            company_contact.grid(row = 2 , column = 0 , columnspan = 4 , padx = 10 , pady = 10 , sticky = W+E)
+            company_contact.grid_columnconfigure(0 , weight = 1)   
+            company_contact.grid_columnconfigure(1 , weight = 1)       
+            
+            company_web = ttk.Label(company_contact , text ="Web: ")
+            company_web.grid(row =2 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            entry_comapany_web = ttk.Entry(company_contact)
+            entry_comapany_web.grid(row = 2 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            company_mail = ttk.Label(company_contact , text ="Mail: ")
+            company_mail.grid(row =2 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            entry_comapany_mail = ttk.Entry(company_contact)
+            entry_comapany_mail.grid(row =2 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            company_phone = ttk.Label(company_contact , text ="Teléfono: ")
+            company_phone.grid(row =3 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            entry_comapany_phone = ttk.Entry(company_contact)
+            entry_comapany_phone.grid(row =3 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            company_phone2 = ttk.Label(company_contact , text ="Teléfono2: ")
+            company_phone2.grid(row =3 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            entry_comapany_phone2 = ttk.Entry(company_contact)
+            entry_comapany_phone2.grid(row =3 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            company_activity = ttk.Label(company_frame , text ="Actividad: ")
+            company_activity.grid(row =4 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            
+            
+        
+            
+            
+            
+            self.center_window(add_company_frame)
     
 
     def sql3(self):
