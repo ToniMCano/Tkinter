@@ -14,7 +14,7 @@ try:
     session = Session()
     
     Base = declarative_base()
-    print('hecho')
+    
     
 except Exception as e:
     print(f"Ha ocurrido un error al conectarse a la Base de Datos:\n{e}")

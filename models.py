@@ -10,6 +10,7 @@ class Employee(Base):
     __table_args__ = {"sqlite_autoincrement" : True}
     
     id_employee = Column(Integer , primary_key = True)
+    employee_alias = Column(String , nullable = False)
     employee_name = Column(String , nullable = False)
     employee_surname = Column(String , nullable = False)
     employee_mail = Column(Integer , nullable = False)
@@ -17,8 +18,9 @@ class Employee(Base):
     password = Column(String , nullable = False)
     permissions = Column(Integer , nullable = False)
     
-    def __init__(self, employee_name = "Pool" , employee_surname = "Terminada" , employee_mail = "company.mail@test.com" , employee_job_title = "None" , password = "******" , permisions = 0):
+    def __init__(self, employee_alias , employee_name = "Pool" , employee_surname = "Terminada" , employee_mail = "company.mail@test.com" , employee_job_title = "None" , password = "******" , permisions = 0):
         
+        self.employee_alias = employee_alias
         self.employee_name = employee_name
         self.employee_surname = employee_surname
         self.employee_mail = employee_mail
@@ -50,7 +52,7 @@ class Client(Base):                                                      # Defin
     state = Column(String , nullable = False)
     
     
-    def __init__(self , name , nif , adress , web , mail , phone , phone2 , activity , contact_person , employee_id , state): # Creamos el constructor para capturar los valores de cada 
+    def __init__(self , name , nif , adress , web , mail , phone , phone2 , activity , contact_person , employee_id , state = "Terminated"): # Creamos el constructor para capturar los valores de cada 
                                                                                                                               # columna el id se autogenera, por eso no lo incluimos
         
         self.name = name

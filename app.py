@@ -8,7 +8,16 @@ import webbrowser
 from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
+from sqlalchemy import and_ , or_  
+from actions import Actions as act
+from datetime import datetime
+import locale
+from tkinter import messagebox as mb
+locale.setlocale(locale.LC_ALL, '')
+
+
  
+
  
 def nace_list():
     excel = openpyxl.load_workbook("recursos\\NACE.xlsx")
@@ -34,8 +43,8 @@ class Main:
         self.ventana_principal.geometry('1200x800')
         self.center_window(self.ventana_principal)
         
-        
         # INFO LISTA
+        
         style = ttk.Style()
         style.configure("mystyle.Treeview" , highlightthickness = 2 , bd = 0, font = ("Calibri" , 9), bg = "lightgrey" ) # Modificar la fuente de la tabla
         style.configure("mystyle.Treeview.Heading" , font = ("Calibri" , 9 , 'bold'))   # Modificar la fuente de las cabeceras
@@ -48,14 +57,14 @@ class Main:
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
         
         self.info["columns"] = ("Estado" , "ultimo_contacto" , "Días_C" , "ultima_venta", "Días_V", "Cantidad" , "Porcentaje")
-        self.info.heading("#0" , text = "Estado")
-        self.info.heading("#1" , text = "Cliente")
-        self.info.heading("#2" , text  ="Último Contacto")
-        self.info.heading("#3" , text = "Días_C")
-        self.info.heading("#4" , text = "Ultima Venta")
-        self.info.heading("#5" , text = "Días_V")
-        self.info.heading("#6" , text = "Cantidad")
-        self.info.heading("#7" , text = "Porcentaje")
+        self.info.heading("#0" , text = "Estado" , command = lambda: self.on_heading_click("state"))
+        self.info.heading("#1" , text = "Cliente" , command = lambda: self.on_heading_click("client"))
+        self.info.heading("#2" , text  ="Último Contacto" , command = lambda: self.on_heading_click("last_contact"))
+        self.info.heading("#3" , text = "Días_C" , command = lambda: self.on_heading_click("days_contact"))
+        self.info.heading("#4" , text = "Ultima Venta" , command = lambda: self.on_heading_click("last_sale"))
+        self.info.heading("#5" , text = "Días_V" , command = lambda: self.on_heading_click("days_sale"))
+        self.info.heading("#6" , text = "Cantidad" , command = lambda: self.on_heading_click("amount"))
+        self.info.heading("#7" , text = "Porcentaje" , command = lambda: self.on_heading_click("percentage"))
         
         self.info.column("#0" , width = 35)
         self.info.column("#1" , width = 150)
@@ -65,19 +74,17 @@ class Main:
         self.info.column("#5" , width = 10)
         self.info.column("#6" , width = 20)
         self.info.column("#7" , width = 20)
-        self.info.heading("#0", command = self.on_heading_click)
+        
         
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
         self.ventana_principal.grid_columnconfigure(5, weight=1)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
-        
         
         #IMAGENES 
         
         self.mobile_image= Image.open("recursos/mobile.png")
         self.mobile_resize = self.mobile_image.resize((10,16))
         self.mobile_icon = ImageTk.PhotoImage(self.mobile_resize)
-        
                 
         self.triangle_icon = Image.open("recursos/triangulo.png")
         self.triangle_icon = self.triangle_icon.resize((10,10))
@@ -103,103 +110,73 @@ class Main:
         self.cross_image.resize((12,12))
         self.cross_icon = ImageTk.PhotoImage(self.cross_image)
         
-        
         # HEADER
         
         self.header = ttk.Frame(self.ventana_principal)
-        self.header.grid(row = 0 , column = 0 , columnspan = 6, pady = 5 , padx = 5 , sticky = 'nsew')
-        #self.header.columnconfigure(0, weight = 1)
-        
-        # AÑADIR CONTACTOS DESDE POOL
-        self.imagen = tk.PhotoImage(file = "recursos/cross.png")
-        
-        self.add_company = tk.Button(self.header , text = 'Add\nCompany' , font = ("Calibri" , 9 ,'bold') , command = self.add_company) 
-        #self.add_company.config(height = 47, width = 47)
-        self.add_company.pack(side = 'left' , padx = 5 , fill = "both" ) 
-        
-        self.pool = tk.Button(self.header, text = "Pool")
-        self.pool.config(cursor = 'arrow')
-        self.pool.config(height=2 ,width=5)
-        self.pool.pack(side="left")
-        
-        self.pop_up = tk.Button(self.header, text = "PopUp")
-        self.pop_up.config(cursor = 'arrow')
-        self.pop_up.config(height = 2, width = 5)
-        self.pop_up.pack(side="right")
-      
-        
+        self.header.grid(row = 0 , column = 0 , columnspan = 6, pady = 5 , padx = 5 , sticky = W+E)
+        self.header.columnconfigure(10, weight = 1)
+     
         # LEAD, CANDIDATE , CONTACT
         
         self.selected_option = StringVar()
         self.selected_option.set("Contact")
-                
-        self.frame_menu_button = Frame(self.header , bg = 'grey' , bd = 1, relief = "sunken")
-        self.frame_menu_button.pack(side="left", padx=5)
         
-        self._label_icon = tk.Label(self.frame_menu_button , textvariable=self.selected_option , bg = 'white' )
-        self._label_icon.config( width = 10, height = 1)
-        self._label_icon.grid(row=0,column=0 ) 
+        self.employee = ttk.Combobox(self.header ,state = "readonly",values=["AMC", "MMG", "ITL"] , width= 10)
+        self.employee.configure(background='lightblue')
+        self.employee.current(newindex=0)
+               
+        self.employee.grid(row = 0 , column = 3 , padx = 5)
+        self.employee.bind("<<ComboboxSelected>>" , self.test)
+
+        self.combo_state = ttk.Combobox(self.header ,state = "readonly",values=["Lead", "Candidate", "Contact"] , width= 10)
+        self.combo_state.configure(background='lightblue')
+        self.combo_state.current(newindex=0)
+        #self.combo_state.config(background = 'white')
+        self.combo_state.grid(row = 0 , column = 4 , padx = 5)
+        self.combo_state.bind("<<ComboboxSelected>>" , self.state)
+
+        # CALENDAR
         
-        self.menu_button = tk.Menubutton(self.frame_menu_button , text = "", image = self.triangle_icon , compound="right",  bg = 'lightgrey' , bd = 1 , relief = "groove")
-        self.menu_button.grid(row = 0 , column = 1 , sticky = "nswe", padx=1) 
+        # Crear un Frame que se mostrará/ocultará self.frame_button
+        self.frame_container_calendar = tk.Frame(self.ventana_principal)
 
-        # Crear un Menú y asociarlo al Menubutton
-        self.menu = tk.Menu(self.menu_button, tearoff=False)
-        self.menu_button.configure(menu=self.menu)
+        # Agregar contenido al Frame
 
-        # Agregar opciones al Menú
-        self.menu.add_command(label="Lead", command= lambda: self.update_selected("Lead"))
-        self.menu.add_command(label="Candidate", command= lambda: self.update_selected("Candidate"))
-        self.menu.add_command(label="Contact", command= lambda: self.update_selected("Contact"))
-
-        self.combo = ttk.Combobox(self.header ,state = "readonly",values=["Python", "C", "C++", "Java"] )
-        self.combo.current(newindex=0)
-        #self.combo.config(background = 'white')
-        self.combo.pack(side='left')
-        self.combo.bind("<<ComboboxSelected>>" , self.test)
-
-
-        def test(self, event):
-            item = self.combo.get()
-            print(item)
-
-        # CALENDARIO
-
-        def toggle_frame_visibility():
-            self.frame_container_calendar.config(bg='')
-            if self.frame_container_calendar.winfo_ismapped(): # Comprueba si self.frame_container_calendar es visible, si es visible lo oculta con self.frame_container_calendar.grid_forget()
-                self.frame_container_calendar.grid_forget()
-            else:
-                self.frame_container_calendar.grid(row=1, column=0) # Si lo pongo en 0 desplaza el contenido que hay en el mismo nivel
-                self.frame_container_calendar.lift()  # Elevar el Frame al frente
+        self.calendar = Calendar(self.frame_container_calendar , selectedmode = "day" , date_pattern = "dd-mm-yyyy")
+        self.calendar.grid(row = 0 , column = 0)
+        self.calendar_date = self.calendar.bind("<<CalendarSelected>>", lambda e: self.calendar_selected_date(e))
         
-
-        self.frame_boton = tk.Frame(self.header, bg = 'white' , bd = 1, relief = "sunken")
-        self.frame_boton.config(height=1)
-        self.frame_boton.pack(side="left" , padx=5)
+        self.frame_calendar_button = tk.Frame(self.header, bg = 'white' , bd = 1, relief = "sunken")
+        self.frame_calendar_button.config(height=1)
+        self.frame_calendar_button.grid(row = 0 , column = 5 , padx = 5)
 
         self.fecha = StringVar()
-        self.fecha.set("25 Abril")
+        self.fecha.set(datetime.now().strftime("%d %B").title())
         
-        self.label_calendar_button = tk.Label(self.frame_boton , textvariable = self.fecha, bg = 'white')
+        
+        self.label_calendar_button = tk.Label(self.frame_calendar_button , textvariable = self.fecha, bg = 'white')
         self.label_calendar_button.config(width = 15 , height = 1)
-        self.label_calendar_button.grid(row = 0, column = 0)
+        self.label_calendar_button.grid(row = 0, column = 6)
         
-        self.boton_fecha = tk.Button(self.frame_boton, image = self.icon_calendar, command=toggle_frame_visibility)
+        self.boton_fecha = tk.Button(self.frame_calendar_button, image = self.icon_calendar, command = self.toggle_frame_visibility)
         self.boton_fecha.config(cursor = 'arrow')
         self.boton_fecha.grid(row=0, column=1, sticky="ew")
 
-        # Crear un Frame que se mostrará/ocultarself.á
-        self.frame_container_calendar = tk.Frame(self.ventana_principal)
-        self.frame_container_calendar.config(bg='')
-
-        # Agregar contenido al Frame
-        self.frame_calendar = tk.Frame(self.frame_container_calendar)
-        self.frame_calendar.pack()
-
-        calendar = Calendar(self.frame_calendar , selectedmode = "day" , date_pattern = "dd-mm-yyyy")
-        calendar.grid(row = 0 , column = 0)
+        # AÑADIR CONTACTOS DESDE POOL
         
+        self.add_company = tk.Button(self.header , text = 'Add\nCompany' , font = ("Calibri" , 9 ,'bold') , command = self.add_company) 
+        #self.add_company.config(height = 47, width = 47)
+        self.add_company.grid(row = 0 , column = 0 , padx = 5) 
+        
+        self.pool = tk.Button(self.header, text = "Pool")
+        self.pool.config(cursor = 'arrow')
+        self.pool.config(height=2 ,width=5)
+        self.pool.grid(row = 0 , column = 1 , padx = 5)
+        
+        self.pop_up = tk.Button(self.header, text = "PopUp")
+        self.pop_up.config(cursor = 'arrow')
+        self.pop_up.config(height = 2, width = 5)
+        self.pop_up.grid(row = 0 , column = 10 , padx = 5 , sticky = E)
         
 
         
@@ -410,8 +387,10 @@ class Main:
         #self.margin_bottom_contacto.config(height= 0)
         self.margin_bottom_contacto.grid(row = 9 , column = 0 , columnspan = 2 , sticky = W+E)
         
-        
+        self.load_contacts(employee)    
+    
     def center_window(self, window):
+        
         window.update_idletasks()
         width = window.winfo_width()
         height = window.winfo_height()
@@ -420,20 +399,24 @@ class Main:
         window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
         
         
-    def on_heading_click(self):
-        print("funciona")
+    def on_heading_click(self , e):
+        
+        print(f"funciona {e}")
         
         
     def update_selected(self,option):
+        
         self.selected_option.set(option)
         print("ha entrado")
         
         
     def capturar(self):
+        
         print(self.entry_mobile.get())
         
         
     def create_contact(self):
+        
         frame = tk.Toplevel()
         frame.title("Nuevo Contacto")
         frame.geometry("400x200")
@@ -485,21 +468,45 @@ class Main:
         
         save_button = ttk.Button(frame_info, text = "Guardar")
         save_button.grid(row = 6 , column = 0 , columnspan = 2 , padx = 20 , pady = 20 , sticky = W+E)
+    
+    
+    def calendar_selected_date(self , event):
         
+        try:
+            fecha_seleccionada = self.calendar.get_date() # 10-04-2024
+            month = int(fecha_seleccionada[3:5])
+            year = int(fecha_seleccionada[6:])
+            
+            if int(fecha_seleccionada[0]) == 0:
+                day = int(fecha_seleccionada[1])
+            
+            else:
+                day = int(fecha_seleccionada[0:2])
+                
+            self.fecha.set(datetime(year,month,day).strftime("%d %B")) 
+            self.toggle_frame_visibility()
+            
+        except Exception as e:
+            mb.showwarning("Error" , "Ha habido un problema con las fechas")
+               
+    
         
     def test(self, event):
-        item = self.combo.get()
+        
+        item = self.combo_state.get()
         print(item)
         
         
     def abrir_enlace(self):
+        
          webbrowser.open_new('https://chat.openai.com/c/2220aa72-de48-497a-b191-203933de98d3')
          
          
     def add_company(self):
+        
             add_company_frame = Toplevel()
             add_company_frame.title("Add Company")
-            add_company_frame.geometry("500x300")
+            add_company_frame.geometry("600x300")
             
             add_company_frame.grid_columnconfigure(0 , weight = 1)
             
@@ -525,9 +532,9 @@ class Main:
             company_activity.grid(row =4 , column = 0 , padx = 5 , pady = 5)
             
             self.nace_list_menu = ttk.Combobox(company_frame, state = 'readonly' , values = nace_list())
-            self.nace_list_menu.grid(row =4 , column = 1 ,  columnspan= 3 , padx = 5 , pady = 5 , sticky = W+E)
+            self.nace_list_menu.grid(row =4 , column = 1 ,  columnspan= 7 , padx = 5 , pady = 5 , sticky = W+E)
             self.nace_list_menu.current(newindex = 0)
-            self.nace_list_menu.bind("<<ComboboxSelected>>" , self.test) # Cambiar la función ######################################
+            self.nace_list_menu.bind("<<ComboboxSelected>>" , self.mas_tests) # Cambiar la función ######################################
             
             
             company_adress = ttk.Labelframe(add_company_frame , text ="Dirección: ")
@@ -539,16 +546,20 @@ class Main:
             company_street = ttk.Entry(company_adress)
             company_street.grid(row=1, column=0, columnspan=3, padx=5, pady=5, sticky="we")
 
-            company_street_label_number = ttk.Label(company_adress, text="Número: ")
-            company_street_label_number.grid(row=0, column=4, padx=5, pady=5, sticky="we")
+            company_street_label_number = ttk.Label(company_adress, text="Núm: ")
+            company_street_label_number.grid(row=0, column=4, pady=5, sticky="we")
 
-            company_street_number = ttk.Entry(company_adress)
-            company_street_number.grid(row=1, column=4, padx=5, pady=5, sticky="we")
+            company_street_number = ttk.Entry(company_adress , width = 6)
+            company_street_number.grid(row=1, column=4,  pady=5)
+            
+            company_street_label_floor = ttk.Label(company_adress, text="Piso: ")
+            company_street_label_floor.grid(row=0, column=5, padx=5, pady=5, sticky="we")
+            
+            company_street_floor = ttk.Entry(company_adress , width = 6)
+            company_street_floor.grid(row=1, column=5, padx=5, pady=5)
             
             company_adress.grid_columnconfigure(0 , weight = 1)
             company_adress.grid_columnconfigure(1 , weight = 1)
-            
-            
             
             company_contact = ttk.Labelframe(add_company_frame , text = "Contacto")   
             company_contact.grid(row = 2 , column = 0 , columnspan = 4 , padx = 10 , pady = 10 , sticky = W+E)
@@ -581,18 +592,51 @@ class Main:
             
             company_activity = ttk.Label(company_frame , text ="Actividad: ")
             company_activity.grid(row =4 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
-            
-            
-            
-        
-            
-            
-            
-            self.center_window(add_company_frame)
-    
 
+            self.center_window(add_company_frame)
+            
+            
+    def state(self, event):  # Recibir valor del Combobox
+        
+            item = self.combo_state.get()
+            print(item)
+
+        # CALENDARIO
+
+    def toggle_frame_visibility(self):
+        
+        self.frame_container_calendar.config(bg='')
+        
+        if self.frame_container_calendar.winfo_ismapped(): # Comprueba si self.frame_container_calendar es visible, si es visible lo oculta con self.frame_container_calendar.grid_forget()
+            self.frame_container_calendar.grid_forget()
+            
+        else:
+            self.frame_container_calendar.grid(row=1, column=0) # Si lo pongo en 0 desplaza el contenido que hay en el mismo nivel
+            self.frame_container_calendar.lift()  # Elevar el Frame al frente
+    
+    
     def sql3(self):
         pass
+    
+
+    def mas_tests(self , event):
+        
+        test = Date()
+        print(test.test(10))
+        
+        
+    def load_contacts(self , employee):
+        #self.info.insert("" , 0 , text = 'client[0]' , values =['client[1]' , 'client[2]' , 'client[3]' , 'client[4]' , 'client[5]' , "Cantidad" , "Porcentaje"])
+        contacts = db.session.query(Client).filter(and_(Client.state == "Lead" , Client.employee_id == employee )).all()
+        
+        for client in contacts:
+            self.info.insert(text = client[0] , values =[client[1] , client[2] , client[3] , client[4] , client[5] , "Cantidad" , "Porcentaje"])
+            
+
+  
+employee = "AMC"
+
+
         
 lista_datos = [
     ["Empresa 1", "01-01-2023", 50, "15-03-2024", 300, 10],
@@ -656,5 +700,6 @@ if __name__ == "__main__":
     #db.session.close()
     root = Tk()
     app = Main(root)
+    act.login(app)
     root.mainloop()
     
