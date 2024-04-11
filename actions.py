@@ -11,13 +11,19 @@ from sqlalchemy import and_ , or_
 from datetime import datetime
 import locale
 from tkinter import messagebox as mb
+import os
 locale.setlocale(locale.LC_ALL, '')
    
 
 
 
 def nace_list():
-    excel = openpyxl.load_workbook("recursos\\NACE.xlsx")
+    
+    if os.name == "nt":
+        excel = openpyxl.load_workbook("recursos\\NACE.xlsx")
+    
+    else:
+        excel = openpyxl.load_workbook("recursos/NACE.xlsx")
 
     nace = excel['Hoja 1']['A']
 
@@ -94,7 +100,7 @@ class Actions:
         frame.geometry("400x200")
         #frame.minsize(400, 400)    # Establecer un tamaño mínimo de 300x200
         frame.grid_columnconfigure(0 , weight = 1)
-        self.center_window(self , frame)
+        Actions.center_window(Actions , frame)
         
         
         frame_info = ttk.Frame(frame)
@@ -146,7 +152,7 @@ class Actions:
     
         add_company_frame = Toplevel()
         add_company_frame.title("Add Company")
-        add_company_frame.geometry("600x300")
+        #add_company_frame.geometry("600x300")
         
         add_company_frame.grid_columnconfigure(0 , weight = 1)
         
@@ -174,7 +180,7 @@ class Actions:
         self.nace_list_menu = ttk.Combobox(company_frame, state = 'readonly' , values = nace_list())
         self.nace_list_menu.grid(row =4 , column = 1 ,  columnspan= 7 , padx = 5 , pady = 5 , sticky = W+E)
         self.nace_list_menu.current(newindex = 0)
-        self.nace_list_menu.bind("<<ComboboxSelected>>" , self.mas_tests) # Cambiar la función ######################################
+        self.nace_list_menu.bind("<<ComboboxSelected>>" , self.test) # Cambiar la función ######################################
         
         
         company_adress = ttk.Labelframe(add_company_frame , text ="Dirección: ")
@@ -233,7 +239,7 @@ class Actions:
         company_activity = ttk.Label(company_frame , text ="Actividad: ")
         company_activity.grid(row =4 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
 
-        self.center_window(add_company_frame)
+        Actions.center_window(Actions , add_company_frame)
             
     
     def calendar_selected_date(self , event):
@@ -270,4 +276,5 @@ class Actions:
     def olvidar(app):
        app.grid_forget()
        
-       
+    def tst(self):
+        pass
