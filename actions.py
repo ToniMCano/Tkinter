@@ -15,7 +15,21 @@ import os
 locale.setlocale(locale.LC_ALL, '')
    
 
-
+hours_list = [
+            "8:00", "8:15", "8:30", "8:45", "9:00",
+            "9:00", "9:15", "9:30", "9:45", "10:00",
+            "10:00", "10:15", "10:30", "10:45", "11:00",
+            "11:00", "11:15", "11:30", "11:45", "12:00",
+            "12:00", "12:15", "12:30", "12:45", "13:00",
+            "13:00", "13:15", "13:30", "13:45", "14:00",
+            "14:00", "14:15", "14:30", "14:45", "15:00",
+            "15:00", "15:15", "15:30", "15:45", "16:00",
+            "16:00", "16:15", "16:30", "16:45", "17:00",
+            "17:00", "17:15", "17:30", "17:45", "18:00",
+            "18:00", "18:15", "18:30", "18:45", "19:00",
+            "19:00", "19:15", "19:30", "19:45", "20:00",
+            "20:00", "20:15", "20:30", "20:45", "20:00",
+              ]
 
 def nace_list():
     
@@ -39,6 +53,8 @@ def nace_list():
 
  
 class Actions:
+    
+    calenda_place = ""
     
     def center_window(self, window):
         
@@ -76,7 +92,7 @@ class Actions:
         employee_password_entry.grid(row =1 , column = 1 , padx = 5 , pady = 10 , sticky = W+E)
         
         log_button = ttk.Button(login , text = "Login")
-        log_button.grid(row = 1 , column = 0 , padx = 10 , pady = 10)
+        log_button.grid(row = 1 , column = 0 , padx = 5 , pady = 5)
         
         Actions.center_window(Actions , login)
         
@@ -96,8 +112,8 @@ class Actions:
     def create_contact(self):
         
         frame = tk.Toplevel()
-        frame.title("Nuevo Contacto")
-        frame.geometry("400x200")
+        frame.title("New Contact")
+        frame.geometry("600x180")
         #frame.minsize(400, 400)    # Establecer un tamaño mínimo de 300x200
         frame.grid_columnconfigure(0 , weight = 1)
         Actions.center_window(Actions , frame)
@@ -106,46 +122,48 @@ class Actions:
         frame_info = ttk.Frame(frame)
         frame_info.grid(row = 0 , column = 0, padx = 5 , pady = 10 , sticky = W+E)
         frame_info.grid_columnconfigure(0 , weight = 1)
-        frame_info.grid_columnconfigure(1 , weight = 1)
         
-        label_name = ttk.Label(frame_info, text = "Nombre:")
+        frame_contact_person = ttk.Labelframe(frame_info , text = "Contact Person")
+        frame_contact_person.grid(row = 0 , column = 0)
+        
+        label_name = ttk.Label(frame_contact_person, text = "Nombre:")
         label_name.grid(row = 0 , column = 0 , padx = 5 , sticky = W+E)
         
-        entry_name = ttk.Entry(frame_info)
+        entry_name = ttk.Entry(frame_contact_person)
         entry_name.grid(row = 1 , column = 0 , padx = 5 , sticky = W+E)
         
-        label_surname = ttk.Label(frame_info , text = "Apellidos")
+        label_surname = ttk.Label(frame_contact_person , text = "Apellidos")
         label_surname.grid(row = 0 , column = 1 , padx = 5 , sticky = W+E)
         
-        entry_surname = ttk.Entry(frame_info)
+        entry_surname = ttk.Entry(frame_contact_person)
         entry_surname.grid(row = 1 , column = 1 , padx = 5 , sticky = W+E)
         
-        label_job_title = ttk.Label(frame_info , text = "Cargo")
-        label_job_title.grid(row = 2 , column = 0 , sticky = W+E , padx = 5)
+        label_job_title = ttk.Label(frame_contact_person , text = "Cargo")
+        label_job_title.grid(row = 0 , column = 2 , sticky = W+E , padx = 5)
         
-        entry_job_title = ttk.Entry(frame_info)
-        entry_job_title.grid(row = 3 , column = 0, sticky = W+E , padx = 5)
+        entry_job_title = ttk.Entry(frame_contact_person)
+        entry_job_title.grid(row = 1 , column = 2, sticky = W+E , padx = 5)
         
-        label_mail = ttk.Label(frame_info , text = "Mail")
-        label_mail.grid(row = 2 , column = 1 , sticky = W+E , padx = 5)
+        label_mail = ttk.Label(frame_contact_person , text = "Mail")
+        label_mail.grid(row = 2 , column = 0 , sticky = W+E , padx = 5)
         
-        entry_mail = ttk.Entry(frame_info)
-        entry_mail.grid(row = 3 , column = 1, sticky = W+E , padx = 5)
+        entry_mail = ttk.Entry(frame_contact_person)
+        entry_mail.grid(row = 3 , column = 0, sticky = W+E , padx = 5 , pady = 5)
         
-        label_phone = ttk.Label(frame_info , text = "Teléfono")
-        label_phone.grid(row = 4 , column = 0 , sticky = W+E , padx = 5)
+        label_phone = ttk.Label(frame_contact_person , text = "Teléfono")
+        label_phone.grid(row = 2 , column = 1 , sticky = W+E , padx = 5)
         
-        entry_phone = ttk.Entry(frame_info)
-        entry_phone.grid(row = 5 , column = 0, sticky = W+E , padx = 5)
+        entry_phone = ttk.Entry(frame_contact_person)
+        entry_phone.grid(row = 3 , column = 1, sticky = W+E , padx = 5 , pady = 5)
         
-        label_mobile = ttk.Label(frame_info , text = "Móvil")
-        label_mobile.grid(row = 4 , column = 1 , sticky = W+E , padx = 5)
+        label_mobile = ttk.Label(frame_contact_person , text = "Móvil")
+        label_mobile.grid(row = 2 , column = 2 , sticky = W+E , padx = 5)
         
-        entry_mobile = ttk.Entry(frame_info)
-        entry_mobile.grid(row = 5 , column = 1, sticky = W+E , padx = 5)
+        entry_mobile = ttk.Entry(frame_contact_person)
+        entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
         
         save_button = ttk.Button(frame_info, text = "Guardar")
-        save_button.grid(row = 6 , column = 0 , columnspan = 2 , padx = 20 , pady = 20 , sticky = W+E)
+        save_button.grid(row = 6 , column = 0 , columnspan = 2 , padx = 200 , pady = 5 , sticky = W+E)
         
         
     def add_company(self):
@@ -238,11 +256,88 @@ class Actions:
         
         company_activity = ttk.Label(company_frame , text ="Actividad: ")
         company_activity.grid(row =4 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        save_company_button = ttk.Button(add_company_frame , text = "Add")
+        save_company_button.grid(row = 5 , column = 0 , pady = 5 )
+        
+        frame_contact_person = ttk.Labelframe(add_company_frame , text = "Contact Person")
+        frame_contact_person.grid(row = 4 , column = 0)
+        
+        label_name = ttk.Label(frame_contact_person, text = "Nombre:")
+        label_name.grid(row = 0 , column = 0 , padx = 5 , sticky = W+E)
+        
+        entry_name = ttk.Entry(frame_contact_person)
+        entry_name.grid(row = 1 , column = 0 , padx = 5 , sticky = W+E)
+        
+        label_surname = ttk.Label(frame_contact_person , text = "Apellidos")
+        label_surname.grid(row = 0 , column = 1 , padx = 5 , sticky = W+E)
+        
+        entry_surname = ttk.Entry(frame_contact_person)
+        entry_surname.grid(row = 1 , column = 1 , padx = 5 , sticky = W+E)
+        
+        label_job_title = ttk.Label(frame_contact_person , text = "Cargo")
+        label_job_title.grid(row = 0 , column = 2 , sticky = W+E , padx = 5)
+        
+        entry_job_title = ttk.Entry(frame_contact_person)
+        entry_job_title.grid(row = 1 , column = 2, sticky = W+E , padx = 5)
+        
+        label_mail = ttk.Label(frame_contact_person , text = "Mail")
+        label_mail.grid(row = 2 , column = 0 , sticky = W+E , padx = 5)
+        
+        entry_mail = ttk.Entry(frame_contact_person)
+        entry_mail.grid(row = 3 , column = 0, sticky = W+E , padx = 5 , pady = 5)
+        
+        label_phone = ttk.Label(frame_contact_person , text = "Teléfono")
+        label_phone.grid(row = 2 , column = 1 , sticky = W+E , padx = 5)
+        
+        entry_phone = ttk.Entry(frame_contact_person)
+        entry_phone.grid(row = 3 , column = 1, sticky = W+E , padx = 5 , pady = 5)
+        
+        label_mobile = ttk.Label(frame_contact_person , text = "Móvil")
+        label_mobile.grid(row = 2 , column = 2 , sticky = W+E , padx = 5)
+        
+        entry_mobile = ttk.Entry(frame_contact_person)
+        entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
 
         Actions.center_window(Actions , add_company_frame)
-            
     
-    def calendar_selected_date(self , event):
+    
+    def calendar(frame , place , date = "" ):
+        
+        frame.calendar = Calendar(frame , selectedmode = "day" , date_pattern = "dd-mm-yyyy")
+        frame.calendar.pack()
+        
+        if place == "general":
+            frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>", lambda e: Actions.calendar_selected_date(frame , place , date , e))
+       
+        elif place != "general":
+            hour = ttk.Combobox(frame , justify = "center" , values = hours_list)
+            hour.current(newindex = 0)
+            hour.pack(fill = "x" , expand = True , anchor = "center")
+            #frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>")
+            send = ttk.Button(frame , text = "Save" , command = lambda: Actions.toggle_frame_visibility(frame , "next") )
+            send.pack(pady = 5)
+
+    def toggle_frame_visibility(frame , place):
+        
+        if frame.winfo_ismapped(): # Comprueba si self.frame_container_calendar es visible, si es visible lo oculta con self.frame_container_calendar.grid_forget()
+            frame.place_forget()
+            
+        else:
+            if place == "general":
+                frame.place(x = 400, y = 50) 
+                frame.lift()  # Elevar el Frame al frente 
+                
+            elif place == 'next':
+                frame.place(x = 0, y = 335) 
+                frame.lift() 
+            
+            elif place == "pop":
+                frame.place(x = 0, y = 360) 
+                frame.lift() 
+
+
+    def calendar_selected_date(self , place , date , event):
         
         try:
             fecha_seleccionada = self.calendar.get_date() # 10-04-2024
@@ -254,27 +349,20 @@ class Actions:
             
             else:
                 day = int(fecha_seleccionada[0:2])
-                
-            self.fecha.set(datetime(year,month,day).strftime("%d %B")) 
-            Actions.toggle_frame_visibility(self.frame_container_calendar)
+            
+            date.set(datetime(year,month,day).strftime("%d %B")) 
+            Actions.toggle_frame_visibility(self , place)
             
         except Exception as e:
             mb.showwarning("Error" , f"Ha habido un problema con las fechas {e}")
             
             
-    def toggle_frame_visibility(frame):
-        
-        frame.config(bg='')
-        
-        if frame.winfo_ismapped(): # Comprueba si self.frame_container_calendar es visible, si es visible lo oculta con self.frame_container_calendar.grid_forget()
-            frame.grid_forget()
-            
-        else:
-            frame.grid(row=1, column=0) # Si lo pongo en 0 desplaza el contenido que hay en el mismo nivel
-            frame.lift()  # Elevar el Frame al frente    
-                
+
+                   
+                    
     def olvidar(app):
        app.grid_forget()
        
-    def tst(self):
-        pass
+    def tst(self , place , event):
+        print(f"Date From: {place} - {self.calendar.get_date()}")
+        Actions.toggle_frame_visibility(self , place)

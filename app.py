@@ -59,7 +59,7 @@ class Main:
         
         
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
-        self.ventana_principal.grid_columnconfigure(5, weight=1)
+        self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
         
         #IMAGENES 
@@ -120,27 +120,30 @@ class Main:
         # CALENDAR
         
         # Crear un Frame que se mostrará/ocultará self.frame_button
-        self.frame_container_calendar = tk.Frame(self.ventana_principal)
+        self.frame_calendar = tk.Frame(self.ventana_principal , bd = 1 ,  relief = 'solid')
+        self.fecha = StringVar()
+        act.calendar(self.frame_calendar, "general" , self.fecha)
+        self.frame_calendar_next = tk.Frame(self.ventana_principal , bd = 1 ,  relief = 'solid')
+        act.calendar(self.frame_calendar_next , "next")
+        self.frame_calendar_pop = tk.Frame(self.ventana_principal , bd = 1 ,  relief = 'solid')
+        act.calendar(self.frame_calendar_pop , "pop")
+        
+                  
 
         # Agregar contenido al Frame
 
-        self.calendar = Calendar(self.frame_container_calendar , selectedmode = "day" , date_pattern = "dd-mm-yyyy")
-        self.calendar.grid(row = 0 , column = 0)
-        self.calendar_date = self.calendar.bind("<<CalendarSelected>>", lambda e: act.calendar_selected_date(self , e))
         
         self.frame_calendar_button = tk.Frame(self.header, bg = 'white' , bd = 1, relief = "sunken")
         self.frame_calendar_button.config(height=1)
         self.frame_calendar_button.grid(row = 0 , column = 5 , padx = 5)
 
-        self.fecha = StringVar()
         self.fecha.set(datetime.now().strftime("%d %B").title())
-        
         
         self.label_calendar_button = tk.Label(self.frame_calendar_button , textvariable = self.fecha, bg = 'white')
         self.label_calendar_button.config(width = 15 , height = 1)
         self.label_calendar_button.grid(row = 0, column = 6)
         
-        self.boton_fecha = tk.Button(self.frame_calendar_button, image = self.icon_calendar, command = lambda: act.toggle_frame_visibility(self.frame_container_calendar))
+        self.boton_fecha = tk.Button(self.frame_calendar_button, image = self.icon_calendar, command = lambda: act.toggle_frame_visibility(self.frame_calendar, "general"))
         self.boton_fecha.config(cursor = 'arrow')
         self.boton_fecha.grid(row=0, column=1, sticky="ew")
 
@@ -172,11 +175,11 @@ class Main:
         self.texto_log.config(height = 3 , width = 80)
         self.texto_log.grid(row = 1 , column = 1, rowspan = 2 , sticky = W+E, padx = 5    , pady = 5)
         
-        self.next_contact = ttk.Button(self.frame_log , text = "Next Contact")
+        self.next_contact = ttk.Button(self.frame_log , text = "Next Contact" , command = lambda: act.toggle_frame_visibility(self.frame_calendar_next , "next"))
         self.next_contact.config(cursor = 'arrow')
         self.next_contact.grid(row = 1, column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
-        self.boton_pop_up = ttk.Button(self.frame_log , text = "Pop Up", command = lambda: act.olvidar(self.frame_tree))
+        self.boton_pop_up = ttk.Button(self.frame_log , text = "Pop Up", command = lambda: act.toggle_frame_visibility(self.frame_calendar_pop , "pop"))
         self.boton_pop_up.config(cursor = 'arrow')
         self.boton_pop_up.grid(row = 2 , column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
