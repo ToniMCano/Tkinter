@@ -149,7 +149,7 @@ class Main:
 
         # AÑADIR CONTACTOS DESDE POOL
         
-        self.add_company = tk.Button(self.header , text = 'Add\nCompany' , font = ("Calibri" , 9 ,'bold') , command = lambda: act.add_company(self)) 
+        self.add_company = tk.Button(self.header , text = 'Add\nCompany' , font = ("Calibri" , 9 ,'bold') , command = lambda: act.add_company()) 
         #self.add_company.config(height = 47, width = 47)
         self.add_company.grid(row = 0 , column = 0 , padx = 5) 
         
@@ -203,54 +203,67 @@ class Main:
        
         # FRAME EMPRESA
         
-        self.frame_empresa = tk.Frame(self.ventana_principal  , borderwidth=1, relief="solid") 
-        self.frame_empresa.grid(row = 1 , column = 5 , pady = 0 , sticky = "nswe" , columnspan = 4, rowspan = 2) # sticky="nswe" Se expande en todas las driecciones.
+        self.frame_company = tk.Frame(self.ventana_principal  , borderwidth=1, relief="solid") 
+        self.frame_company.grid(row = 1 , column = 5 , pady = 0 , sticky = "nswe" , columnspan = 4, rowspan = 2) # sticky="nswe" Se expande en todas las driecciones.
         
-        self.frame_empresa.grid_columnconfigure(1, weight=1)
-        self.frame_empresa.grid_columnconfigure(0, weight=1)
+        self.frame_company.grid_columnconfigure(1, weight=1)
+        self.frame_company.grid_columnconfigure(0, weight=1)
         
-        self.encabezado_empresa = tk.Label(self.frame_empresa, text="Empresa", bg='black', fg='white')
-        self.encabezado_empresa.grid(row = 0 , column = 0 , columnspan = 3  , sticky=W+E)
+        self.header_company = tk.Label(self.frame_company, text="Empresa", bg='black', fg='white')
+        self.header_company.grid(row = 0 , column = 0 , columnspan = 3  , sticky=W+E)
         
-        self.label_nombre_empreasa = ttk.Label(self.frame_empresa, text = "Empresa" , font = ("Calibri" , 9 , 'bold'))
-        self.label_nombre_empreasa.grid(row = 1 , column = 0,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
+        self.label_company_name = ttk.Label(self.frame_company, text = "Empresa" , font = ("Calibri" , 9 , 'bold'))
+        self.label_company_name.grid(row = 1 , column = 0,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
         
-        self.entry_nombre_empresa = ttk.Entry(self.frame_empresa)
-        self.entry_nombre_empresa.insert(0 , "Gusanitos,S.A") # Es lo mismo que placeholder
-        self.entry_nombre_empresa.grid(row = 2, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
+        self.label_company_name = ttk.Entry(self.frame_company)
+        self.label_company_name.insert(0 , "Gusanitos,S.A") # Es lo mismo que placeholder
+        self.label_company_name.grid(row = 2, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
         
         
-        self.label_empleados_empresa = ttk.Label(self.frame_empresa , text = "Número de Empleados", font = ("Calibri" , 9 , 'bold'))
-        self.label_empleados_empresa.grid(row = 1 , column = 1 , sticky = W+E , padx = 2  , pady = 2)
+        self.label_nif = ttk.Label(self.frame_company , text = "N.I.F.", font = ("Calibri" , 9 , 'bold'))
+        self.label_nif.grid(row = 1 , column = 1 , sticky = W+E , padx = 2  , pady = 2)
         
-        self.entry_empleados_empresa = ttk.Entry(self.frame_empresa)
-        self.entry_empleados_empresa.insert(0,"50-100")
-        self.entry_empleados_empresa.grid(row = 2 , column = 1 , padx = 2  , pady = 2 , sticky = W+E)
+        self.entry_nif = ttk.Entry(self.frame_company)
+        self.entry_nif.insert(0,"A29268166")
+        self.entry_nif.grid(row = 2 , column = 1 , padx = 2  , pady = 2 , sticky = W+E)
+        
+        self.label_adress = ttk.Label(self.frame_company , text = "Dirección")
+        self.label_adress.grid(row = 3 , column = 0 , columnspan = 2 , sticky = "we" , padx = 2 , pady = 2) 
+
+        self.entry_adress = ttk.Entry(self.frame_company)
+        self.entry_adress.grid(row = 4 , column =0 , columnspan = 2 , sticky = "we" , padx = 2 , pady = 2)
                 
-        self.label_actividad_empresa = ttk.Label(self.frame_empresa , text = "Actividad", font = ("Calibri" , 9 , 'bold'))
-        self.label_actividad_empresa.grid(row = 3 , column = 0, sticky=W+E , padx = 2 , pady = 2)
+        self.label_activity = ttk.Label(self.frame_company , text = "Actividad", font = ("Calibri" , 9 , 'bold'))
+        self.label_activity.grid(row = 5 , column = 0, sticky=W+E , padx = 2 , pady = 2)
         
-        self.entry_actividad_empresa = ttk.Entry(self.frame_empresa)
-        self.entry_actividad_empresa.insert(0, "Arquitectura e Ingeniería")
-        self.entry_actividad_empresa.grid(row = 4 , column = 0, columnspan= 2 , sticky = W+E , padx = 2  , pady = 2) 
+        self.entry_activity = ttk.Combobox(self.frame_company , values = act.nace_list() , font = ("Calibri" , 9 , 'bold'))
+        # self.entry_activity.current(newindex =     ) Capturaré el alor con lista.index(nace)
+        self.entry_activity.grid(row = 6 , column = 0 , sticky = W+E , padx = 2  , pady = 2) 
         
-        self.label_web = ttk.Label(self.frame_empresa , text = "Web", font = ("Calibri" , 9 , 'bold'))
-        self.label_web.grid(row = 5, column = 0,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
+        self.label_employees = ttk.Label(self.frame_company , text = "Empleados", font = ("Calibri" , 9 , 'bold'))
+        self.label_employees.grid(row = 5 , column = 1, sticky=W+E , padx = 2 , pady = 2)
         
-        self.entry_web = ttk.Entry(self.frame_empresa)
+        self.entry_employees = ttk.Combobox(self.frame_company , values = [" < 10" , "10 - 50" , "50 - 250" , " > 250"], font = ("Calibri" , 9 , 'bold'))
+        # self.entry_employees .current(newindex =     ) Capturaré el alor con lista.index(nace)
+        self.entry_employees.grid(row = 6 , column = 1 , sticky = W+E , padx = 2  , pady = 2) 
+        
+        self.label_web = ttk.Label(self.frame_company , text = "Web", font = ("Calibri" , 9 , 'bold'))
+        self.label_web.grid(row = 7 , column = 0,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
+        
+        self.entry_web = ttk.Entry(self.frame_company)
         self.entry_web.insert(0,"www.google.com")
-        self.entry_web.grid(row = 6, column= 0 , padx = 2  , pady = 2 , sticky = W+E)
+        self.entry_web.grid(row = 8 , column= 0 , padx = 2  , pady = 2 , sticky = W+E)
         
         self.web_button = ttk.Button(self.entry_web ,  image = self.web_icon , command = self.abrir_enlace)
         self.web_button.config(cursor = 'arrow')
         self.web_button.pack(side = "right")
         
-        self.label_mail = ttk.Label(self.frame_empresa , text = "Mail", font = ("Calibri" , 9 , 'bold'))
-        self.label_mail.grid(row = 5, column = 1, sticky = W+E , padx = 2 , pady = 2)
+        self.label_mail = ttk.Label(self.frame_company , text = "Mail", font = ("Calibri" , 9 , 'bold'))
+        self.label_mail.grid(row = 7, column = 1, sticky = W+E , padx = 2 , pady = 2)
         
-        self.entry_mail_empresa = ttk.Entry(self.frame_empresa)
+        self.entry_mail_empresa = ttk.Entry(self.frame_company)
         self.entry_mail_empresa.insert(0,"provwork2015@gmail.com")
-        self.entry_mail_empresa.grid(row = 6 , column = 1,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
+        self.entry_mail_empresa.grid(row = 8 , column = 1,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
         
         
         
@@ -258,30 +271,30 @@ class Main:
         self.mail_button.config(cursor = 'arrow')
         self.mail_button.pack(side = "right")
         
-        self.label_phone = ttk.Label(self.frame_empresa , text = "Teléfono", font = ("Calibri" , 9 , 'bold'))
-        self.label_phone.grid(row = 7, column = 0 , sticky = W+E , padx = 2 ,  pady = 2)
+        self.label_phone = ttk.Label(self.frame_company , text = "Teléfono", font = ("Calibri" , 9 , 'bold'))
+        self.label_phone.grid(row = 9, column = 0 , sticky = W+E , padx = 2 ,  pady = 2)
         
-        self.entry_telefono_empresa = ttk.Entry(self.frame_empresa)
+        self.entry_telefono_empresa = ttk.Entry(self.frame_company)
         self.entry_telefono_empresa.insert(0,"965125477")
-        self.entry_telefono_empresa.grid(row = 8, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
+        self.entry_telefono_empresa.grid(row = 10, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
         
         self.phone_button = ttk.Button(self.entry_telefono_empresa , image = self.phone_icon)
         self.phone_button.config(cursor = 'arrow')
         self.phone_button.pack(side = "right")
         
-        self.label_phone2 = ttk.Label(self.frame_empresa , text = "Otro Teléfono", font = ("Calibri" , 9 , 'bold'))
-        self.label_phone2.grid(row = 7, column= 1  , padx = 2  , pady = 2 , sticky = W+E)
+        self.label_phone2 = ttk.Label(self.frame_company , text = "Otro Teléfono", font = ("Calibri" , 9 , 'bold'))
+        self.label_phone2.grid(row = 9, column= 1  , padx = 2  , pady = 2 , sticky = W+E)
         
-        self.entry_phone2 = ttk.Entry(self.frame_empresa)
+        self.entry_phone2 = ttk.Entry(self.frame_company)
         self.entry_phone2.insert(0,"684458253")
-        self.entry_phone2.grid(row = 8, column= 1  , padx = 2  , pady = 2 , sticky = W+E)
+        self.entry_phone2.grid(row = 10, column= 1  , padx = 2  , pady = 2 , sticky = W+E)
         
         self.phone2_button = ttk.Button(self.entry_phone2 , image = self.mobile_icon)
         self.phone2_button.config(cursor = 'arrow')
         self.phone2_button.pack(side = "right")
         
-        self.margin_bottom = ttk.Label(self.frame_empresa)
-        self.margin_bottom.grid(row = 9 ,column= 0 , columnspan=2, sticky = W+E , pady =1)
+        self.margin_bottom = ttk.Label(self.frame_company)
+        self.margin_bottom.grid(row = 11 ,column= 0 , columnspan=2, sticky = W+E , pady =1)
         
         
         #FRAME CONTACTO
@@ -472,10 +485,6 @@ if __name__ == "__main__":
     
     
     db.Base.metadata.create_all(db.engine)
-    #€usuario = Contact(name_contact = "campo uno" , last =  "campo dos")
-    #db.session.add(usuario)
-    #db.session.commit()
-    #db.session.close()
     root = Tk()
     app = Main(root)
     root.mainloop()

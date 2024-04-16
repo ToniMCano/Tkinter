@@ -31,30 +31,12 @@ hours_list = [
             "20:00", "20:15", "20:30", "20:45", "20:00",
               ]
 
-def nace_list():
-    
-    if os.name == "nt":
-        excel = openpyxl.load_workbook("recursos\\NACE.xlsx")
-    
-    else:
-        excel = openpyxl.load_workbook("recursos/NACE.xlsx")
 
-    nace = excel['Hoja 1']['A']
-
-    lista_nace = []
-
-    for x in nace:
-        valor = x.value.split(" - ")
-        
-        if len(valor[0]) > 1:
-            lista_nace.append( valor[0] + " " + valor[1])
-        
-    return lista_nace
-
+employee = int()
  
 class Actions:
-    
-    calenda_place = ""
+
+    global employee
     
     def center_window(self, window):
         
@@ -106,7 +88,25 @@ class Actions:
         self.info.insert("" , 0 , text = 'client[0]' , values =['client[1]' , 'client[2]' , 'client[3]' , 'client[4]' , 'client[5]' , "Cantidad" , "Porcentaje"])
                
                
+    def nace_list():
     
+        if os.name == "nt":
+            excel = openpyxl.load_workbook("recursos\\NACE.xlsx")
+        
+        else:
+            excel = openpyxl.load_workbook("recursos/NACE.xlsx")
+
+        nace = excel['Hoja 1']['A']
+
+        lista_nace = []
+
+        for x in nace:
+            valor = x.value.split(" - ")
+            
+            if len(valor[0]) > 1:
+                lista_nace.append( valor[0] + " " + valor[1])
+            
+        return lista_nace
         
     
     def create_contact(self):
@@ -162,12 +162,13 @@ class Actions:
         entry_mobile = ttk.Entry(frame_contact_person)
         entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
         
-        save_button = ttk.Button(frame_info, text = "Guardar")
+        save_button = ttk.Button(frame_info, text = "Guardar" , command=Actions.olvidar)
         save_button.grid(row = 6 , column = 0 , columnspan = 2 , padx = 200 , pady = 5 , sticky = W+E)
         
         
-    def add_company(self):
+    def add_company(data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección " : f"{''} - {''} - {''}"  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}):
     
+   
         add_company_frame = Toplevel()
         add_company_frame.title("Add Company")
         #add_company_frame.geometry("600x300")
@@ -183,22 +184,30 @@ class Actions:
         company_name = ttk.Label(company_frame , text ="Nombre: ")
         company_name.grid(row =0 , column = 0 , padx = 5 , pady = 5 )
         
-        entry_comapany_name = ttk.Entry(company_frame)
-        entry_comapany_name.grid(row =0 , column = 1 , columnspan = 5 , padx = 5 , pady = 5 , sticky = W+E)
+        entry_company_name = ttk.Entry(company_frame)
+        entry_company_name.grid(row =0 , column = 1 , columnspan = 5 , padx = 5 , pady = 5 , sticky = W+E)
         
         company_nif= ttk.Label(company_frame , text ="N.I.F: ")
         company_nif.grid(row =0 , column = 6 , padx = 5 , pady = 5)
         
-        entry_comapany_nif = ttk.Entry(company_frame)
-        entry_comapany_nif.grid(row =0 , column = 7 , padx = 5 , pady = 5)
+        entry_company_nif = ttk.Entry(company_frame)
+        entry_company_nif.grid(row =0 , column = 7 , padx = 5 , pady = 5)
         
         company_activity = ttk.Label(company_frame , text ="Actividad: ")
-        company_activity.grid(row =4 , column = 0 , padx = 5 , pady = 5)
+        company_activity.grid(row =1 , column = 0 , columnspan= 7 , padx = 5 , pady = 5 , sticky = "w")
         
-        self.nace_list_menu = ttk.Combobox(company_frame, state = 'readonly' , values = nace_list())
-        self.nace_list_menu.grid(row =4 , column = 1 ,  columnspan= 7 , padx = 5 , pady = 5 , sticky = W+E)
-        self.nace_list_menu.current(newindex = 0)
-        self.nace_list_menu.bind("<<ComboboxSelected>>" , self.test) # Cambiar la función ######################################
+        nace_list_combo = ttk.Combobox(company_frame, state = 'readonly' , values = Actions.nace_list())
+        nace_list_combo.grid(row =2 , column = 0 ,  columnspan= 7 , padx = 5 , pady = 5 , sticky = W+E)
+        nace_list_combo.current(newindex = 0)
+        #nace_list_combo.bind("<<ComboboxSelected>>" , self.test)
+        
+        number_of_employees = ttk.Label(company_frame, text = "Empleados: ")
+        number_of_employees.grid(row = 1 , column = 7 , padx = 5 , pady = 5 , sticky = "w")
+        
+        number_of_employees_entry = ttk.Combobox(company_frame, state = 'readonly' , values =  [" < 10" , "10 - 50" , "50 - 250" , " > 250"])
+        number_of_employees_entry.grid(row =2 , column = 7  , padx = 5 , pady = 5 , sticky = W+E)
+        number_of_employees_entry.current(newindex = 0)
+        #number_of_employees_entry.bind("<<ComboboxSelected>>" , self.test) 
         
         
         company_adress = ttk.Labelframe(add_company_frame , text ="Dirección: ")
@@ -233,32 +242,26 @@ class Actions:
         company_web = ttk.Label(company_contact , text ="Web: ")
         company_web.grid(row =2 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
         
-        entry_comapany_web = ttk.Entry(company_contact)
-        entry_comapany_web.grid(row = 2 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
+        entry_company_web = ttk.Entry(company_contact)
+        entry_company_web.grid(row = 2 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
         
         company_mail = ttk.Label(company_contact , text ="Mail: ")
         company_mail.grid(row =2 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
         
-        entry_comapany_mail = ttk.Entry(company_contact)
-        entry_comapany_mail.grid(row =2 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
+        entry_company_mail = ttk.Entry(company_contact)
+        entry_company_mail.grid(row =2 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
         
         company_phone = ttk.Label(company_contact , text ="Teléfono: ")
         company_phone.grid(row =3 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
         
-        entry_comapany_phone = ttk.Entry(company_contact)
-        entry_comapany_phone.grid(row =3 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
+        entry_company_phone = ttk.Entry(company_contact)
+        entry_company_phone.grid(row =3 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
         
         company_phone2 = ttk.Label(company_contact , text ="Teléfono2: ")
         company_phone2.grid(row =3 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
         
-        entry_comapany_phone2 = ttk.Entry(company_contact)
-        entry_comapany_phone2.grid(row =3 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
-        
-        company_activity = ttk.Label(company_frame , text ="Actividad: ")
-        company_activity.grid(row =4 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
-        
-        save_company_button = ttk.Button(add_company_frame , text = "Add")
-        save_company_button.grid(row = 5 , column = 0 , pady = 5 )
+        entry_company_phone2 = ttk.Entry(company_contact)
+        entry_company_phone2.grid(row =3 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
         
         frame_contact_person = ttk.Labelframe(add_company_frame , text = "Contact Person")
         frame_contact_person.grid(row = 4 , column = 0)
@@ -298,24 +301,145 @@ class Actions:
         
         entry_mobile = ttk.Entry(frame_contact_person)
         entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
+        
+        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: Actions.test_add_company(add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección " : f"{company_street.get()} - {company_street_number.get() } - {company_street_floor.get()}"  , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
+        save_company_button.grid(row = 5 , column = 0 , pady = 5 )
 
         Actions.center_window(Actions , add_company_frame)
-    
-    
+        
+        entry_company_name.insert(0 , data["Nombre Empresa: "])
+        entry_company_nif.insert(0 , data["N.I.F.: "])
+        company_street.insert(0 , data["Dirección "].split("-")[0])
+        company_street_number.insert(0 , data["Dirección "].split("-")[1])      
+        company_street_floor.insert(0 , data["Dirección "].split("-")[2])
+        entry_company_web.insert(0 , data["Web: "])
+        entry_company_mail.insert(0 , data["Mail Empresa: "])      
+        entry_company_phone.insert(0 , data["Teléfono Empresa: "])
+        entry_company_phone2.insert(0 , data["Teléfono2 Empresa: "])
+        entry_name.insert(0 , data["Nombre Contacto: "])
+        entry_surname.insert(0 , data["Apellidos Contacto: "])
+        entry_mail.insert(0 , data["Mail Contacto: "])
+        entry_phone.insert(0 , data["Teléfono Contacto: "])
+        entry_job_title.insert(0 , data["Cargo: "])
+        entry_mobile.insert(0 , data["Móvil Contacto: "])
+        
+        
+        
+            
+            
+    def test_add_company(add_company_frame , data):
+
+        if data["Nombre Contacto: "] != "" or data['Apellidos Contacto: '] != "" or data['Teléfono Contacto: '] != "" or data['Mail Contacto: '] or data['Nombre Empresa: '] != ""  or data['N.I.F.: '] != ""  or data['Mail Empresa: '] != ""  or data['Teléfono Empresa: ']  :
+
+            mb.showwarning( "Faltan Datos:" , 
+            f"""Algunos campos no pueden estar vacíos, compruebalos
+            
+            
+                Empresa:                               
+                
+                
+                Nombre:   {data['Nombre Empresa: ']}   
+                
+                N.I.F:    {data['N.I.F.: ']}           
+                
+                Teléfono: {data['Teléfono Empresa: ']} 
+                
+                Mail:     {data['Mail Empresa: '] }    
+                
+                
+                
+                Persona de Contacto: 
+                
+
+                Nombre:    {data['Nombre Contacto: ']}
+
+                Apellidos: {data['Apellidos Contacto: ']}
+
+                Teléfono:  {data['Teléfono Contacto: ']}
+
+                Mail: {data["Mail Contacto: "]}
+                
+            """ 
+            )
+            
+            
+            
+            Actions.add_company(data)
+            
+        elif :
+                     
+        else:
+            data['Mail Empresa: ']
+            data['Teléfono Empresa: ']
+            data['N.I.F.: ']      
+            data["Teléfono Contacto: "] 
+            data["Móvil Contacto: "]
+            data["Mail Contacto: "]
+            "Id de la Empresa"
+                
+            try:
+                contact_person = ContactPerson(data["Nombre Contacto: "] , data["Apellidos Contacto: "] , data["Cargo: "] , data["Teléfono Contacto: "] , data["Móvil Contacto: "] , data["Mail Contacto: "] , "Id de la Empresa")
+                
+                db.session.add(contact_person)
+                db.session.commit()
+                
+                vcontact_person = db.session.query(ContactPerson).order_by(ContactPerson.id_person.desc()).first() # Se asigna el último empleado introducido en la DB, es decir el que se crea a la vez que la empresa.
+                
+                company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección "] , data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee , "Pool", data["Empleados: "])
+                
+                db.session.add(company)
+                db.session.commit()
+                
+                vcontact_person.client_id = db.session.query(Client).order_by(Client.id_client.desc()).first() # Asignamos la persona de contacto creada.
+                
+                db.session.close()
+                
+                add_company_frame.destroy()   
+                
+                mb.showinfo("Se ha creado una nueva Empresa" , 
+        f"""
+        Empresa:
+        {data['Nombre Empresa: ']}
+        
+        Persona de Contacto: 
+        {data['Nombre Contacto: ']} {data['Apellidos Contacto: ']} 
+        
+        Cargo:
+        {data['Cargo: ']}
+        """)
+
+            except Exception as e:
+                print(e)
+                mb.showerror("Ha ocurrido un error inesperado" , f"{e}")
+            
+       
+            
+            
+        
+        
     def calendar(frame , place , date = "" ):
         
+        header_calendar = StringVar(value = "View")
+        label_calendar = tk.Label(frame , textvariable = header_calendar , bg = "black" , fg = "white")
+        label_calendar.pack(fill = "x" , expand = True)
         frame.calendar = Calendar(frame , selectedmode = "day" , date_pattern = "dd-mm-yyyy")
         frame.calendar.pack()
         
         if place == "general":
-            frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>", lambda e: Actions.calendar_selected_date(frame , place , date , e))
+            frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>", lambda e: Actions.general_calendar_date(frame , place , date , e))
        
         elif place != "general":
-            hour = ttk.Combobox(frame , justify = "center" , values = hours_list)
+            if place == "next":
+                header_calendar.set("Next Contact")
+            else:
+                header_calendar.set("Pop Up")
+                
+            hour = ttk.Combobox(frame , justify = "left" , values = hours_list , width = 10)
             hour.current(newindex = 0)
+            hour.config(justify=CENTER)
             hour.pack(fill = "x" , expand = True , anchor = "center")
             #frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>")
-            send = ttk.Button(frame , text = "Save" , command = lambda: Actions.toggle_frame_visibility(frame , "next") )
+            send = ttk.Button(frame , text = "Save" , command = lambda: Actions.tst(frame , place , hour = hour.get()) )
             send.pack(pady = 5)
 
     def toggle_frame_visibility(frame , place):
@@ -325,22 +449,22 @@ class Actions:
             
         else:
             if place == "general":
-                frame.place(x = 400, y = 50) 
+                frame.place(x = 320, y = 50) 
                 frame.lift()  # Elevar el Frame al frente 
                 
             elif place == 'next':
-                frame.place(x = 0, y = 335) 
+                frame.place(x = 0, y = 242) 
                 frame.lift() 
             
             elif place == "pop":
-                frame.place(x = 0, y = 360) 
+                frame.place(x = 0, y = 272) 
                 frame.lift() 
 
 
-    def calendar_selected_date(self , place , date , event):
+    def general_calendar_date(self , place , date , event):
         
         try:
-            fecha_seleccionada = self.calendar.get_date() # 10-04-2024
+            fecha_seleccionada = self.calendar.get_date() # 10-04-2024 Comprobar si se puede ordenar así en la DB.
             month = int(fecha_seleccionada[3:5])
             year = int(fecha_seleccionada[6:])
             
@@ -355,14 +479,13 @@ class Actions:
             
         except Exception as e:
             mb.showwarning("Error" , f"Ha habido un problema con las fechas {e}")
-            
-            
-
-                   
+                     
                     
-    def olvidar(app):
-       app.grid_forget()
+    def olvidar():
+       #app.grid_forget()
+       vcontact_person = db.session.query(ContactPerson).order_by(ContactPerson.id_person.desc()).first()
+       print(vcontact_person.id_person , employee)
        
-    def tst(self , place , event):
-        print(f"Date From: {place} - {self.calendar.get_date()}")
+    def tst(self , place , hour):
+        print(f"Date From: {place} - {self.calendar.get_date()} - {hour}")
         Actions.toggle_frame_visibility(self , place)
