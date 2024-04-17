@@ -170,6 +170,10 @@ class Actions:
         
     def new_company(data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección " : f"{''} - {''} - {''}"  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}):
     
+        load_image= Image.open("recursos/upload.png")
+        load_image.resize((6,6))
+        load_image_icon = ImageTk.PhotoImage(load_image)
+        
         
         add_company_frame = Toplevel()
         add_company_frame.title("Add Company")
@@ -177,14 +181,15 @@ class Actions:
         
         add_company_frame.grid_columnconfigure(0 , weight = 1)
         
-        files_frame = ttk.Frame(add_company_frame)
+        files_frame = tk.Frame(add_company_frame)
         files_frame.grid(row = 0 , column = 0 , columnspan = 2 , sticky = W+E)
+        files_frame.grid_columnconfigure(0, weight=1)
         
-        files_label = ttk.Label(files_frame, text = "Subir desde archivo")
-        files_label.grid(row = 0 , column = 0)
+        files_top = ttk.Label(files_frame , text = "")
+        files_top.grid(row = 0 , column = 0, sticky = W+E ) 
         
-        files_button = ttk.Button(files_frame , text = "test" , command = Actions.load_companies)
-        files_button.grid(row = 0 , column = 1)
+        files_button = ttk.Button(files_frame , text = "Subir desde archivo (Varias Empresas)" , command = Actions.load_companies)
+        files_button.grid(row = 1 , column = 0 , columnspan = 2 , sticky = W+E , padx = 20)        
         
         company_frame = ttk.Labelframe(add_company_frame , text = 'Empresa')
         company_frame.grid(row = 1 , column = 0 , columnspan = 4 , padx = 10 , pady = 10 , sticky = W+E)
@@ -197,9 +202,6 @@ class Actions:
         
         entry_company_name = ttk.Entry(company_frame)
         entry_company_name.grid(row =0 , column = 1 , columnspan = 5 , padx = 5 , pady = 5 , sticky = W+E)
-        
-        company_nif= ttk.Label(company_frame , text ="N.I.F: ")
-        company_nif.grid(row =0 , column = 6 , padx = 5 , pady = 5)
         
         entry_company_nif = ttk.Entry(company_frame)
         entry_company_nif.grid(row =0 , column = 7 , padx = 5 , pady = 5)
@@ -315,6 +317,7 @@ class Actions:
         
         save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: Actions.test_add_company(add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección " : f"{company_street.get()} - {company_street_number.get() } - {company_street_floor.get()}"  , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
         save_company_button.grid(row = 5 , column = 0 , pady = 10)
+        
 
         Actions.center_window(Actions , add_company_frame)
         
@@ -334,7 +337,8 @@ class Actions:
         entry_job_title.insert(0 , data["Cargo: "])
         entry_mobile.insert(0 , data["Móvil Contacto: "])
         
-            
+        
+                    
     def test_add_company(add_company_frame , data):
 
         if data["Nombre Contacto: "] != "" and data['Apellidos Contacto: '] != "" and data['Teléfono Contacto: '] != "" and data['Mail Contacto: '] and data['Nombre Empresa: '] != ""  and data['N.I.F.: '] != ""  and data['Mail Empresa: '] != ""  and data['Teléfono Empresa: '] != "":
@@ -462,8 +466,8 @@ class Actions:
         pass
 
     def load_companies():
-        filedialog.askopenfile(title = "Cargar desde Excel" , filetypes = ("Ficheros Excel" , "*.xlsx"))
-        
+        excel = filedialog.askopenfilename(title = "Cargar desde Excel" , filetypes = (("Ficheros Excel" , "*.xlsx"),))
+        print(excel)
     def calendar(frame , place , date = "" ):
         
         header_calendar = StringVar(value = "View")

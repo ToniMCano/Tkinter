@@ -84,13 +84,10 @@ class Main:
         self.mail_icon = self.mail_image.resize((16,12))
         self.mail_icon = ImageTk.PhotoImage(self.mail_icon)
         
-        self.phone_image = Image.open("recursos/phone.png")
+        self.phone_image = Image.open("recursos\\phone.png")
         self.phone_icon = self.phone_image.resize((12,12))
         self.phone_icon = ImageTk.PhotoImage(self.phone_icon)
-        
-        self.cross_image = Image.open("recursos/cross.png")
-        self.cross_image.resize((12,12))
-        self.cross_icon = ImageTk.PhotoImage(self.cross_image)
+
         
         # HEADER
         
