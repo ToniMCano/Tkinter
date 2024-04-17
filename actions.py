@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk , filedialog
 from tkinter import *
 from PIL import Image, ImageTk
 from tkcalendar import Calendar
@@ -13,6 +13,7 @@ import locale
 from tkinter import messagebox as mb
 import os
 from sqlalchemy.exc import IntegrityError
+
 locale.setlocale(locale.LC_ALL, '')
    
 nif_check = ['a','b','c','e','f','g','h','j','p','q','r','s','u','v' , 'w' , 'n']
@@ -124,23 +125,23 @@ class Actions:
         frame_info.grid(row = 0 , column = 0, padx = 5 , pady = 10 , sticky = W+E)
         frame_info.grid_columnconfigure(0 , weight = 1)
         
-        frame_contact_person = ttk.Labelframe(frame_info , text = "Contact Person")
+        frame_contact_person = ttk.Labelframe(frame_info , text = "Contact Person" , labelanchor = 'n')
         frame_contact_person.grid(row = 0 , column = 0)
         
         label_name = ttk.Label(frame_contact_person, text = "Nombre:")
-        label_name.grid(row = 0 , column = 0 , padx = 5 , sticky = W+E)
+        label_name.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
         
         entry_name = ttk.Entry(frame_contact_person)
         entry_name.grid(row = 1 , column = 0 , padx = 5 , sticky = W+E)
         
         label_surname = ttk.Label(frame_contact_person , text = "Apellidos")
-        label_surname.grid(row = 0 , column = 1 , padx = 5 , sticky = W+E)
+        label_surname.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
         
         entry_surname = ttk.Entry(frame_contact_person)
         entry_surname.grid(row = 1 , column = 1 , padx = 5 , sticky = W+E)
         
         label_job_title = ttk.Label(frame_contact_person , text = "Cargo")
-        label_job_title.grid(row = 0 , column = 2 , sticky = W+E , padx = 5)
+        label_job_title.grid(row = 0 , column = 2 , sticky = W+E , padx = 5 , pady = 5 )
         
         entry_job_title = ttk.Entry(frame_contact_person)
         entry_job_title.grid(row = 1 , column = 2, sticky = W+E , padx = 5)
@@ -169,15 +170,24 @@ class Actions:
         
     def new_company(data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección " : f"{''} - {''} - {''}"  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}):
     
-   
+        
         add_company_frame = Toplevel()
         add_company_frame.title("Add Company")
         #add_company_frame.geometry("600x300")
         
         add_company_frame.grid_columnconfigure(0 , weight = 1)
         
+        files_frame = ttk.Frame(add_company_frame)
+        files_frame.grid(row = 0 , column = 0 , columnspan = 2 , sticky = W+E)
+        
+        files_label = ttk.Label(files_frame, text = "Subir desde archivo")
+        files_label.grid(row = 0 , column = 0)
+        
+        files_button = ttk.Button(files_frame , text = "test" , command = Actions.load_companies)
+        files_button.grid(row = 0 , column = 1)
+        
         company_frame = ttk.Labelframe(add_company_frame , text = 'Empresa')
-        company_frame.grid(row = 0 , column = 0 , columnspan = 4 , padx = 10 , pady = 10 , sticky = W+E)
+        company_frame.grid(row = 1 , column = 0 , columnspan = 4 , padx = 10 , pady = 10 , sticky = W+E)
         
         company_frame.grid_columnconfigure(0 , weight = 1)   
         company_frame.grid_columnconfigure(1 , weight = 1)
@@ -212,7 +222,7 @@ class Actions:
         
         
         company_adress = ttk.Labelframe(add_company_frame , text ="Dirección: ")
-        company_adress.grid(row =1 , column = 0 , columnspan = 4 , padx = 10 , pady = 10 , sticky = W+E)
+        company_adress.grid(row = 2 , column = 0 , columnspan = 4 , padx = 10 , pady = 10 , sticky = W+E)
         
         company_street_label = ttk.Label(company_adress, text="Calle: ")
         company_street_label.grid(row=0, column=0, padx=5, pady=5, columnspan=3, sticky="we")
@@ -265,7 +275,7 @@ class Actions:
         entry_company_phone2.grid(row =3 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
         
         frame_contact_person = ttk.Labelframe(add_company_frame , text = "Contact Person")
-        frame_contact_person.grid(row = 4 , column = 0)
+        frame_contact_person.grid(row = 3 , column = 0)
         
         label_name = ttk.Label(frame_contact_person, text = "Nombre:")
         label_name.grid(row = 0 , column = 0 , padx = 5 , sticky = W+E)
@@ -304,7 +314,7 @@ class Actions:
         entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
         
         save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: Actions.test_add_company(add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección " : f"{company_street.get()} - {company_street_number.get() } - {company_street_floor.get()}"  , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
-        save_company_button.grid(row = 5 , column = 0 , pady = 5 )
+        save_company_button.grid(row = 5 , column = 0 , pady = 10)
 
         Actions.center_window(Actions , add_company_frame)
         
@@ -451,7 +461,9 @@ class Actions:
     def show_company(company_id):
         pass
 
-
+    def load_companies():
+        filedialog.askopenfile(title = "Cargar desde Excel" , filetypes = ("Ficheros Excel" , "*.xlsx"))
+        
     def calendar(frame , place , date = "" ):
         
         header_calendar = StringVar(value = "View")
