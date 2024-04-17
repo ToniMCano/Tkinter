@@ -12,6 +12,7 @@ from datetime import datetime
 import locale
 from tkinter import messagebox as mb
 import os
+from sqlalchemy.exc import IntegrityError
 locale.setlocale(locale.LC_ALL, '')
    
 nif_check = ['a','b','c','e','f','g','h','j','p','q','r','s','u','v' , 'w' , 'n']
@@ -334,22 +335,26 @@ class Actions:
                        
                     if ("@" in data['Mail Empresa: '] and data['Mail Empresa: '].split("@")[0] != "" and len(data['Mail Empresa: '].split(".")[-1])) >= 2 and ("@" in data['Mail Contacto: '] and data['Mail Contacto: '].split("@")[0] != "" and len(data['Mail Contacto: '].split(".")[-1]) >= 2):
                         
-                        if (str(data['Teléfono Contacto: ']).isdigit() and len(data['Teléfono Contacto: ']) == 9) and (str(data["Móvil Contacto: "]).isdigit() and len(data["Móvil Contacto: "]) == 9) and (str(data["Teléfono Empresa: "]).isdigit() and len(data["Teléfono Empresa: "]) == 9):
+                        if (str(data['Teléfono Contacto: ']).isdigit() and len(data['Teléfono Contacto: ']) == 9)  and (str(data["Teléfono Empresa: "]).isdigit() and len(data["Teléfono Empresa: "]) == 9):
                 
                         
                             Actions.add_company(data , add_company_frame)
                         
                         else:
                             mb.showwarning("Teléfono" , f"El formato del Teléfono no es correcto, comprueba Teléfono Empras y Teléfono Contacto.")
+                            add_company_frame.lift()
                     
                     else:
                         mb.showwarning("Mail" , f"El formato del Mail no es correcto, comprueba los Mails.")
+                        add_company_frame.lift()
                 
                 else:
                     mb.showwarning("Web" , f'El formato de la Web no es correcto [{data["Web: "]}]')
+                    add_company_frame.lift()
                     
             else:
-                mb.showwarning("N.I.F." , f"El formato del N.I.F. no es correcto [{data['N.I.F.: ']}]")                    
+                mb.showwarning("N.I.F." , f"El formato del N.I.F. no es correcto [{data['N.I.F.: ']}]")
+                add_company_frame.lift()                    
                
         else:
             print("else")
@@ -394,23 +399,57 @@ class Actions:
             
             db.session.close()
             
-            add_company_frame.destroy()   
-            
-            mb.showinfo("Se ha creado una nueva Empresa" , 
-    f"""
-    Empresa:
-    {data['Nombre Empresa: ']}
-
-    Persona de Contacto: 
-    {data['Nombre Contacto: ']} {data['Apellidos Contacto: ']} 
-
-    Cargo:
-    {data['Cargo: ']}
-    """)
+            add_company_frame.destroy() 
+             
+            Actions.show_new_company(data['Nombre Empresa: '] , data['Nombre Contacto: '] , data['Apellidos Contacto: '] , data['Cargo: '])
 
         except Exception as e:
-            print(e)
-            mb.showerror("Ha ocurrido un error inesperado" , f"{e}")
+            
+            if isinstance(e, IntegrityError):
+                print(e)
+                db.session.close()
+                mb.showerror("Error de Integridad" , f"La empresa ya existe, el Nombre o el N.I.F. ya existen en la Base de Datos.")
+                
+            else:
+                print(e)
+                mb.showerror("Ha ocurrido un error inesperado" , f"{e}")
+            add_company_frame.destroy()    
+            Actions.new_company(data)
+ 
+            
+    def show_new_company(company_name , contact_name , contact_surname , contact_job):
+        
+        show = Toplevel()
+        show.title("Se ha creado una nueva Empresa") 
+        show.resizable(0,0)
+
+        
+        frame = LabelFrame(show , text = "Nueva Empresa" , labelanchor = 'n')
+        frame.grid(row = 0 , column =0 , columnspan = 2 , padx = 20 , pady = 10 , sticky = W+E)
+        message = Label(frame ,  text= 
+        f"""
+        Empresa:
+        {company_name}
+
+        Persona de Contacto: 
+        {contact_name} {contact_surname} 
+        
+        Cargo
+        {contact_job}
+        """ , justify = 'left')
+        message.grid(row = 0 , column =0 , columnspan = 2 ,  sticky = W+E)
+        
+        show_button = ttk.Button(show , text = "Ver Empresa" , width = 20)
+        show_button.grid(row = 1 , column = 0 , padx = 10 , pady = 10 , sticky = W+E)
+        
+        continue_button = ttk.Button(show , text = "Continuar" , width = 20)
+        continue_button.grid(row = 1 , column = 1 , padx = 10 , pady = 10 , sticky = W+E)
+        
+        Actions.center_window(Actions , show)
+        
+    
+    def show_company(company_id):
+        pass
 
 
     def calendar(frame , place , date = "" ):
