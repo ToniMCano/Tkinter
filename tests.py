@@ -13,5 +13,5 @@ mail = '@algo.com'
 telfefono = 965223965
 movil =     615492484
 
-if nif[0].lower() in nif_check:
-    print(mail.split("@"))
+print(web.split("."))
+print(web)

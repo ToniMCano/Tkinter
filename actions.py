@@ -166,7 +166,7 @@ class Actions:
         save_button.grid(row = 6 , column = 0 , columnspan = 2 , padx = 200 , pady = 5 , sticky = W+E)
         
         
-    def add_company(data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección " : f"{''} - {''} - {''}"  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}):
+    def new_company(data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección " : f"{''} - {''} - {''}"  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}):
     
    
         add_company_frame = Toplevel()
@@ -326,85 +326,93 @@ class Actions:
             
     def test_add_company(add_company_frame , data):
 
-        if data["Nombre Contacto: "] != "" or data['Apellidos Contacto: '] != "" or data['Teléfono Contacto: '] != "" or data['Mail Contacto: '] or data['Nombre Empresa: '] != ""  or data['N.I.F.: '] != ""  or data['Mail Empresa: '] != ""  or data['Teléfono Empresa: ']:
-            print(1)
-            if (str(data['Teléfono Contacto: ']).isdigit() and len(data['Teléfono Contacto: ']) == 9) and (str(data["Móvil Contacto: "]).isdigit() and len(data["Móvil Contacto: "]) == 9) and (str(data["Teléfono Empresa: "]).isdigit() and len(data["Teléfono Empresa: "]) == 9):
+        if data["Nombre Contacto: "] != "" and data['Apellidos Contacto: '] != "" and data['Teléfono Contacto: '] != "" and data['Mail Contacto: '] and data['Nombre Empresa: '] != ""  and data['N.I.F.: '] != ""  and data['Mail Empresa: '] != ""  and data['Teléfono Empresa: '] != "":
+            
+            if data['N.I.F.: '][0].lower() in nif_check and len(data['N.I.F.: ']) == 9:
                 
-                print(2)
-                if ("@" in data['Mail Empresa: '] and data['Mail Empresa: '].split("@")[0] != "" and len(data['Mail Empresa: '].split(".")[-1]) >= 2) and ("@" in data['Mail Contacto: '] and data['Mail Contacto: '].split("@")[0] != "" and len(data['Mail Contacto: '].split(".")[-1]) >= 2):
-                    print(3)
-                    if data['N.I.F.: '][0].lower() in nif_check and len(data['N.I.F.: '] == 9):
-                        print(4)
-                        try:
-                            contact_person = ContactPerson(data["Nombre Contacto: "] , data["Apellidos Contacto: "] , data["Cargo: "] , data["Teléfono Contacto: "] , data["Móvil Contacto: "] , data["Mail Contacto: "] , "Id de la Empresa")
-                            
-                            db.session.add(contact_person)
-                            db.session.commit()
-                            
-                            vcontact_person = db.session.query(ContactPerson).order_by(ContactPerson.id_person.desc()).first() # Se asigna el último empleado introducido en la DB, es decir el que se crea a la vez que la empresa.
-                            
-                            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección "] , data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee , "Pool", data["Empleados: "])
-                            
-                            db.session.add(company)
-                            db.session.commit()
-                            
-                            vcontact_person.client_id = db.session.query(Client).order_by(Client.id_client.desc()).first() # Asignamos la persona de contacto creada.
-                            
-                            db.session.close()
-                            
-                            add_company_frame.destroy()   
-                            
-                            mb.showinfo("Se ha creado una nueva Empresa" , 
-                    f"""
-                    Empresa:
-                    {data['Nombre Empresa: ']}
+                if data["Web: "].split(".")[0] == "www" and len(data["Web: "].split(".")[-1]) >= 2:
+                       
+                    if ("@" in data['Mail Empresa: '] and data['Mail Empresa: '].split("@")[0] != "" and len(data['Mail Empresa: '].split(".")[-1])) >= 2 and ("@" in data['Mail Contacto: '] and data['Mail Contacto: '].split("@")[0] != "" and len(data['Mail Contacto: '].split(".")[-1]) >= 2):
+                        
+                        if (str(data['Teléfono Contacto: ']).isdigit() and len(data['Teléfono Contacto: ']) == 9) and (str(data["Móvil Contacto: "]).isdigit() and len(data["Móvil Contacto: "]) == 9) and (str(data["Teléfono Empresa: "]).isdigit() and len(data["Teléfono Empresa: "]) == 9):
+                
+                        
+                            Actions.add_company(data , add_company_frame)
+                        
+                        else:
+                            mb.showwarning("Teléfono" , f"El formato del Teléfono no es correcto, comprueba Teléfono Empras y Teléfono Contacto.")
                     
-                    Persona de Contacto: 
-                    {data['Nombre Contacto: ']} {data['Apellidos Contacto: ']} 
+                    else:
+                        mb.showwarning("Mail" , f"El formato del Mail no es correcto, comprueba los Mails.")
+                
+                else:
+                    mb.showwarning("Web" , f'El formato de la Web no es correcto [{data["Web: "]}]')
                     
-                    Cargo:
-                    {data['Cargo: ']}
-                    """)
-
-                        except Exception as e:
-                            print(e)
-                            mb.showerror("Ha ocurrido un error inesperado" , f"{e}")
-                                    
+            else:
+                mb.showwarning("N.I.F." , f"El formato del N.I.F. no es correcto [{data['N.I.F.: ']}]")                    
+               
         else:
             print("else")
             mb.showwarning( "Faltan Datos:" , 
-            f"""Faltan Datos o son incorrectos, compruebalos
-            
+            f"""Faltan Datos o son incorrectos, compruebalos.
             
                 Empresa:                               
-                
-                
+            
                 Nombre:   {data['Nombre Empresa: ']}   
-                
-                N.I.F:    {data['N.I.F.: ']}           
-                
+                N.I.F:    {data['N.I.F.: ']}       
                 Teléfono: {data['Teléfono Empresa: ']} 
-                
                 Mail:     {data['Mail Empresa: '] }    
                 
-                
-                
                 Persona de Contacto: 
-                
-
+            
                 Nombre:    {data['Nombre Contacto: ']}
-
                 Apellidos: {data['Apellidos Contacto: ']}
-
                 Teléfono:  {data['Teléfono Contacto: ']}
-
                 Mail: {data["Mail Contacto: "]}
-                
             """ 
             )
-            
-            Actions.add_company(data)
+            add_company_frame.destroy()
+            Actions.new_company(data)
       
+      
+    def add_company(data , add_company_frame):
+        
+        try:
+            contact_person = ContactPerson(data["Nombre Contacto: "] , data["Apellidos Contacto: "] , data["Cargo: "] , data["Teléfono Contacto: "] , data["Móvil Contacto: "] , data["Mail Contacto: "] , "Id de la Empresa")
+            
+            db.session.add(contact_person)
+            db.session.commit()
+            
+            vcontact_person = db.session.query(ContactPerson).order_by(ContactPerson.id_person.desc()).first() # Se asigna el último empleado introducido en la DB, es decir el que se crea a la vez que la empresa.
+            
+            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección "] , data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee , "Pool", data["Empleados: "])
+            
+            db.session.add(company)
+            db.session.commit()
+            
+            vcontact_person.client_id = db.session.query(Client).order_by(Client.id_client.desc()).first() # Asignamos la persona de contacto creada.
+            
+            db.session.close()
+            
+            add_company_frame.destroy()   
+            
+            mb.showinfo("Se ha creado una nueva Empresa" , 
+    f"""
+    Empresa:
+    {data['Nombre Empresa: ']}
+
+    Persona de Contacto: 
+    {data['Nombre Contacto: ']} {data['Apellidos Contacto: ']} 
+
+    Cargo:
+    {data['Cargo: ']}
+    """)
+
+        except Exception as e:
+            print(e)
+            mb.showerror("Ha ocurrido un error inesperado" , f"{e}")
+
+
     def calendar(frame , place , date = "" ):
         
         header_calendar = StringVar(value = "View")

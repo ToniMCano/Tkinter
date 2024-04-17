@@ -149,9 +149,9 @@ class Main:
 
         # AÑADIR CONTACTOS DESDE POOL
         
-        self.add_company = tk.Button(self.header , text = 'Add\nCompany' , font = ("Calibri" , 9 ,'bold') , command = lambda: act.add_company()) 
-        #self.add_company.config(height = 47, width = 47)
-        self.add_company.grid(row = 0 , column = 0 , padx = 5) 
+        self.new_company = tk.Button(self.header , text = 'Add\nCompany' , font = ("Calibri" , 9 ,'bold') , command = lambda: act.new_company()) 
+        #self.new_company.config(height = 47, width = 47)
+        self.new_company.grid(row = 0 , column = 0 , padx = 5) 
         
         self.pool = tk.Button(self.header, text = "Pool")
         self.pool.config(cursor = 'arrow')
