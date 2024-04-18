@@ -170,9 +170,9 @@ class Actions:
         
     def new_company(data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección " : f"{''} - {''} - {''}"  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}):
     
-        load_image= Image.open("recursos/upload.png")
-        load_image.resize((6,6))
-        load_image_icon = ImageTk.PhotoImage(load_image)
+        #load_image= Image.open("recursos/upload.png")
+        #load_image.resize((6,6))
+        #load_image_icon = ImageTk.PhotoImage(load_image)
         
         
         add_company_frame = Toplevel()
@@ -192,16 +192,19 @@ class Actions:
         files_button.grid(row = 1 , column = 0 , columnspan = 2 , sticky = W+E , padx = 20)        
         
         company_frame = ttk.Labelframe(add_company_frame , text = 'Empresa')
-        company_frame.grid(row = 1 , column = 0 , columnspan = 4 , padx = 10 , pady = 10 , sticky = W+E)
+        company_frame.grid(row = 1 , column = 0 , columnspan = 4 , padx = 10 , pady = 5 , sticky = W+E)
         
-        company_frame.grid_columnconfigure(0 , weight = 1)   
+        #company_frame.grid_columnconfigure(0 , weight = 1)   
         company_frame.grid_columnconfigure(1 , weight = 1)
         
         company_name = ttk.Label(company_frame , text ="Nombre: ")
-        company_name.grid(row =0 , column = 0 , padx = 5 , pady = 5 )
+        company_name.grid(row =0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
         
         entry_company_name = ttk.Entry(company_frame)
         entry_company_name.grid(row =0 , column = 1 , columnspan = 5 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        company_nif = ttk.Label(company_frame , text  = "N.I.F.: ")
+        company_nif.grid(row =0 , column = 6 , padx = 5 , pady = 5)
         
         entry_company_nif = ttk.Entry(company_frame)
         entry_company_nif.grid(row =0 , column = 7 , padx = 5 , pady = 5)
@@ -222,9 +225,8 @@ class Actions:
         number_of_employees_entry.current(newindex = 0)
         #number_of_employees_entry.bind("<<ComboboxSelected>>" , self.test) 
         
-        
         company_adress = ttk.Labelframe(add_company_frame , text ="Dirección: ")
-        company_adress.grid(row = 2 , column = 0 , columnspan = 4 , padx = 10 , pady = 10 , sticky = W+E)
+        company_adress.grid(row = 2 , column = 0 , columnspan = 4 , padx = 10 , pady = 5 , sticky = W+E)
         
         company_street_label = ttk.Label(company_adress, text="Calle: ")
         company_street_label.grid(row=0, column=0, padx=5, pady=5, columnspan=3, sticky="we")
@@ -244,13 +246,38 @@ class Actions:
         company_street_floor = ttk.Entry(company_adress , width = 6)
         company_street_floor.grid(row=1, column=5, padx=5, pady=5)
         
+        company_adress2 = ttk.Frame(company_adress)
+        company_adress2.grid(row = 2 , column =0 , columnspan = 8 , padx = 5 , pady = 5 , sticky = W+E)  
+        
+        company_adress2.grid_columnconfigure(1 , weight = 1)
+        company_adress2.grid_columnconfigure(4 , weight = 1)
+        
+        company_city = ttk.Label(company_adress2 , text = "Ciudad: ")
+        company_city.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        company_city_entry = ttk.Entry(company_adress2)
+        company_city_entry.grid(row = 0 , column = 1 , columnspan = 2 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        company_province= ttk.Label(company_adress2 , text = "Provincia: ")
+        company_province.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        company_province_entry = ttk.Entry(company_adress2)
+        company_province_entry.grid(row = 0 , column = 4 , columnspan = 2,  padx = 5 , pady = 5 , sticky = W+E)
+        
+        company_postal_code = ttk.Label(company_adress2 , text = "C.P.: ")
+        company_postal_code.grid(row = 0 , column = 6 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        company_postal_code._entry = ttk.Entry(company_adress2)
+        company_postal_code._entry.grid(row = 0 , column = 7 , padx = 5 , pady = 5 , sticky = E)
+        
         company_adress.grid_columnconfigure(0 , weight = 1)
         company_adress.grid_columnconfigure(1 , weight = 1)
         
         company_contact = ttk.Labelframe(add_company_frame , text = "Contacto")   
-        company_contact.grid(row = 2 , column = 0 , columnspan = 4 , padx = 10 , pady = 10 , sticky = W+E)
-        company_contact.grid_columnconfigure(0 , weight = 1)   
-        company_contact.grid_columnconfigure(1 , weight = 1)       
+        company_contact.grid(row = 3, column = 0 , columnspan = 4 , padx = 10 , pady = 5 , sticky = W+E)
+        
+        company_contact.grid_columnconfigure(1 , weight = 1)   
+        company_contact.grid_columnconfigure(3 , weight = 1)       
         
         company_web = ttk.Label(company_contact , text ="Web: ")
         company_web.grid(row =2 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
@@ -277,7 +304,11 @@ class Actions:
         entry_company_phone2.grid(row =3 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
         
         frame_contact_person = ttk.Labelframe(add_company_frame , text = "Contact Person")
-        frame_contact_person.grid(row = 3 , column = 0)
+        frame_contact_person.grid(row = 4 , column = 0  , padx = 10 , pady = 5 , sticky = W+E)
+        
+        frame_contact_person.grid_columnconfigure(0 , weight = 1)
+        frame_contact_person.grid_columnconfigure(1 , weight = 1)
+        frame_contact_person.grid_columnconfigure(2 , weight = 1)
         
         label_name = ttk.Label(frame_contact_person, text = "Nombre:")
         label_name.grid(row = 0 , column = 0 , padx = 5 , sticky = W+E)

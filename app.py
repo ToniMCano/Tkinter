@@ -84,7 +84,7 @@ class Main:
         self.mail_icon = self.mail_image.resize((16,12))
         self.mail_icon = ImageTk.PhotoImage(self.mail_icon)
         
-        self.phone_image = Image.open("recursos\\phone.png")
+        self.phone_image = Image.open("recursos/phone.png")
         self.phone_icon = self.phone_image.resize((12,12))
         self.phone_icon = ImageTk.PhotoImage(self.phone_icon)
 
