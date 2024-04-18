@@ -10,8 +10,8 @@ class Employee(Base):
     __table_args__ = {"sqlite_autoincrement" : True}
     
     id_employee = Column(Integer , primary_key = True)
-    employee_alias = Column(String , nullable = False)
-    employee_name = Column(String , nullable = False)
+    employee_alias = Column(String , nullable = False )
+    employee_name = Column(String , unique = True , nullable = False)
     employee_surname = Column(String , nullable = False)
     employee_mail = Column(Integer , nullable = False)
     employee_phone = Column(Integer)
@@ -116,7 +116,8 @@ class Contact(Base):
     
     id_contact = Column(Integer , primary_key = True)
     company_state = Column(String , nullable = False)
-    last_contact = Column(String)
+    last_contact_date = Column(String)
+    last_contact_hour = Column(String)
     log = Column(String , nullable = False)
     client_id = Column(Integer , ForeignKey("client.id_client"))
     contact_state = Column(String , nullable = False)
@@ -124,12 +125,13 @@ class Contact(Base):
     contact_employee_id = Column(Integer , ForeignKey('employee.id_employee'))
     contact_person_id = Column(Integer , ForeignKey('contact_person.id_person'))
 
-def __init__(self , last_contact , log , client_id , contact_state , contact_counter , contact_employee_id , contact_person_id , company_state = 'pool'):
-    self.company_state = company_state
-    self.last_contact = last_contact
-    self.log = log
-    self.client_id = client_id
-    self.contact_state = contact_state
-    self.contact_counter = contact_counter
-    self.contact_employee_id = contact_employee_id
-    self.contact_person_id = contact_person_id
+    def __init__(self , last_contact_date , last_contact_hour , log , client_id , contact_employee_id , contact_person_id , company_state = 'pool' , contact_state = None , contact_counter = 0):
+        self.company_state = company_state
+        self.last_contact_date = last_contact_date
+        self.last_contact_hour = last_contact_hour
+        self.log = log
+        self.client_id = client_id
+        self.contact_state = contact_state # La dejo creada por si en un futuro incluyo otra función (Localizado, No Localizado, Aclarado, Venta...)
+        self.contact_counter = contact_counter
+        self.contact_employee_id = contact_employee_id
+        self.contact_person_id = contact_person_id

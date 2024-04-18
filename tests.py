@@ -5,7 +5,7 @@ import random
 import sqlalchemy
 from sqlalchemy import and_ , or_
 import db
-from models import Client , ContactPerson
+from models import Client , ContactPerson , Employee , Contact
 
 
 
@@ -43,7 +43,7 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
             row.append(int("9" + ''.join(random.choices(nif , k = 8)) )) 
             row.append("")
             row.append(random.choice(nace))
-            row.append(0)
+            row.append(alias)
             row.append(employee)
             row.append("Pool")
             row.append(random.choice(employees))
@@ -64,7 +64,7 @@ def contacts():   # UN CONTACTO PARA CADA EMPRESA
     
     for i , person in enumerate(range(60)):
         
-        contact = ContactPerson(f"Name{str(i)}" , f"Surname{str(i)}" , f"General Manager" , int(f"9{"".join(random.choices(nif , k = 8))}") , "" , f"contact{str(i)}@mail.com" , i , "Notes")        
+        contact = ContactPerson(f"Name{str(i)}" , f"Surname{str(i)}" , f"General Manager" , int(f"9{"".join(random.choices(nif , k = 8))}") , "" , f"contact{str(i)}@mail.com" , i+1 , "Notes")        
         try:
             db.session.add(contact)
             db.session.commit()
@@ -92,4 +92,25 @@ def insertar(excel):  # excel debe ser la referencia a una hoja (excel["Sheet"])
         db.session.commit()
     db.session.close()    
               
-contacts()
+
+def empleados():
+     
+    for i , x in enumerate(range(3)):
+        
+        employee = Employee(f"EA{str(i)}", f"Name{str(i)}" , f"Surname{str(i)}" , f"ea{str(i)}@company.com", int(f"9652293{str(i)}") ,"Comercial" , 1234 , 1)
+        db.session.add(employee)
+        db.session.commit()
+    db.session.close()
+    
+#last_contact_date , last_contact_hour , log , client_id , contact_counter , contact_employee_id , contact_person_id , company_state = 'pool' , contact_state = None):
+    
+def contact():
+    for i , company in enumerate(range(60)):
+        for contact in range(10):
+            contact_random = Contact(company_state = "Contact" , last_contact_date = "17-04-2024" , last_contact_hour = f"{str(random.randint(8,19))}:00" , log =  "No localizado, estará a parir de las 16:00" ,client_id =  i+1 ,contact_state = "" , contact_counter = 1 , contact_employee_id = random.randint(1,3) , contact_person_id =  i+1)
+            db.session.add(contact_random)
+            db.session.commit()
+    db.session.close()
+
+
+

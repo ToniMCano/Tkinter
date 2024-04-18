@@ -25,6 +25,9 @@ class Main:
         self.ventana_principal.geometry('1200x800')
         act.center_window(self, self.ventana_principal)
         
+        login_button = ttk.Button(self.ventana_principal , text = "Login")
+        login_button.place(x = -1 , y = 0)
+        
         # INFO LISTA
         
         style = ttk.Style()
@@ -38,29 +41,26 @@ class Main:
         self.info = ttk.Treeview(self.frame_tree,height = 20 , style="mystyle.Treeview")
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
         
-        self.info["columns"] = ("Estado" , "ultimo_contacto" , "Días_C" , "ultima_venta", "Días_V", "Cantidad" , "Porcentaje")
+        self.info["columns"] = ( "#0" , "#1" , "#2" , "#3" ,  "#4")
         self.info.heading("#0" , text = "Estado" , command = lambda: self.on_heading_click("state"))
         self.info.heading("#1" , text = "Cliente" , command = lambda: self.on_heading_click("client"))
         self.info.heading("#2" , text  ="Último Contacto" , command = lambda: self.on_heading_click("last_contact"))
-        self.info.heading("#3" , text = "Días_C" , command = lambda: self.on_heading_click("days_contact"))
-        self.info.heading("#4" , text = "Ultima Venta" , command = lambda: self.on_heading_click("last_sale"))
-        self.info.heading("#5" , text = "Días_V" , command = lambda: self.on_heading_click("days_sale"))
-        self.info.heading("#6" , text = "Cantidad" , command = lambda: self.on_heading_click("amount"))
-        self.info.heading("#7" , text = "Código Postal" , command = lambda: self.on_heading_click("percentage"))
+        self.info.heading("#3" , text = "Hora" , command = lambda: self.on_heading_click("amount"))
+        self.info.heading("#4" , text = "Días" , command = lambda: self.on_heading_click("days_contact"))
+        self.info.heading("#5" , text = "Código Postal" , command = lambda: self.on_heading_click("percentage"))
         
         self.info.column("#0" , width = 35)
         self.info.column("#1" , width = 150)
         self.info.column("#2" , width = 50)
         self.info.column("#3" , width = 10)
-        self.info.column("#4" , width = 50)
+        self.info.column("#4" , width = 10)
         self.info.column("#5" , width = 10)
-        self.info.column("#6" , width = 20)
-        self.info.column("#7" , width = 20)
         
         
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
+        act.login()
         
         #IMAGENES 
         
@@ -382,7 +382,7 @@ class Main:
         self.margin_bottom_contacto.grid(row = 9 , column = 0 , columnspan = 2 , sticky = W+E)
         
         act.load_contacts( self, employee)    
-        act.login()
+        
         
         
     def on_heading_click(self , e):
