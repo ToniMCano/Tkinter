@@ -50,7 +50,7 @@ class Actions:
         window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
     
     
-    def login():
+    def login(root):
             
         login = Toplevel()
         login.title("Login")
@@ -75,19 +75,22 @@ class Actions:
         employee_password_entry = ttk.Entry(frame)
         employee_password_entry.grid(row =1 , column = 1 , padx = 5 , pady = 10 , sticky = W+E)
         
-        log_button = ttk.Button(login , text = "Login")
+        log_button = ttk.Button(login , text = "Login" , command = lambda: Actions.load_contacts(root))
         log_button.grid(row = 1 , column = 0 , padx = 5 , pady = 5)
         
+        login.lift()
         Actions.center_window(Actions , login)
         
+
+    
      
      
     def load_contacts(self , employee):
-        #self.info.insert("" , 0 , text = 'client[0]' , values =['client[1]' , 'client[2]' , 'client[3]' , 'client[4]' , 'client[5]' , "Cantidad" , "Porcentaje"])
-        #contacts = db.session.query(Client).filter(and_(Client.state == "Lead" , Client.employee_id == employee )).all()
-        
-        #for client in contacts:
-        self.info.insert("" , 0 , text = 'client[0]' , values =['client[1]' , 'client[2]' , 'client[3]' , 'client[4]' , 'client[5]' , "Cantidad" , "Código Postal"])
+        contacts = db.session.query(Contact).filter(and_(Contact.company_state == "Contact" , Contact.contact_employee_id == 1 )).all()
+    
+        for client in contacts:
+            company_name = db.session.query(Client).filter(Client.contact_person == client.contact_person_id).first()
+            self.info.insert("" , 0 , text = client.company_state , values = (company_name.name, client.last_contact_date  ,"funciíon D" , client.next_contact , "función CP"))
                
                
     def nace_list():
@@ -530,7 +533,7 @@ class Actions:
             mb.showwarning("Errores en la inserción de Empresas" , f"Empresas que no han podido ser insertadas: {errores}")    
         
         
-    def calendar(frame , place , date = "" ):
+    def calendar(frame , place , date = "" ):  
         
         header_calendar = StringVar(value = "View")
         
@@ -538,7 +541,7 @@ class Actions:
         
         label_calendar.pack(fill = "x" , expand = True)
         
-        frame.calendar = Calendar(frame , selectedmode = "day" , date_pattern = "dd-mm-yyyy")
+        frame.calendar = Calendar(frame , selectedmode = "day" , date_pattern = "yyyy-mm-dd") # Para poder ordenarlo en la DB "YYYY-MM-DD"
         frame.calendar.pack()
         
         if place == "general":
@@ -566,7 +569,7 @@ class Actions:
         
         if frame.winfo_ismapped(): # Comprueba si self.frame_container_calendar es visible, si es visible lo oculta con self.frame_container_calendar.grid_forget()
             frame.place_forget()
-            
+
         else:
             if place == "general":
                 frame.place(x = 320, y = 50) 
@@ -584,20 +587,23 @@ class Actions:
     def general_calendar_date(self , place , date , event):
         
         try:
-            fecha_seleccionada = self.calendar.get_date() # 10-04-2024 Comprobar si se puede ordenar así en la DB.
-            month = int(fecha_seleccionada[3:5])
-            year = int(fecha_seleccionada[6:])
+            fecha_seleccionada = self.calendar.get_date() ## Para poder ordenarlo en la DB "YYYY-MM-DD" 
             
-            if int(fecha_seleccionada[0]) == 0:
-                day = int(fecha_seleccionada[1])
+            month = int(fecha_seleccionada[5:7])
+            year = int(fecha_seleccionada[0:4])
             
+            if int(fecha_seleccionada[-2]) == 0:
+                day = int(fecha_seleccionada[-1])
+                
             else:
-                day = int(fecha_seleccionada[0:2])
+                day = int(fecha_seleccionada[-2:])
             
             date.set(datetime(year,month,day).strftime("%d %B")) 
+            
             Actions.toggle_frame_visibility(self , place)
             
         except Exception as e:
+            print(e)
             mb.showwarning("Error" , f"Ha habido un problema con las fechas {e}")
                      
                     
@@ -607,6 +613,6 @@ class Actions:
        print(vcontact_person.id_person , employee)
        
        
-    def tst(self , place , hour):
-        print(f"Date From: {place} - {self.calendar.get_date()} - {hour}")
+    def tst(self , place , hour): #  (YYYY-MM-DD HH:MM:SS)  Para poder ordenarlo en la DB 
+        print(f"Date From: {place} - {self.calendar.get_date()} {hour}") 
         Actions.toggle_frame_visibility(self , place)

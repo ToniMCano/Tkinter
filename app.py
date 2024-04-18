@@ -25,8 +25,6 @@ class Main:
         self.ventana_principal.geometry('1200x800')
         act.center_window(self, self.ventana_principal)
         
-        login_button = ttk.Button(self.ventana_principal , text = "Login")
-        login_button.place(x = -1 , y = 0)
         
         # INFO LISTA
         
@@ -45,22 +43,23 @@ class Main:
         self.info.heading("#0" , text = "Estado" , command = lambda: self.on_heading_click("state"))
         self.info.heading("#1" , text = "Cliente" , command = lambda: self.on_heading_click("client"))
         self.info.heading("#2" , text  ="Último Contacto" , command = lambda: self.on_heading_click("last_contact"))
-        self.info.heading("#3" , text = "Hora" , command = lambda: self.on_heading_click("amount"))
-        self.info.heading("#4" , text = "Días" , command = lambda: self.on_heading_click("days_contact"))
+        self.info.heading("#3" , text = "Días" , command = lambda: self.on_heading_click("amount"))
+        self.info.heading("#4" , text = "Próximo Contacto" , command = lambda: self.on_heading_click("days_contact"))
         self.info.heading("#5" , text = "Código Postal" , command = lambda: self.on_heading_click("percentage"))
         
         self.info.column("#0" , width = 35)
         self.info.column("#1" , width = 150)
         self.info.column("#2" , width = 50)
         self.info.column("#3" , width = 10)
-        self.info.column("#4" , width = 10)
+        self.info.column("#4" , width = 50)
         self.info.column("#5" , width = 10)
         
         
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
-        act.login()
+        act.login(self)
+        act.load_contacts(self , "")
         
         #IMAGENES 
         
@@ -155,12 +154,14 @@ class Main:
         self.pool.config(height=2 ,width=5)
         self.pool.grid(row = 0 , column = 1 , padx = 5)
         
+        login_button = ttk.Button(self.header , text = "Login" , command = act.login)
+        login_button.grid(row = 0 , column = 10 , sticky = E)
+        
         self.pop_up = tk.Button(self.header, text = "PopUp")
         self.pop_up.config(cursor = 'arrow')
         self.pop_up.config(height = 2, width = 5)
-        self.pop_up.grid(row = 0 , column = 10 , padx = 5 , sticky = E)
+        self.pop_up.grid(row = 0 , column = 11 , padx = 5 , sticky = E)
         
-
         
         # LOG
 
@@ -380,9 +381,7 @@ class Main:
         self.margin_bottom_contacto = Label(self.contact_frame , text = "id: 45612" , bg = 'black' , fg = 'white')
         #self.margin_bottom_contacto.config(height= 0)
         self.margin_bottom_contacto.grid(row = 9 , column = 0 , columnspan = 2 , sticky = W+E)
-        
-        act.load_contacts( self, employee)    
-        
+             
         
         
     def on_heading_click(self , e):

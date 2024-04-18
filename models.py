@@ -117,21 +117,23 @@ class Contact(Base):
     id_contact = Column(Integer , primary_key = True)
     company_state = Column(String , nullable = False)
     last_contact_date = Column(String)
-    last_contact_hour = Column(String)
+    next_contact = Column(String)
     log = Column(String , nullable = False)
     client_id = Column(Integer , ForeignKey("client.id_client"))
     contact_state = Column(String , nullable = False)
     contact_counter = Column(Integer , nullable = False)
     contact_employee_id = Column(Integer , ForeignKey('employee.id_employee'))
     contact_person_id = Column(Integer , ForeignKey('contact_person.id_person'))
+    pop_up = Column(Boolean)
 
-    def __init__(self , last_contact_date , last_contact_hour , log , client_id , contact_employee_id , contact_person_id , company_state = 'pool' , contact_state = None , contact_counter = 0):
+    def __init__(self , last_contact_date , next_contact , log , client_id , contact_employee_id , contact_person_id , company_state = 'pool' , contact_state = None , contact_counter = 0 , pop_up = False):
         self.company_state = company_state
         self.last_contact_date = last_contact_date
-        self.last_contact_hour = last_contact_hour
+        self.next_contact = next_contact
         self.log = log
         self.client_id = client_id
         self.contact_state = contact_state # La dejo creada por si en un futuro incluyo otra función (Localizado, No Localizado, Aclarado, Venta...)
         self.contact_counter = contact_counter
         self.contact_employee_id = contact_employee_id
         self.contact_person_id = contact_person_id
+        self.pop_up = pop_up
