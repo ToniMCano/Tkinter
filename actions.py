@@ -87,7 +87,7 @@ class Actions:
         #contacts = db.session.query(Client).filter(and_(Client.state == "Lead" , Client.employee_id == employee )).all()
         
         #for client in contacts:
-        self.info.insert("" , 0 , text = 'client[0]' , values =['client[1]' , 'client[2]' , 'client[3]' , 'client[4]' , 'client[5]' , "Cantidad" , "Porcentaje"])
+        self.info.insert("" , 0 , text = 'client[0]' , values =['client[1]' , 'client[2]' , 'client[3]' , 'client[4]' , 'client[5]' , "Cantidad" , "Código Postal"])
                
                
     def nace_list():
@@ -227,6 +227,8 @@ class Actions:
         
         company_adress = ttk.Labelframe(add_company_frame , text ="Dirección: ")
         company_adress.grid(row = 2 , column = 0 , columnspan = 4 , padx = 10 , pady = 5 , sticky = W+E)
+        company_adress.grid_columnconfigure(0 , weight = 1)
+        company_adress.grid_columnconfigure(1 , weight = 1)
         
         company_street_label = ttk.Label(company_adress, text="Calle: ")
         company_street_label.grid(row=0, column=0, padx=5, pady=5, columnspan=3, sticky="we")
@@ -249,29 +251,23 @@ class Actions:
         company_adress2 = ttk.Frame(company_adress)
         company_adress2.grid(row = 2 , column =0 , columnspan = 8 , padx = 5 , pady = 5 , sticky = W+E)  
         
-        company_adress2.grid_columnconfigure(1 , weight = 1)
-        company_adress2.grid_columnconfigure(4 , weight = 1)
-        
         company_city = ttk.Label(company_adress2 , text = "Ciudad: ")
-        company_city.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+        company_city.grid(row = 0 , column = 0 , padx = 5 , pady = 5)# , sticky = W+E)
         
         company_city_entry = ttk.Entry(company_adress2)
-        company_city_entry.grid(row = 0 , column = 1 , columnspan = 2 , padx = 5 , pady = 5 , sticky = W+E)
+        company_city_entry.grid(row = 0 , column = 1, columnspan = 2 , padx = 5 , pady = 5 , sticky = W+E)
         
         company_province= ttk.Label(company_adress2 , text = "Provincia: ")
-        company_province.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
+        company_province.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = E)
         
         company_province_entry = ttk.Entry(company_adress2)
-        company_province_entry.grid(row = 0 , column = 4 , columnspan = 2,  padx = 5 , pady = 5 , sticky = W+E)
+        company_province_entry.grid(row = 0 , column = 4, columnspan = 2 , padx = 5 , pady = 5 , sticky = W+E)
         
         company_postal_code = ttk.Label(company_adress2 , text = "C.P.: ")
-        company_postal_code.grid(row = 0 , column = 6 , padx = 5 , pady = 5 , sticky = W+E)
+        company_postal_code.grid(row = 0 , column = 6 , padx = 5 , pady = 5 )# , sticky = W+E)
         
-        company_postal_code._entry = ttk.Entry(company_adress2)
-        company_postal_code._entry.grid(row = 0 , column = 7 , padx = 5 , pady = 5 , sticky = E)
-        
-        company_adress.grid_columnconfigure(0 , weight = 1)
-        company_adress.grid_columnconfigure(1 , weight = 1)
+        company_postal_code_entry = ttk.Entry(company_adress2)
+        company_postal_code_entry.grid(row = 0 , column = 7 , padx = 5 , pady = 5 )# , sticky = W+E)
         
         company_contact = ttk.Labelframe(add_company_frame , text = "Contacto")   
         company_contact.grid(row = 3, column = 0 , columnspan = 4 , padx = 10 , pady = 5 , sticky = W+E)
@@ -496,23 +492,64 @@ class Actions:
     def show_company(company_id):
         pass
 
+
     def load_companies():
-        excel = filedialog.askopenfilename(title = "Cargar desde Excel" , filetypes = (("Ficheros Excel" , "*.xlsx"),))
-        print(excel)
+        
+        excel_paht = filedialog.askopenfilename(title = "Cargar desde Excel" , filetypes = (("Ficheros Excel" , "*.xlsx"),))
+        excel = openpyxl.open(excel_paht)
+        
+        rows = []
+        ready = []
+        errores = []
+        
+        for row in excel["Sheet"].rows:
+            
+            for cell in row:
+                rows.append(cell.value)
+                
+            ready.append(rows)
+            rows = []
+        
+        for i , registro in enumerate(ready):
+            
+            new = Client(registro[0] , registro[1] , registro[2] , registro[3] , registro[4] , registro[5] , registro[6] , registro[7] , registro[8] , registro[9] , registro[10] , registro[11])
+            
+            try:
+                
+                db.session.add(new)
+                db.session.commit()
+                
+            except Exception as e:
+                
+                errores.append(i+1)
+            
+        db.session.close()
+        
+        if len(errores) > 0:
+            
+            mb.showwarning("Errores en la inserción de Empresas" , f"Empresas que no han podido ser insertadas: {errores}")    
+        
+        
     def calendar(frame , place , date = "" ):
         
         header_calendar = StringVar(value = "View")
+        
         label_calendar = tk.Label(frame , textvariable = header_calendar , bg = "black" , fg = "white")
+        
         label_calendar.pack(fill = "x" , expand = True)
+        
         frame.calendar = Calendar(frame , selectedmode = "day" , date_pattern = "dd-mm-yyyy")
         frame.calendar.pack()
         
         if place == "general":
+            
             frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>", lambda e: Actions.general_calendar_date(frame , place , date , e))
        
         elif place != "general":
+            
             if place == "next":
                 header_calendar.set("Next Contact")
+                
             else:
                 header_calendar.set("Pop Up")
                 
@@ -523,6 +560,7 @@ class Actions:
             #frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>")
             send = ttk.Button(frame , text = "Save" , command = lambda: Actions.tst(frame , place , hour = hour.get()) )
             send.pack(pady = 5)
+
 
     def toggle_frame_visibility(frame , place):
         
@@ -567,6 +605,7 @@ class Actions:
        #app.grid_forget()
        vcontact_person = db.session.query(ContactPerson).order_by(ContactPerson.id_person.desc()).first()
        print(vcontact_person.id_person , employee)
+       
        
     def tst(self , place , hour):
         print(f"Date From: {place} - {self.calendar.get_date()} - {hour}")

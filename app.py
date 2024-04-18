@@ -46,7 +46,7 @@ class Main:
         self.info.heading("#4" , text = "Ultima Venta" , command = lambda: self.on_heading_click("last_sale"))
         self.info.heading("#5" , text = "Días_V" , command = lambda: self.on_heading_click("days_sale"))
         self.info.heading("#6" , text = "Cantidad" , command = lambda: self.on_heading_click("amount"))
-        self.info.heading("#7" , text = "Porcentaje" , command = lambda: self.on_heading_click("percentage"))
+        self.info.heading("#7" , text = "Código Postal" , command = lambda: self.on_heading_click("percentage"))
         
         self.info.column("#0" , width = 35)
         self.info.column("#1" , width = 150)

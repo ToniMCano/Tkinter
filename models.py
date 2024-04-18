@@ -14,23 +14,25 @@ class Employee(Base):
     employee_name = Column(String , nullable = False)
     employee_surname = Column(String , nullable = False)
     employee_mail = Column(Integer , nullable = False)
+    employee_phone = Column(Integer)
     employee_job_title = Column(String , nullable = False)
     password = Column(String , nullable = False)
     permissions = Column(Integer , nullable = False)
     
-    def __init__(self, employee_alias , employee_name = "Pool" , employee_surname = "Terminada" , employee_mail = "company.mail@test.com" , employee_job_title = "None" , password = "******" , permisions = 0):
+    def __init__(self, employee_alias = "xxx", employee_name = "Pool" , employee_surname = "Terminada" , employee_mail = "company.mail@test.com" , employee_phone = 999999999 , employee_job_title = "None" , password = "******" , permisions = 0):
         
         self.employee_alias = employee_alias
         self.employee_name = employee_name
         self.employee_surname = employee_surname
         self.employee_mail = employee_mail
+        self.employee_phone = employee_phone
         self.employee_job_title = employee_job_title
         self.password = password
         self.permissions = permisions
         
     def __str__(self):
         
-        return f"Se ha añadido el empleado:\nNombre: {self.employee_name}\nApellido: {self.employee_surname}\nMail: {self.employee_mail}\nCargo: {self.employee_job_title}\nPermisos: {self.permissions}"
+        return f"Se ha añadido el empleado:\nNombre: {self.employee_name}\nApellido: {self.employee_surname}\nMail: {self.employee_mail}\nJ Teléfono: {self.employee_phone}\nCargo: {self.employee_job_title}\nPermisos: {self.permissions}"
 
 
 class Client(Base):                                                      # Definimos la columnas
