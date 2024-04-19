@@ -35,10 +35,10 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
         nace.append(x[0].value)
             
     for employee_id in range(3):
-        for data_row in range(20):
+        for data_row in range(50):
             row.append("Company".lower() + str(alias))
             row.append(random.choice(nif_check).capitalize() + "".join(random.choices(nif , k=8)))
-          #  row.append(f"adress{str(alias)}-{str(alias)}-{str(alias + int(random.choice(nif)))}- City{str(alias)}- Province{str(alias)}-C.P:{"".join(random.choices(nif , k = 5))}")
+            row.append(f"adress{str(alias)}-{str(alias)}-{str(alias + int(random.choice(nif)))}- City{str(alias)}- Province{str(alias)}-C.P:{"".join(random.choices(nif , k = 5))}")
             row.append(f"www.web{str(alias)}.com")  
             row.append(f"{row[0]}@{row[3][4:]}")
             row.append(int("9" + ''.join(random.choices(nif , k = 8)) )) 
@@ -46,17 +46,36 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
             row.append(random.choice(nace))
             row.append(alias)
             row.append(employee)
-            row.append("Pool")
+            row.append("Contact")
             row.append(random.choice(employees))
+            row.append(f"2024-{str(random.randint(1,3))}-{str(random.randint(1,30))}")
+            row.append("")
+            row.append(random.randint(0,3))
+            
+            if row[-1] == 0:
+                row[-5] = "Pool"
+                
+            if row[-3][5:7] == "02":
+                row[-3] = row[-3].replace(row[-3][-2:] , f"{str(random.randint(10,28))}")
+                
+            if len(row[-3].split("-")[1]) == 1:
+                row[-3] = row[-3].replace(f"-{row[-3][5]}-" , f"-0{str(row[-3][5])}-")
+                
+            if len(row[-3].split("-")[2]) == 1:
+                row[-3] = row[-3].replace(f"{row[-3][-1]}" , f"0{str(row[-3][-1])}")
+                
             data.append(row)
+            
             row = []
+            
             alias += 1
+            
         employee += 1
             
     for x in data: 
         active_sheet.append(x) # Añadimos las filas
         
-    wb.save("data.xlsx")    
+    wb.save("data2.xlsx")    
     
 
 def contacts():   # UN CONTACTO PARA CADA EMPRESA
@@ -65,7 +84,7 @@ def contacts():   # UN CONTACTO PARA CADA EMPRESA
     
     for i , person in enumerate(range(60)):
         
-        #contact = ContactPerson(f"Name{str(i)}" , f"Surname{str(i)}" , f"General Manager" , int(f"9{"".join(random.choices(nif , k = 8))}") , "" , f"contact{str(i)}@mail.com" , i+1 , "Notes")        
+        contact = ContactPerson(f"Name{str(i)}" , f"Surname{str(i)}" , f"General Manager" , int(f"9{"".join(random.choices(nif , k = 8))}") , "" , f"contact{str(i)}@mail.com" , i+1 , "Notes")        
         try:
             db.session.add(contact)
             db.session.commit()
@@ -110,7 +129,7 @@ def contact():
         
     for i , company in enumerate(range(60)):
         for contact in range(10):
-            contact_random = Contact(company_state = "Contact" , last_contact_date = f"{date()} {str(random.randint(8,19))}:00" , next_contact = f"{date()} {str(random.randint(8,19))}:00"  , log =  "No localizado, estará a parir de las 16:00" ,client_id =  i+1 ,contact_state = "" , contact_counter = 1 , contact_employee_id = random.randint(1,3) , contact_person_id =  i+1)
+            contact_random = Contact(company_state = "Contact" , last_contact_date = f"{date()} {str(random.randint(8,19))}:00" , next_contact = f"{date()} {str(random.randint(8,19))}:00"  , log =  "No localizado, estará a parir de las 16:00" ,client_id =  i+1 , contact_counter = random.randint(0,3) , contact_employee_id = random.randint(1,3) , contact_person_id =  i+1)
             db.session.add(contact_random)
             db.session.commit()
     db.session.close()
@@ -154,8 +173,18 @@ def check_employee(window , employee_password = 1234 , alias = "EA1"):
         
         
 def test3():
-    new = Contact('last_contact_date' , 'next_contact' , 'log' , 'client_id' , 'contact_employee_id' , 'contact_person_id' , company_state = 'pool' ,  contact_counter = 0 , pop_up = False)
-    db.session.add(new)
-    db.session.commit()
-    db.session.close()
-test3()
+    clientes = db.session.query(Client)
+    #contactss = db.session.query(Contact).filter(Contact.contact_person_id == ).all()
+    
+    for x in clientes:
+        contactss = db.session.query(Contact).filter(Contact.contact_person_id == x.id_client ).all()
+        for y in contactss:
+            y.contact_counter = x.counter
+        
+
+
+
+datos_muestra()
+empleados()
+contact()
+contacts()

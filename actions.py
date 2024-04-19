@@ -7,7 +7,7 @@ import webbrowser
 from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
-from sqlalchemy import and_ , or_  
+from sqlalchemy import and_ , or_ , func
 from datetime import datetime
 import locale
 from tkinter import messagebox as mb
@@ -82,9 +82,9 @@ class Actions:
         Actions.center_window(Actions , login_window)
 
      
-    def load_contacts(self , employee_id ):
+    def load_contacts(self , employee_id ): # last_gestion = session.query(func.max(Client.counter)).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
 
-        contacts = db.session.query(Contact).filter(and_(Contact.company_state == "Contact" , Contact.contact_employee_id == employee_id)).all()
+        contacts = db.session.query(Contact).filter(and_(Contact.company_state == "Contact" , Contact.contact_employee_id == employee_id)).order_by(Contact.last_contact_date).group_by(Contact.client_id).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
     
         for client in contacts:
             company_name = db.session.query(Client).filter(Client.contact_person == client.contact_person_id).first()
@@ -629,11 +629,10 @@ class Actions:
 
     def get_days(client):
         # Para almacenar start_contact_date datetime.now()).split(" ")[0].split("-")
-        
         today = datetime.now()
-        date = client.start_contact_date
+        date = client.start_contact_date.split("-")
         
-        days =str(datetime(2024,4,1) - datetime.now() ).split(" ")[0].strip("-")
+        days =str(datetime(int(date[0]),int(date[1]),int(date[2])) - datetime.now() ).split(" ")[0].strip("-")
         
         return days
-            
+                
