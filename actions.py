@@ -88,8 +88,8 @@ class Actions:
     
         for client in contacts:
             company_name = db.session.query(Client).filter(Client.contact_person == client.contact_person_id).first()
-            self.info.insert("" , 0 , text = client.company_state , values = (Actions.get_days(company_name) , company_name.name, client.last_contact_date   , client.next_contact , company_name.adress[-5:]))
-        
+            self.info.insert("" , 0 , text = company_name.state , values = (Actions.get_days(company_name) , company_name.name, client.last_contact_date   , client.next_contact , company_name.adress[-5:]))
+        self.contacts.set(f"Contactos: {len(contacts)}")
         
     def check_employee(root , employee_password , alias , window):
         employees =  db.session.query(Employee).all()

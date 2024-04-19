@@ -153,4 +153,9 @@ def check_employee(window , employee_password = 1234 , alias = "EA1"):
             
         
         
-check_employee()
+def test3():
+    new = Contact('last_contact_date' , 'next_contact' , 'log' , 'client_id' , 'contact_employee_id' , 'contact_person_id' , company_state = 'pool' ,  contact_counter = 0 , pop_up = False)
+    db.session.add(new)
+    db.session.commit()
+    db.session.close()
+test3()

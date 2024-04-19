@@ -189,8 +189,6 @@ class Main:
         # NÚMERO DE CONTACTOS/ESTADO
         
         self.contacts = StringVar()
-        test = [1,2,1,1,1]
-        self.contacts.set(f"Contactos: {len(test)}")
         
         self.contacts_number = tk.Frame(self.frame_tree , bg = "lightgrey")
         self.contacts_number.grid(row = 1 , column = 0 , sticky = "nswe")
