@@ -41,16 +41,16 @@ class Main:
         
         self.info["columns"] = ( "#0" , "#1" , "#2" , "#3" ,  "#4")
         self.info.heading("#0" , text = "Estado" , command = lambda: self.on_heading_click("state"))
-        self.info.heading("#1" , text = "Cliente" , command = lambda: self.on_heading_click("client"))
-        self.info.heading("#2" , text  ="Último Contacto" , command = lambda: self.on_heading_click("last_contact"))
-        self.info.heading("#3" , text = "Días" , command = lambda: self.on_heading_click("amount"))
+        self.info.heading("#1" , text = "Días" , command = lambda: self.on_heading_click("client"))
+        self.info.heading("#2" , text  ="Cliente" , command = lambda: self.on_heading_click("last_contact"))
+        self.info.heading("#3" , text = "Último Contacto" , command = lambda: self.on_heading_click("amount"))
         self.info.heading("#4" , text = "Próximo Contacto" , command = lambda: self.on_heading_click("days_contact"))
         self.info.heading("#5" , text = "Código Postal" , command = lambda: self.on_heading_click("percentage"))
         
         self.info.column("#0" , width = 35)
-        self.info.column("#1" , width = 150)
-        self.info.column("#2" , width = 50)
-        self.info.column("#3" , width = 10)
+        self.info.column("#1" , width = 10)
+        self.info.column("#2" , width = 150)
+        self.info.column("#3" , width = 50)
         self.info.column("#4" , width = 50)
         self.info.column("#5" , width = 10)
         
@@ -59,7 +59,8 @@ class Main:
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
         act.login(self)
-        act.load_contacts(self , "")
+        #act.load_contacts(self , "")
+        
         
         #IMAGENES 
         

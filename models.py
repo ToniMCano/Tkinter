@@ -53,9 +53,10 @@ class Client(Base):                                                      # Defin
     employee_id = Column(Integer , ForeignKey("employee.id_employee"))
     state = Column(String , nullable = False)
     number_of_employees = Column(String , nullable = False)
+    start_contact_date = Column(String , nullable = False)
     
     
-    def __init__(self , name , nif , adress , web , mail , phone , phone2 , activity , contact_person , employee_id = 0 , state = "Terminated" , number_of_employees = "1"): # Creamos el constructor para capturar los valores de cada 
+    def __init__(self , name , nif , adress , web , mail , phone , phone2 , activity , contact_person , employee_id = 0 , state = "Terminated" , number_of_employees = "1" , start_contact_date = ""): # Creamos el constructor para capturar los valores de cada 
                                                                                                                               # columna el id se autogenera, por eso no lo incluimos
         
         self.name = name
@@ -70,6 +71,7 @@ class Client(Base):                                                      # Defin
         self.employee_id = employee_id
         self.state = state
         self.number_of_employees = number_of_employees
+        self.start_contact_date = start_contact_date
         
     
     def __str__(self):

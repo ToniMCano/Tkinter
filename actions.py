@@ -52,14 +52,14 @@ class Actions:
     
     def login(root):
             
-        login = Toplevel()
-        login.title("Login")
+        login_window = Toplevel()
+        login_window.title("Login")
         #login.geometry("300x200")
         
-        login.grid_columnconfigure(0 , weight = 1)
+        login_window.grid_columnconfigure(0 , weight = 1)
         #login.grid_rowconfigure(0 , weight = 1)
         
-        frame = ttk.Labelframe(login , text = "Login")
+        frame = ttk.Labelframe(login_window , text = "Login")
         frame.grid(row = 0 , column = 0 , padx = 10 , pady = 5 , sticky = "we")
         frame.grid_columnconfigure(1, weight = 1)        
         
@@ -75,23 +75,32 @@ class Actions:
         employee_password_entry = ttk.Entry(frame)
         employee_password_entry.grid(row =1 , column = 1 , padx = 5 , pady = 10 , sticky = W+E)
         
-        log_button = ttk.Button(login , text = "Login" , command = lambda: Actions.load_contacts(root))
+        log_button = ttk.Button(login_window , text = "Login" , command = lambda: Actions.check_employee(root , employee_password_entry.get() , employee_alias_entry.get() , login_window))
         log_button.grid(row = 1 , column = 0 , padx = 5 , pady = 5)
         
-        login.lift()
-        Actions.center_window(Actions , login)
-        
+        login_window.lift()
+        Actions.center_window(Actions , login_window)
 
-    
      
-     
-    def load_contacts(self , employee):
-        contacts = db.session.query(Contact).filter(and_(Contact.company_state == "Contact" , Contact.contact_employee_id == 1 )).all()
+    def load_contacts(self , employee_id ):
+
+        contacts = db.session.query(Contact).filter(and_(Contact.company_state == "Contact" , Contact.contact_employee_id == employee_id)).all()
     
         for client in contacts:
             company_name = db.session.query(Client).filter(Client.contact_person == client.contact_person_id).first()
-            self.info.insert("" , 0 , text = client.company_state , values = (company_name.name, client.last_contact_date  ,"funciíon D" , client.next_contact , "función CP"))
-               
+            self.info.insert("" , 0 , text = client.company_state , values = (Actions.get_days(company_name) , company_name.name, client.last_contact_date   , client.next_contact , company_name.adress[-5:]))
+        
+        
+    def check_employee(root , employee_password , alias , window):
+        employees =  db.session.query(Employee).all()
+        exists = False
+        for employee in employees:
+            if employee.employee_alias == alias and employee.password == str(employee_password):
+                exists = True
+                window.destroy()
+                Actions.load_contacts(root , employee.id_employee)
+        if not exists:
+            print("El usuario o la contraseña no son correctos")
                
     def nace_list():
     
@@ -616,3 +625,15 @@ class Actions:
     def tst(self , place , hour): #  (YYYY-MM-DD HH:MM:SS)  Para poder ordenarlo en la DB 
         print(f"Date From: {place} - {self.calendar.get_date()} {hour}") 
         Actions.toggle_frame_visibility(self , place)
+
+
+    def get_days(client):
+        # Para almacenar start_contact_date datetime.now()).split(" ")[0].split("-")
+        
+        today = datetime.now()
+        date = client.start_contact_date
+        
+        days =str(datetime(2024,4,1) - datetime.now() ).split(" ")[0].strip("-")
+        
+        return days
+            

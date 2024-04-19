@@ -6,6 +6,7 @@ import sqlalchemy
 from sqlalchemy import and_ , or_
 import db
 from models import Client , ContactPerson , Employee , Contact
+from datetime import datetime
 
 
 
@@ -37,7 +38,7 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
         for data_row in range(20):
             row.append("Company".lower() + str(alias))
             row.append(random.choice(nif_check).capitalize() + "".join(random.choices(nif , k=8)))
-            row.append(f"adress{str(alias)}-{str(alias)}-{str(alias + int(random.choice(nif)))}- City{str(alias)}- Province{str(alias)}-C.P:{"".join(random.choices(nif , k = 5))}")
+          #  row.append(f"adress{str(alias)}-{str(alias)}-{str(alias + int(random.choice(nif)))}- City{str(alias)}- Province{str(alias)}-C.P:{"".join(random.choices(nif , k = 5))}")
             row.append(f"www.web{str(alias)}.com")  
             row.append(f"{row[0]}@{row[3][4:]}")
             row.append(int("9" + ''.join(random.choices(nif , k = 8)) )) 
@@ -64,7 +65,7 @@ def contacts():   # UN CONTACTO PARA CADA EMPRESA
     
     for i , person in enumerate(range(60)):
         
-        contact = ContactPerson(f"Name{str(i)}" , f"Surname{str(i)}" , f"General Manager" , int(f"9{"".join(random.choices(nif , k = 8))}") , "" , f"contact{str(i)}@mail.com" , i+1 , "Notes")        
+        #contact = ContactPerson(f"Name{str(i)}" , f"Surname{str(i)}" , f"General Manager" , int(f"9{"".join(random.choices(nif , k = 8))}") , "" , f"contact{str(i)}@mail.com" , i+1 , "Notes")        
         try:
             db.session.add(contact)
             db.session.commit()
@@ -135,4 +136,21 @@ def load_contacts():
         company_name = db.session.query(Client).filter(Client.contact_person == client.contact_person_id).first()
         print(company_name.name)
                
-load_contacts()
+#print ((str(datetime(2024,6,19 ) - datetime.now())[:3]))
+
+
+def check_employee(window , employee_password = 1234 , alias = "EA1"):
+    employees =  db.session.query(Employee).all()
+    exists = False
+    for employee in employees:
+        if employee.employee_alias == alias and employee.password == str(employee_password):
+            load_contacts()
+            exists = True
+            window.destroy()
+            load_contacts(employee.id_employee)
+    if not exists:
+        print("El usuario o la contraseña no son correctos")
+            
+        
+        
+check_employee()
