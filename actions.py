@@ -81,7 +81,7 @@ class Actions:
         login_window.lift()
         Actions.center_window(Actions , login_window)
 
-     
+    # CAMBIAR_CLASE
     def load_contacts(self , employee_id ): # last_gestion = session.query(func.max(Client.counter)).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
 
         contacts = db.session.query(Contact).filter(and_(Contact.company_state == "Contact" , Contact.contact_employee_id == employee_id)).order_by(Contact.last_contact_date).group_by(Contact.client_id).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
@@ -91,6 +91,7 @@ class Actions:
             self.info.insert("" , 0 , text = company_name.state , values = (Actions.get_days(company_name) , company_name.name, client.last_contact_date   , client.next_contact , company_name.adress[-5:]))
         self.contacts.set(f"Contactos: {len(contacts)}")
         
+    # CAMBIAR_CLASE    
     def check_employee(root , employee_password , alias , window):
         employees =  db.session.query(Employee).all()
         exists = False
@@ -432,7 +433,7 @@ class Actions:
             add_company_frame.destroy()
             Actions.new_company(data)
       
-      
+    # CAMBIAR_CLASE
     def add_company(data , add_company_frame):
         
         try:
@@ -469,7 +470,7 @@ class Actions:
             add_company_frame.destroy()    
             Actions.new_company(data)
  
-            
+    # CAMBIAR_CLASE porque va unida  a una operación en la DB        
     def show_new_company(company_name , contact_name , contact_surname , contact_job):
         
         show = Toplevel()
@@ -500,11 +501,7 @@ class Actions:
         
         Actions.center_window(Actions , show)
         
-    
-    def show_company(company_id):
-        pass
-
-
+    # CAMBIAR_CLASE
     def load_companies():
         
         excel_paht = filedialog.askopenfilename(title = "Cargar desde Excel" , filetypes = (("Ficheros Excel" , "*.xlsx"),))
@@ -523,16 +520,14 @@ class Actions:
             rows = []
         
         for i , registro in enumerate(ready):
-            
-            new = Client(registro[0] , registro[1] , registro[2] , registro[3] , registro[4] , registro[5] , registro[6] , registro[7] , registro[8] , registro[9] , registro[10] , registro[11])
+  
+            new = Client(registro[0] , registro[1] , registro[2] , registro[3] , registro[4] , registro[5] , registro[6] , registro[7] , registro[8] , registro[9] , registro[10] , registro[11] , registro[12] , registro[13])
             
             try:
-                
                 db.session.add(new)
                 db.session.commit()
                 
-            except Exception as e:
-                
+            except Exception as e:   
                 errores.append(i+1)
             
         db.session.close()
@@ -615,24 +610,34 @@ class Actions:
             print(e)
             mb.showwarning("Error" , f"Ha habido un problema con las fechas {e}")
                      
-                    
+    # CAMBIAR_CLASE     
     def olvidar():
        #app.grid_forget()
        vcontact_person = db.session.query(ContactPerson).order_by(ContactPerson.id_person.desc()).first()
        print(vcontact_person.id_person , employee)
        
-       
+    # CAMBIAR_CLASE 
     def tst(self , place , hour): #  (YYYY-MM-DD HH:MM:SS)  Para poder ordenarlo en la DB 
         print(f"Date From: {place} - {self.calendar.get_date()} {hour}") 
         Actions.toggle_frame_visibility(self , place)
 
-
+    # CAMBIAR_CLASE va con load_contacts
     def get_days(client):
-        # Para almacenar start_contact_date datetime.now()).split(" ")[0].split("-")
+        
         today = datetime.now()
-        date = client.start_contact_date.split("-")
         
-        days =str(datetime(int(date[0]),int(date[1]),int(date[2])) - datetime.now() ).split(" ")[0].strip("-")
+        try:
+            date = client.start_contact_date.split("-")
+            
+            print(date)
+            
+            days =str(datetime(int(date[0]),int(date[1]),int(date[2])) - datetime.now() ).split(" ")[0].strip("-")
         
+        except Exception as e:
+            print(e) 
+            days = 0
+            
         return days
+                
+                
                 
