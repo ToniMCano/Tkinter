@@ -58,6 +58,7 @@ class Main:
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
+        self.info.bind("<ButtonRelease-1>" , lambda event: act.get_client_id(self , event))
         act.login(self)
         #act.load_contacts(self , "")
         
@@ -170,9 +171,9 @@ class Main:
         self.frame_log.grid(row = 2, column = 0 , sticky = W+E)
         self.frame_log.grid_columnconfigure(1, weight=1)
         
-        self.texto_log =Text(self.frame_log)
-        self.texto_log.config(height = 3 , width = 80)
-        self.texto_log.grid(row = 1 , column = 1, rowspan = 2 , sticky = W+E, padx = 5    , pady = 5)
+        self.text_log =Text(self.frame_log)
+        self.text_log.config(height = 3 , width = 80)
+        self.text_log.grid(row = 1 , column = 1, rowspan = 2 , sticky = W+E, padx = 5    , pady = 5)
         
         self.next_contact = ttk.Button(self.frame_log , text = "Next Contact" , command = lambda: act.toggle_frame_visibility(self.frame_calendar_next , "next"))
         self.next_contact.config(cursor = 'arrow')
@@ -185,6 +186,8 @@ class Main:
         self.boton_log = ttk.Button(self.frame_log , text = "Log")
         self.boton_log.config(cursor = 'arrow')
         self.boton_log.grid(row = 1 , column = 7, padx = 2 , pady= 2 , sticky = "nswe" , rowspan = 2)
+        self.contact_log = Frame(self.frame_tree , bg = 'red')
+        self.contact_log.grid(row = 3 , column = 0, sticky  = W+E , pady = 5)
         
         # NÚMERO DE CONTACTOS/ESTADO
         
@@ -212,16 +215,14 @@ class Main:
         self.label_company_name = ttk.Label(self.frame_company, text = "Empresa" , font = ("Calibri" , 9 , 'bold'))
         self.label_company_name.grid(row = 1 , column = 0,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
         
-        self.label_company_name = ttk.Entry(self.frame_company)
-        self.label_company_name.insert(0 , "Gusanitos,S.A") # Es lo mismo que placeholder
-        self.label_company_name.grid(row = 2, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
+        self.entry_company_name = ttk.Entry(self.frame_company)
+        self.entry_company_name.grid(row = 2, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
         
         
         self.label_nif = ttk.Label(self.frame_company , text = "N.I.F.", font = ("Calibri" , 9 , 'bold'))
         self.label_nif.grid(row = 1 , column = 1 , sticky = W+E , padx = 2  , pady = 2)
         
         self.entry_nif = ttk.Entry(self.frame_company)
-        self.entry_nif.insert(0,"A29268166")
         self.entry_nif.grid(row = 2 , column = 1 , padx = 2  , pady = 2 , sticky = W+E)
         
         self.label_adress = ttk.Label(self.frame_company , text = "Dirección")
@@ -248,7 +249,6 @@ class Main:
         self.label_web.grid(row = 7 , column = 0,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
         
         self.entry_web = ttk.Entry(self.frame_company)
-        self.entry_web.insert(0,"www.google.com")
         self.entry_web.grid(row = 8 , column= 0 , padx = 2  , pady = 2 , sticky = W+E)
         
         self.web_button = ttk.Button(self.entry_web ,  image = self.web_icon , command = self.abrir_enlace)
@@ -259,7 +259,6 @@ class Main:
         self.label_mail.grid(row = 7, column = 1, sticky = W+E , padx = 2 , pady = 2)
         
         self.entry_mail_empresa = ttk.Entry(self.frame_company)
-        self.entry_mail_empresa.insert(0,"provwork2015@gmail.com")
         self.entry_mail_empresa.grid(row = 8 , column = 1,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
         
         
@@ -271,22 +270,20 @@ class Main:
         self.label_phone = ttk.Label(self.frame_company , text = "Teléfono", font = ("Calibri" , 9 , 'bold'))
         self.label_phone.grid(row = 9, column = 0 , sticky = W+E , padx = 2 ,  pady = 2)
         
-        self.entry_telefono_empresa = ttk.Entry(self.frame_company)
-        self.entry_telefono_empresa.insert(0,"965125477")
-        self.entry_telefono_empresa.grid(row = 10, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
+        self.entry_company_phone = ttk.Entry(self.frame_company)
+        self.entry_company_phone.grid(row = 10, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
         
-        self.phone_button = ttk.Button(self.entry_telefono_empresa , image = self.phone_icon)
+        self.phone_button = ttk.Button(self.entry_company_phone , image = self.phone_icon)
         self.phone_button.config(cursor = 'arrow')
         self.phone_button.pack(side = "right")
         
         self.label_phone2 = ttk.Label(self.frame_company , text = "Otro Teléfono", font = ("Calibri" , 9 , 'bold'))
         self.label_phone2.grid(row = 9, column= 1  , padx = 2  , pady = 2 , sticky = W+E)
         
-        self.entry_phone2 = ttk.Entry(self.frame_company)
-        self.entry_phone2.insert(0,"684458253")
-        self.entry_phone2.grid(row = 10, column= 1  , padx = 2  , pady = 2 , sticky = W+E)
+        self.entry_company_phone2 = ttk.Entry(self.frame_company)
+        self.entry_company_phone2.grid(row = 10, column= 1  , padx = 2  , pady = 2 , sticky = W+E)
         
-        self.phone2_button = ttk.Button(self.entry_phone2 , image = self.mobile_icon)
+        self.phone2_button = ttk.Button(self.entry_company_phone2 , image = self.mobile_icon)
         self.phone2_button.config(cursor = 'arrow')
         self.phone2_button.pack(side = "right")
         
@@ -316,31 +313,27 @@ class Main:
         self.other_contact.config(height=10 , padx=5)
         self.other_contact.pack(side = "left" , fill = "y")
         
-        self.label_nombre_contacto = ttk.Label(self.contact_frame , text = "Nombre  ")
-        self.label_nombre_contacto.grid(row = 1 , column = 0 , sticky = W+E, padx = 2 , pady = 2) 
+        self.label_contact_name = ttk.Label(self.contact_frame , text = "Nombre  ")
+        self.label_contact_name.grid(row = 1 , column = 0 , sticky = W+E, padx = 2 , pady = 2) 
         
-        self.entry_nombre_contacto = ttk.Entry(self.contact_frame)
-        self.entry_nombre_contacto.insert(0 , "Pepitos")
-        self.entry_nombre_contacto.grid(row = 2 , column = 0 ,  padx = 2 , pady = 2 , sticky = W+E)
+        self.entry_contact_name = ttk.Entry(self.contact_frame)
+        self.entry_contact_name.grid(row = 2 , column = 0 ,  padx = 2 , pady = 2 , sticky = W+E)
         
-        self.label_apellido_contacto = ttk.Label(self.contact_frame , text = "Apellidos")
-        self.label_apellido_contacto.grid(row = 1 , column = 1 , sticky = W+E, padx = 2 , pady = 2) 
+        self.label_contact_surname = ttk.Label(self.contact_frame , text = "Apellidos")
+        self.label_contact_surname.grid(row = 1 , column = 1 , sticky = W+E, padx = 2 , pady = 2) 
         
-        self.entry_apellido_contacto = ttk.Entry(self.contact_frame)
-        self.entry_apellido_contacto.insert(0, "Palotes")
-        self.entry_apellido_contacto.grid(row = 2 , column = 1 , padx = 2 , pady = 2 , sticky = W+E)
+        self.entry_contact_surname = ttk.Entry(self.contact_frame)
+        self.entry_contact_surname.grid(row = 2 , column = 1 , padx = 2 , pady = 2 , sticky = W+E)
         
-        self.label_cargo = ttk.Label(self.contact_frame, text = "Cargo")
-        self.label_cargo.grid(row = 3 , column = 0, padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_cargo = ttk.Entry(self.contact_frame)
-        self.entry_cargo.insert(0, "Director General")
-        self.entry_cargo.grid(row = 4 , column = 0 , padx = 2, pady = 2 , sticky = W+E)
+        self.label_job_title = ttk.Label(self.contact_frame, text = "Cargo")
+        self.label_job_title.grid(row = 3 , column = 0, padx = 2 , pady = 2 , sticky = W+E)
+        self.entry_job_title = ttk.Entry(self.contact_frame)
+        self.entry_job_title.grid(row = 4 , column = 0 , padx = 2, pady = 2 , sticky = W+E)
         
         self.label_mail_contacto = ttk.Label(self.contact_frame , text = "Mail")
         self.label_mail_contacto.grid(row = 3 , column = 1 , padx = 2 , pady = 2  , sticky = W+E)
         
         self.entry_contact_mail = ttk.Entry(self.contact_frame)
-        self.entry_contact_mail.insert(0,"pepito.palotes@gusanitosa.com")
         self.entry_contact_mail.grid(row = 4, column = 1 , padx = 2 , pady = 2 , sticky = W+E)
         
         self.contact_mail_button = ttk.Button(self.entry_contact_mail , image = self.mail_icon) 
@@ -351,7 +344,6 @@ class Main:
         self.label_contact_phone.grid(row = 5 , column = 0 , padx = 2, pady = 2 , sticky = W+E)
         
         self.entry_contact_phone = ttk.Entry(self.contact_frame)
-        self.entry_contact_phone.insert(0, "963278165")
         self.entry_contact_phone.grid(row = 6 , column = 0 , padx = 2 , pady = 2 , sticky = W+E)
         
         self.contact_phone_button = ttk.Button(self.entry_contact_phone , image = self.phone_icon)
@@ -362,7 +354,6 @@ class Main:
         self.label_mobile.grid(row = 5 , column = 1 , padx = 2 , pady = 2 , sticky = W+E)
         
         self.entry_mobile = ttk.Entry(self.contact_frame)
-        self.entry_mobile.insert(0 , "686289365")
         self.entry_mobile.grid(row = 6 , column = 1 , pady = 2 , padx = 2 , sticky = W+E)
         
         self.mobile_button = ttk.Button(self.entry_mobile , image = self.mobile_icon , width = 2 , command = self.capturar )
@@ -373,9 +364,9 @@ class Main:
         self.free_space.grid(row = 7 , column = 0 , columnspan = 2 ,sticky = 'nswe')
         self.contact_frame.grid_rowconfigure(7,weight=1)
         
-        self.notas = Text(self.contact_frame)
-        self.notas.config(padx = 2 , pady = 2 ,width = 30 , height = 3)
-        self.notas.grid(row = 8, column = 0, columnspan = 2 , sticky = W+E ,ipady = 10, ipadx=15)
+        self.notes = Text(self.contact_frame)
+        self.notes.config(padx = 2 , pady = 2 ,width = 30 , height = 3)
+        self.notes.grid(row = 8, column = 0, columnspan = 2 , sticky = W+E ,ipady = 10, ipadx=15)
         
         self.margin_bottom_contacto = Label(self.contact_frame , text = "id: 45612" , bg = 'black' , fg = 'white')
         #self.margin_bottom_contacto.config(height= 0)

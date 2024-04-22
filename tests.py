@@ -7,6 +7,7 @@ from sqlalchemy import and_ , or_
 import db
 from models import Client , ContactPerson , Employee , Contact
 from datetime import datetime
+import os
 
 
 
@@ -38,7 +39,7 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
         for data_row in range(50):
             row.append("Company".lower() + str(alias))
             row.append(random.choice(nif_check).capitalize() + "".join(random.choices(nif , k=8)))
-            row.append(f"adress{str(alias)}-{str(alias)}-{str(alias + int(random.choice(nif)))}- City{str(alias)}- Province{str(alias)}-C.P:{''.join(random.choices(nif , k = 5))}")
+            row.append(f"adress{str(alias)},{str(alias)} {str(random.randint(1,20))} - {random.choice(nif_check).capitalize()}  City{str(alias)}, (Province{str(alias)}) {''.join(random.choices(nif , k = 5))}")
             row.append(f"www.web{str(alias)}.com")  
             row.append(f"{row[0]}@{row[3][4:]}")
             row.append(int("9" + ''.join(random.choices(nif , k = 8)) )) 
@@ -49,10 +50,10 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
             row.append("Contact")
             row.append(random.choice(employees))
             row.append(start_date())
-            row.append(random.randint(0,3))
+            row.append(random.randint(0,1))
             
             if row[-1] == 0:
-                row[-5] = "Pool"
+                row[-4] = "Pool"
 
             data.append(row)
             
@@ -65,12 +66,12 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
     for x in data: 
         active_sheet.append(x) # Añadimos las filas
         
-    wb.save("data2.xlsx")    
+    wb.save("data.xlsx")    
     
     
 def start_date():
     
-    date = ["2024", str(random.randint(1,12)) , str(random.randint(1,30))]
+    date = ["2024", str(random.randint(1,3)) , str(random.randint(1,30))]
     
     if len(date[1]) == 1:
         date[1] = f"0{date[1]}"
@@ -91,7 +92,7 @@ def contacts():   # UN CONTACTO PARA CADA EMPRESA
     
     for i , person in enumerate(range(150)):
         
-        contact = ContactPerson(f"Name{str(i)}" , f"Surname{str(i)}" , f"General Manager" , int(f"9{''.join(random.choices(nif , k = 8))}") , "" , f"contact{str(i)}@mail.com" , i+1 , "Notes")        
+        contact = ContactPerson(f"Name{str(i+1)}" , f"Surname{str(i+1)}" , f"General Manager" , int(f"9{''.join(random.choices(nif , k = 8))}") , "" , f"contact{str(i+1)}@mail.com" , i+1 , "Notes")        
         try:
             db.session.add(contact)
             db.session.commit()
@@ -189,7 +190,7 @@ def test3():
             y.contact_counter = x.counter
         
 
-empleados()
+datos_muestra()
 contact()
 contacts()
-
+empleados()

@@ -7,7 +7,7 @@ import webbrowser
 from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
-from sqlalchemy import and_ , or_ , func
+from sqlalchemy import and_ , or_ , func ,asc , desc
 from datetime import datetime
 import locale
 from tkinter import messagebox as mb
@@ -82,12 +82,13 @@ class Actions:
         Actions.center_window(Actions , login_window)
 
     # CAMBIAR_CLASE
-    def load_contacts(self , employee_id ): # last_gestion = session.query(func.max(Client.counter)).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
+    def load_contacts(self , employee_id ): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
+        
+        contacts = db.session.query(Contact).filter(and_(Contact.company_state == "Contact")).order_by(Contact.last_contact_date.desc()).group_by(Contact.client_id).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
 
-        contacts = db.session.query(Contact).filter(and_(Contact.company_state == "Contact" , Contact.contact_employee_id == employee_id)).order_by(Contact.last_contact_date).group_by(Contact.client_id).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
-    
         for client in contacts:
             company_name = db.session.query(Client).filter(Client.contact_person == client.contact_person_id).first()
+            
             self.info.insert("" , 0 , text = company_name.state , values = (Actions.get_days(company_name) , company_name.name, client.last_contact_date   , client.next_contact , company_name.adress[-5:]))
         self.contacts.set(f"Contactos: {len(contacts)}")
         
@@ -119,7 +120,7 @@ class Actions:
             valor = x.value.split(" - ")
             
             if len(valor[0]) > 1:
-                lista_nace.append( valor[0] + " " + valor[1])
+                lista_nace.append( valor[0] + " - " + valor[1])
             
         return lista_nace
         
@@ -629,8 +630,6 @@ class Actions:
         try:
             date = client.start_contact_date.split("-")
             
-            print(date)
-            
             days =str(datetime(int(date[0]),int(date[1]),int(date[2])) - datetime.now() ).split(" ")[0].strip("-")
         
         except Exception as e:
@@ -640,4 +639,75 @@ class Actions:
         return days
                 
                 
-                
+    def get_client_id(tree , event):
+
+        row = tree.info.focus()
+        item = tree.info.item(row)
+        client_name = item['values'][1]
+        
+        Actions.client_name_query(tree , client_name)
+        
+
+    # CAMBIAR_CLASE 
+    def client_name_query(tree , client_name):
+        
+        client = db.session.query(Client).filter(Client.name == client_name).first()
+        contact_person = db.session.get(ContactPerson , client.contact_person)
+        
+        tree.entry_company_name.delete(0 , END)
+        tree.entry_company_name.insert(0 , client.name) # Es lo mismo que placeholder
+        
+        tree.entry_nif.delete(0 , END)
+        tree.entry_nif.insert(0, client.nif)
+        
+        tree.entry_adress.delete(0 , END)
+        tree.entry_adress.insert(0 , client.adress)
+        
+        tree.entry_activity.current(newindex = Actions.current_combo(client.activity , Actions.nace_list()))
+        
+        tree.entry_employees.current(newindex = Actions.current_combo(client.number_of_employees , "employees"))
+        
+        tree.entry_web.delete(0 , END)
+        tree.entry_web.insert(0, client.web)
+        
+        tree.entry_mail_empresa.delete(0 , END)
+        tree.entry_mail_empresa.insert(0 , client.mail)
+        
+        tree.entry_company_phone.delete(0 , END)
+        tree.entry_company_phone.insert(0, client.phone)
+        
+        tree.entry_company_phone2.delete(0 , END)
+        tree.entry_company_phone2.insert(0, str(client.phone2))
+        
+        tree.entry_contact_name.delete(0 , END)
+        tree.entry_contact_name.insert(0, contact_person.contact_name)
+        
+        tree.entry_contact_surname.delete(0 , END)
+        tree.entry_contact_surname.insert(0,contact_person.contact_surname)
+        
+        tree.entry_job_title.delete(0 , END)
+        tree.entry_job_title.insert(0, contact_person.contact_job_title)
+        
+        tree.entry_contact_mail.delete(0 , END)
+        tree.entry_contact_mail.insert(0,contact_person.contact_mail)
+        
+        tree.entry_contact_phone.delete(0 , END)
+        tree.entry_contact_phone.insert(0, contact_person.contact_phone)
+        
+        tree.entry_mobile.delete(0 , END)
+        tree.entry_mobile.insert(0 , contact_person.contact_mobile)
+        
+        
+        #tree.notes.delete(0 , END)
+        #tree.notes.insert(0 , "686289365")
+        
+    def current_combo(data, combo):
+        
+        if combo == "employees":
+            combo = [" < 10" , "10 - 50" , "50 - 250" , " > 250"]
+
+        index = combo.index(data)
+            
+        return (index)   
+    
+        
