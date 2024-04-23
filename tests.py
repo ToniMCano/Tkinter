@@ -114,7 +114,7 @@ def empleados():
      
     for i , x in enumerate(range(3)):
         
-        employee = Employee(f"EA{str(i)}", f"Name{str(i)}" , f"Surname{str(i)}" , f"ea{str(i)}@company.com", int(f"9652293{str(i)}") ,"Comercial" , 1234 , 1)
+        employee = Employee(f"EA{str(i+1)}", f"Name{str(i+1)}" , f"Surname{str(i+1)}" , f"ea{str(i+1)}@company.com", int(f"9652293{str(i+1)}") ,"Comercial" , 1234 , 1)
         db.session.add(employee)
         db.session.commit()
     db.session.close()
@@ -169,6 +169,6 @@ def test3():
 #datos_muestra()
 #contact()
 #contacts()
-#empleados()
+empleados()
 
-d
+

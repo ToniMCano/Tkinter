@@ -101,15 +101,20 @@ class Actions:
 
 
     # CAMBIAR_CLASE
-    def load_contacts(self , employee_id ): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
+    def load_contacts(self , employee_id_sended ): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
         
-        contacts = db.session.query(Contact).filter(and_(Contact.company_state == "Contact")).order_by(Contact.last_contact_date.desc()).group_by(Contact.client_id).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
+        #state == "Contact")).order_by(Contact.last_contact_date.desc()).group_by(Contact.client_id).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
+        contacts = 0
+        clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == employee_id_sended)).all()
+        # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
 
-        for client in contacts:
-            company_name = db.session.query(Client).filter(Client.contact_person == client.contact_person_id).first()
+        for client in clients:
+            contact = db.session.query(Contact).filter(Contact.contact_person_id == client.contact_person).order_by(Contact.last_contact_date.desc()).group_by(Contact.contact_person_id).first()
             
-            self.info.insert("" , 0 , text = company_name.state , values = (Actions.get_days(company_name) , company_name.name, client.last_contact_date   , client.next_contact , company_name.adress[-5:]))
-        self.contacts.set(f"Contactos: {len(contacts)}")
+            self.info.insert("" , 0 , text = client.state , values = (Actions.get_days(client) , client.name, contact.last_contact_date   , contact.next_contact , client.adress[-5:]))
+            contacts += 1
+        self.contacts.set(f"Contactos: {contacts}")
+        
         
     
                
