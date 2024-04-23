@@ -80,6 +80,25 @@ class Actions:
         
         login_window.lift()
         Actions.center_window(Actions , login_window)
+        
+        # CAMBIAR_CLASE    
+    def check_employee(root , employee_password , alias , window):
+        
+        employees =  db.session.query(Employee).all()
+        exists = False
+        
+        for employee in employees:
+            if employee.employee_alias == alias and employee.password == str(employee_password):
+                
+                exists = True
+                window.destroy()
+                
+                Actions.load_contacts(root , employee.id_employee)
+                
+        if not exists:
+            mb.showwarning("Login Error" , "El usuario o la contraseña no son correctos")
+            window.lift()
+
 
     # CAMBIAR_CLASE
     def load_contacts(self , employee_id ): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
@@ -92,17 +111,7 @@ class Actions:
             self.info.insert("" , 0 , text = company_name.state , values = (Actions.get_days(company_name) , company_name.name, client.last_contact_date   , client.next_contact , company_name.adress[-5:]))
         self.contacts.set(f"Contactos: {len(contacts)}")
         
-    # CAMBIAR_CLASE    
-    def check_employee(root , employee_password , alias , window):
-        employees =  db.session.query(Employee).all()
-        exists = False
-        for employee in employees:
-            if employee.employee_alias == alias and employee.password == str(employee_password):
-                exists = True
-                window.destroy()
-                Actions.load_contacts(root , employee.id_employee)
-        if not exists:
-            print("El usuario o la contraseña no son correctos")
+    
                
     def nace_list():
     
@@ -124,16 +133,15 @@ class Actions:
             
         return lista_nace
         
-    
-    def create_contact(self):
+     
+    def create_contact(self , company = ""): # #ecibir el id de la empresa.
         
         frame = tk.Toplevel()
         frame.title("New Contact")
-        frame.geometry("600x180")
-        #frame.minsize(400, 400)    # Establecer un tamaño mínimo de 300x200
+        frame.geometry("600x180")   
         frame.grid_columnconfigure(0 , weight = 1)
-        Actions.center_window(Actions , frame)
         
+        Actions.center_window(Actions , frame)
         
         frame_info = ttk.Frame(frame)
         frame_info.grid(row = 0 , column = 0, padx = 5 , pady = 10 , sticky = W+E)
@@ -178,11 +186,11 @@ class Actions:
         entry_mobile = ttk.Entry(frame_contact_person)
         entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
         
-        save_button = ttk.Button(frame_info, text = "Guardar" , command=Actions.olvidar)
+        save_button = ttk.Button(frame_info, text = "Guardar" , command=Actions.olvidar)  # Cambiar función
         save_button.grid(row = 6 , column = 0 , columnspan = 2 , padx = 200 , pady = 5 , sticky = W+E)
         
         
-    def new_company(data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección " : f"{''} - {''} - {''}"  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}):
+    def new_company(data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección: " : ""  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}):
     
         #load_image= Image.open("recursos/upload.png")
         #load_image.resize((6,6))
@@ -356,27 +364,27 @@ class Actions:
         entry_mobile = ttk.Entry(frame_contact_person)
         entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
         
-        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: Actions.test_add_company(add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección " : f"{company_street.get()} - {company_street_number.get() } - {company_street_floor.get()}"  , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
+        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: Actions.test_add_company(add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}, {company_street_number.get() } {company_street_floor.get()} {company_city_entry.get()}, ({company_province_entry.get()}) {company_postal_code_entry.get()}"  , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
         save_company_button.grid(row = 5 , column = 0 , pady = 10)
         
 
         Actions.center_window(Actions , add_company_frame)
-        
-        entry_company_name.insert(0 , data["Nombre Empresa: "])
-        entry_company_nif.insert(0 , data["N.I.F.: "])
-        company_street.insert(0 , data["Dirección "].split("-")[0])
-        company_street_number.insert(0 , data["Dirección "].split("-")[1])      
-        company_street_floor.insert(0 , data["Dirección "].split("-")[2])
-        entry_company_web.insert(0 , data["Web: "])
-        entry_company_mail.insert(0 , data["Mail Empresa: "])      
-        entry_company_phone.insert(0 , data["Teléfono Empresa: "])
-        entry_company_phone2.insert(0 , data["Teléfono2 Empresa: "])
-        entry_name.insert(0 , data["Nombre Contacto: "])
-        entry_surname.insert(0 , data["Apellidos Contacto: "])
-        entry_mail.insert(0 , data["Mail Contacto: "])
-        entry_phone.insert(0 , data["Teléfono Contacto: "])
-        entry_job_title.insert(0 , data["Cargo: "])
-        entry_mobile.insert(0 , data["Móvil Contacto: "])
+        #et(), "Dirección: " : f"{company_street.get()}, {company_street_number.get() } {company_street_floor.get()} {company_city_entry.get()} ({company_province_entry.get()}) {company_postal_code_entry.get()}"
+        #entry_company_name.insert(0 , data["Nombre Empresa: "])
+        #entry_company_nif.insert(0 , data["N.I.F.: "])
+        #company_street.insert(0 , data["Dirección: "].split(",")[0])
+        #company_street_number.insert(0 , data["Dirección: "].split(",")[1])      
+        #company_street_floor.insert(0 , data["Dirección: "].split(",")[1].split(" ")[0])
+        #entry_company_web.insert(0 , data["Web: "])
+        #entry_company_mail.insert(0 , data["Mail Empresa: "])      
+        #entry_company_phone.insert(0 , data["Teléfono Empresa: "])
+        #entry_company_phone2.insert(0 , data["Teléfono2 Empresa: "])
+        #entry_name.insert(0 , data["Nombre Contacto: "])
+        #entry_surname.insert(0 , data["Apellidos Contacto: "])
+        #entry_mail.insert(0 , data["Mail Contacto: "])
+        #entry_phone.insert(0 , data["Teléfono Contacto: "])
+        #entry_job_title.insert(0 , data["Cargo: "])
+        #entry_mobile.insert(0 , data["Móvil Contacto: "])
         
         
                     
@@ -435,20 +443,18 @@ class Actions:
             Actions.new_company(data)
       
     # CAMBIAR_CLASE
-    def add_company(data , add_company_frame):
+    def add_company(data , add_company_frame , employee_adder = 0 , company_to_add = 0):
         
         try:
-            contact_person = ContactPerson(data["Nombre Contacto: "] , data["Apellidos Contacto: "] , data["Cargo: "] , data["Teléfono Contacto: "] , data["Móvil Contacto: "] , data["Mail Contacto: "] , "Id de la Empresa")
             
-            db.session.add(contact_person)
-            db.session.commit()
+            vcontact_person = Actions.add_contact(data , employee_adder)
             
-            vcontact_person = db.session.query(ContactPerson).order_by(ContactPerson.id_person.desc()).first() # Se asigna el último empleado introducido en la DB, es decir el que se crea a la vez que la empresa.
-            
-            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección "] , data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee , "Pool", data["Empleados: "])
+            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee , "Pool", data["Empleados: "])
+            vcontact_person.client_id = vcontact_person.id_person
             
             db.session.add(company)
             db.session.commit()
+            
             
             vcontact_person.client_id = db.session.query(Client).order_by(Client.id_client.desc()).first() # Asignamos la persona de contacto creada.
             
@@ -471,6 +477,22 @@ class Actions:
             add_company_frame.destroy()    
             Actions.new_company(data)
  
+    # CAMBIAR_CLASE 
+    def add_contact(data , employee_adder):
+        
+        try:                                                                                                                                                                                                # TO-DO sustituir por la empresa adminstradora
+            contact_person = ContactPerson(data["Nombre Contacto: "] , data["Apellidos Contacto: "] , data["Cargo: "] , data["Teléfono Contacto: "] , data["Móvil Contacto: "] , data["Mail Contacto: "] , "Id de la Empresa" , employee_adder)
+                
+            db.session.add(contact_person)
+            db.session.commit()
+            
+            vcontact_person = db.session.query(ContactPerson).order_by(ContactPerson.id_person.desc()).first() # Se asigna el último empleado introducido en la DB, es decir el que se crea a la vez que la empresa.
+            
+            return vcontact_person
+        
+        except Exception as e:
+            mb.showerror("Error al añadir Persona de Contacto" , f"{e}")
+        
     # CAMBIAR_CLASE porque va unida  a una operación en la DB        
     def show_new_company(company_name , contact_name , contact_surname , contact_job):
         
@@ -522,7 +544,7 @@ class Actions:
         
         for i , registro in enumerate(ready):
   
-            new = Client(registro[0] , registro[1] , registro[2] , registro[3] , registro[4] , registro[5] , registro[6] , registro[7] , registro[8] , registro[9] , registro[10] , registro[11] , registro[12] , registro[13])
+            new = Client(registro[0] , registro[1] , registro[2] , registro[3] , registro[4] , registro[5] , registro[6] , registro[7] , registro[8] , registro[9] , registro[10] , registro[11] , registro[12] , registro[13] , registro[14])
             
             try:
                 db.session.add(new)
@@ -628,9 +650,9 @@ class Actions:
         today = datetime.now()
         
         try:
-            date = client.start_contact_date.split("-")
+            date = client.start_contact_date
             
-            days =str(datetime(int(date[0]),int(date[1]),int(date[2])) - datetime.now() ).split(" ")[0].strip("-")
+            days = str(today - datetime.strptime(date, "%Y-%m-%d %H:%M:%S")).split(" ")[0] 
         
         except Exception as e:
             print(e) 

@@ -6,7 +6,7 @@ import sqlalchemy
 from sqlalchemy import and_ , or_
 import db
 from models import Client , ContactPerson , Employee , Contact
-from datetime import datetime
+from datetime import datetime , timedelta
 import os
 
 
@@ -30,6 +30,7 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
     employees =  [" < 10" , "10 - 50" , "50 - 250" , " > 250"]
     alias = 1
     employee = 1
+    starts = start_date()
 
 
     for x in excel["Hoja 1"]:
@@ -37,6 +38,7 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
             
     for employee_id in range(3):
         for data_row in range(50):
+            start = start_date()
             row.append("Company".lower() + str(alias))
             row.append(random.choice(nif_check).capitalize() + "".join(random.choices(nif , k=8)))
             row.append(f"adress{str(alias)},{str(alias)} {str(random.randint(1,20))} - {random.choice(nif_check).capitalize()}  City{str(alias)}, (Province{str(alias)}) {''.join(random.choices(nif , k = 5))}")
@@ -49,11 +51,12 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
             row.append(employee)
             row.append("Contact")
             row.append(random.choice(employees))
-            row.append(start_date())
+            row.append(starts[alias - 1])
             row.append(random.randint(0,1))
+            row.append(0) # created_by
             
-            if row[-1] == 0:
-                row[-4] = "Pool"
+            if row[-2] == 0:
+                row[-5] = "Pool"
 
             data.append(row)
             
@@ -71,19 +74,21 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
     
 def start_date():
     
-    date = ["2024", str(random.randint(1,3)) , str(random.randint(1,30))]
-    
-    if len(date[1]) == 1:
-        date[1] = f"0{date[1]}"
+    day =1 
+    month = 1
+    new_date = datetime(2024,month,day,8,0,0)
+    dated = []
+
+    for x in range(150):
+        try:
+            dated.append(str(new_date))
+            new_date = new_date + timedelta(hours = random.randint(1,12))
         
-        if date[1] == "02":
-            date[2] = str(random.randint(1,28))
-        
-    if len(date[2]) == 1:
-        date[2] = f"0{date[2]}"
-        
-    row = "-".join(date)  
-    return row
+        except ValueError:
+            day = 1
+            month +=1
+            
+    return dated
 
 
 def contacts():   # UN CONTACTO PARA CADA EMPRESA
@@ -91,8 +96,8 @@ def contacts():   # UN CONTACTO PARA CADA EMPRESA
     registro = []
     
     for i , person in enumerate(range(150)):
-        
-        contact = ContactPerson(f"Name{str(i+1)}" , f"Surname{str(i+1)}" , f"General Manager" , int(f"9{''.join(random.choices(nif , k = 8))}") , "" , f"contact{str(i+1)}@mail.com" , i+1 , "Notes")        
+                                                                                                                                                                                                      # added_by
+        contact = ContactPerson(f"Name{str(i+1)}" , f"Surname{str(i+1)}" , f"General Manager" , int(f"9{''.join(random.choices(nif , k = 8))}") , "" , f"contact{str(i+1)}@mail.com" , i+1 , "Notes" , 0 )        
         try:
             db.session.add(contact)
             db.session.commit()
@@ -103,23 +108,7 @@ def contacts():   # UN CONTACTO PARA CADA EMPRESA
         
     db.session.close()
             
-    
-def insertar(excel):  # excel debe ser la referencia a una hoja (excel["Sheet"])
-    rows = []
-    ready = []
-    
-    for row in excel.rows:
-        for cell in row:
-            rows.append(cell.value)
-        ready.append(rows)
-        rows = []
-    
-    for registro in ready:
-        new = Client(registro[0] , registro[1] , registro[2] , registro[3] , registro[4] , registro[5] , registro[6] , registro[7] , registro[8] , registro[9] , registro[10] , registro[11])
-        db.session.add(new)
-        db.session.commit()
-    db.session.close()    
-              
+ 
 
 def empleados():
      
@@ -166,20 +155,7 @@ def load_contacts():
 #print ((str(datetime(2024,6,19 ) - datetime.now())[:3]))
 
 
-def check_employee(window , employee_password = 1234 , alias = "EA1"):
-    employees =  db.session.query(Employee).all()
-    exists = False
-    for employee in employees:
-        if employee.employee_alias == alias and employee.password == str(employee_password):
-            load_contacts()
-            exists = True
-            window.destroy()
-            load_contacts(employee.id_employee)
-    if not exists:
-        print("El usuario o la contraseña no son correctos")
-            
-        
-        
+
 def test3():
     clientes = db.session.query(Client)
     #contactss = db.session.query(Contact).filter(Contact.contact_person_id == ).all()
@@ -190,7 +166,9 @@ def test3():
             y.contact_counter = x.counter
         
 
-datos_muestra()
-contact()
-contacts()
-empleados()
+#datos_muestra()
+#contact()
+#contacts()
+#empleados()
+
+d
