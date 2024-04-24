@@ -97,7 +97,9 @@ class Actions:
                 
         if not exists:
             mb.showwarning("Login Error" , "El usuario o la contraseña no son correctos")
-            window.lift()
+            top.focus_set()
+            top.wait_window()
+            
 
 
     # CAMBIAR_CLASE
@@ -672,12 +674,12 @@ class Actions:
         item = tree.info.item(row)
         client_name = item['values'][1]
         
-        Actions.client_name_query(tree , client_name)
+        Actions.load_client_info(tree , client_name)
         
         
 
     # CAMBIAR_CLASE 
-    def client_name_query(tree , client_name):
+    def load_client_info(tree , client_name):
         
         client = db.session.query(Client).filter(Client.name == client_name).first()
         contact_person = db.session.get(ContactPerson , client.contact_person)
@@ -725,7 +727,7 @@ class Actions:
         tree.entry_mobile.delete(0 , END)
         tree.entry_mobile.insert(0 , contact_person.contact_mobile)
         
-        Actions.load_comments(tree)
+        Actions.load_comments(tree , client.nif)
         
         
         #tree.notes.delete(0 , END)
@@ -741,8 +743,17 @@ class Actions:
         return (index)   
     
     # CAMBIAR_CLASE_1
-    def load_comments(self):
-        client = db.session.query(Client).filter(Client.nif == self.entry_nif.get()).first()
+    def load_comments(self , nif):
+        
+        try:
+            for log in self.contact_log.winfo_children():
+                log.destroy()
+            
+            print("destroyed")
+        except UnboundLocalError:
+            print("NOT destroyed")
+
+        client = db.session.query(Client).filter(Client.nif == nif).first()
         comments = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).all()
         comments_counter = 0
         
@@ -767,7 +778,7 @@ class Actions:
         client = db.session.get(Client , client_by_id)
         contact_person = db.session.get(ContactPerson , client.contact_person)
         employee = db.session.get(Employee , client.employee_id)
-        return f"{last_contact} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}]"
+        return f"{datetime.strptime(last_contact, '%Y-%m-%d %H:%M').strftime('%d %B %Y %H:%M').title()} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}]"
         
         
 
