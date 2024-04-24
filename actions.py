@@ -666,13 +666,14 @@ class Actions:
         return days
                 
                 
-    def get_client_id(tree , event):
+    def get_client_name(tree , event):
 
         row = tree.info.focus()
         item = tree.info.item(row)
         client_name = item['values'][1]
         
         Actions.client_name_query(tree , client_name)
+        
         
 
     # CAMBIAR_CLASE 
@@ -724,6 +725,8 @@ class Actions:
         tree.entry_mobile.delete(0 , END)
         tree.entry_mobile.insert(0 , contact_person.contact_mobile)
         
+        Actions.load_comments(tree)
+        
         
         #tree.notes.delete(0 , END)
         #tree.notes.insert(0 , "686289365")
@@ -737,4 +740,37 @@ class Actions:
             
         return (index)   
     
+    # CAMBIAR_CLASE_1
+    def load_comments(self):
+        client = db.session.query(Client).filter(Client.nif == self.entry_nif.get()).first()
+        comments = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).all()
+        comments_counter = 0
         
+        for i, comment in enumerate(comments):
+            log_frame = f"log_{str(i)}"
+            label_info = f"label_{str(i)}"
+            label_content = f"content_{str(i)}"
+            
+            log_frame = tk.Frame(self.contact_log , bg = "white" , height = 10 , bd = 1 , relief = "solid")
+            log_frame.pack(fill = "x" , expand = True , padx = 10 , pady = 5)
+            
+            label_info = tk.Label(log_frame , text = f"{Actions.load_info_log(comment.client_id , comment.last_contact_date)}" , bg = "black" , fg = "white")
+            label_info.pack(fill = "x" , expand = True)
+            
+            label_content = tk.Label(log_frame , text = f"{comment.log}" , bg = "White")
+            label_content.pack(fill = "x" , expand = True)
+            
+            comments_counter += 1
+        print(comments_counter)
+        
+    def load_info_log(client_by_id , last_contact):
+        client = db.session.get(Client , client_by_id)
+        contact_person = db.session.get(ContactPerson , client.contact_person)
+        employee = db.session.get(Employee , client.employee_id)
+        return f"{last_contact} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}]"
+        
+        
+
+
+
+  

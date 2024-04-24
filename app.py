@@ -58,7 +58,7 @@ class Main:
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
-        self.info.bind("<ButtonRelease-1>" , lambda event: act.get_client_id(self , event))
+        self.info.bind("<ButtonRelease-1>" , lambda event: act.get_client_name(self , event))
         act.login(self)
         #act.load_contacts(self , "")
         
@@ -183,10 +183,11 @@ class Main:
         self.boton_pop_up.config(cursor = 'arrow')
         self.boton_pop_up.grid(row = 2 , column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
-        self.boton_log = ttk.Button(self.frame_log , text = "Log")
+        self.boton_log = ttk.Button(self.frame_log , text = "Log" , command = lambda: act.load_comments(self))
         self.boton_log.config(cursor = 'arrow')
         self.boton_log.grid(row = 1 , column = 7, padx = 2 , pady= 2 , sticky = "nswe" , rowspan = 2)
-        self.contact_log = Frame(self.frame_tree , bg = 'red')
+        
+        self.contact_log = Frame(self.frame_tree)
         self.contact_log.grid(row = 3 , column = 0, sticky  = W+E , pady = 5)
         
         # NÚMERO DE CONTACTOS/ESTADO
@@ -368,7 +369,7 @@ class Main:
         self.notes.config(padx = 2 , pady = 2 ,width = 30 , height = 3)
         self.notes.grid(row = 8, column = 0, columnspan = 2 , sticky = W+E ,ipady = 10, ipadx=15)
         
-        self.margin_bottom_contacto = Label(self.contact_frame , text = "id: 45612" , bg = 'black' , fg = 'white')
+        self.margin_bottom_contacto = Label(self.contact_frame , text = "ID: {act.get_company_id()}" , bg = 'black' , fg = 'white')
         #self.margin_bottom_contacto.config(height= 0)
         self.margin_bottom_contacto.grid(row = 9 , column = 0 , columnspan = 2 , sticky = W+E)
              

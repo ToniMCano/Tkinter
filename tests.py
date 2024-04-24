@@ -166,9 +166,18 @@ def test3():
             y.contact_counter = x.counter
         
 
-#datos_muestra()
-#contact()
-#contacts()
-empleados()
 
-
+def load_comments():
+        comments = db.session.query(Contact).filter(Contact.client_id == 1).order_by(Contact.last_contact_date.desc())
+        comments_counter = 0
+        
+        for comment in comments:
+            print(comment)
+            comments_counter += 1
+        print (comments_counter)
+        
+        
+def info_log():
+        contact_date = f"{datetime.now().strftime('%d %B %Y %H:%M')}"
+        return f"{contact_date} Pepito Grillo [EA1]"
+print(info_log())
