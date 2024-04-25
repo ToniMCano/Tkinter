@@ -9,14 +9,14 @@ import db
 import openpyxl
 from sqlalchemy import and_ , or_ , func ,asc , desc
 from datetime import datetime
-import locale
+#import locale
 from tkinter import messagebox as mb
 import os
 from sqlalchemy.exc import IntegrityError
 from tkinter.scrolledtext import ScrolledText
 import customtkinter
 
-locale.setlocale(locale.LC_ALL, '')
+#locale.setlocale(locale.LC_ALL, '')
    
 nif_check = ['a','b','c','e','f','g','h','j','p','q','r','s','u','v' , 'w' , 'n']
 hours_list = [
@@ -729,7 +729,9 @@ class Actions:
     # CAMBIAR_CLASE_1
     def load_comments(self , nif):
         frame_log = customtkinter.CTkScrollableFrame(self.frame_tree, fg_color = "lightgrey")
-        frame_log.grid(row = 3 , sticky = 'nsew')
+        frame_log.grid(row = 3 , column = 0 , rowspan = 10, sticky = 'nsew')
+        
+        
         
         try:
             for log in frame_log.winfo_children():
@@ -749,7 +751,7 @@ class Actions:
             label_content = f"content_{str(i)}"
             
             log_frame = tk.Frame(frame_log , bg = "white" , height = 10 , bd = 1 , relief = "solid")
-            log_frame.pack(fill = "x" , expand = True , pady = 2)
+            log_frame.pack(fill = "both" , expand = True , pady = 2)
             
             label_info = tk.Label(log_frame , text = f"{Actions.load_info_log(comment.client_id , comment.last_contact_date)}" , bg = "black" , fg = "white")
             label_info.pack(fill = "x" , expand = True)

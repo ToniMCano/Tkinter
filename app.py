@@ -1,5 +1,4 @@
 
-
 import tkinter as tk
 from tkinter import ttk
 from tkinter import *
@@ -12,9 +11,9 @@ import openpyxl
 from sqlalchemy import and_ , or_  
 from actions import Actions as act
 from datetime import datetime
-import locale
+#import locale
 from tkinter import messagebox as mb
-locale.setlocale(locale.LC_ALL, '')
+#locale.setlocale(locale.LC_ALL, '')
 
 
 
@@ -36,6 +35,8 @@ class Main:
         self.frame_tree = ttk.Frame(self.ventana_principal)
         self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan=3)
         self.frame_tree.grid_columnconfigure(0, weight=1)
+        self.frame_tree.grid_rowconfigure(3, weight=1)
+        
         
         self.info = ttk.Treeview(self.frame_tree,height = 20 , style="mystyle.Treeview")
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
@@ -171,6 +172,7 @@ class Main:
         self.frame_log = Frame(self.frame_tree )
         self.frame_log.grid(row = 2, column = 0  , sticky = W+E)
         self.frame_log.grid_columnconfigure(1, weight=1)
+        #self.frame_tree.grid_rowconfigure(3 , weight = 1)
         
         self.text_log =Text(self.frame_log)
         self.text_log.config(height = 3 , width = 80)
@@ -188,9 +190,7 @@ class Main:
         self.boton_log.config(cursor = 'arrow')
         self.boton_log.grid(row = 1 , column = 7, padx = 2 , pady= 2 , sticky = "nswe" , rowspan = 2)
         
-        #self.contact_log = Frame(self.frame_tree)
-        #self.contact_log.grid(row = 3 , column = 0, sticky  = W+E , pady = 5)
-        #
+       
         # NÚMERO DE CONTACTOS/ESTADO
         
         self.contacts = StringVar()
