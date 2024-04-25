@@ -168,7 +168,7 @@ class Main:
         # LOG
 
         self.frame_log = Frame(self.frame_tree )
-        self.frame_log.grid(row = 2, column = 0 , padx = 5 , sticky = W+E)
+        self.frame_log.grid(row = 2, column = 0  , sticky = W+E)
         self.frame_log.grid_columnconfigure(1, weight=1)
         
         self.text_log =Text(self.frame_log)
@@ -187,9 +187,9 @@ class Main:
         self.boton_log.config(cursor = 'arrow')
         self.boton_log.grid(row = 1 , column = 7, padx = 2 , pady= 2 , sticky = "nswe" , rowspan = 2)
         
-        self.contact_log = Frame(self.frame_tree)
-        self.contact_log.grid(row = 3 , column = 0, sticky  = W+E , pady = 5)
-        
+        #self.contact_log = Frame(self.frame_tree)
+        #self.contact_log.grid(row = 3 , column = 0, sticky  = W+E , pady = 5)
+        #
         # NÚMERO DE CONTACTOS/ESTADO
         
         self.contacts = StringVar()

@@ -13,6 +13,8 @@ import locale
 from tkinter import messagebox as mb
 import os
 from sqlalchemy.exc import IntegrityError
+from tkinter.scrolledtext import ScrolledText
+import customtkinter
 
 locale.setlocale(locale.LC_ALL, '')
    
@@ -374,26 +376,8 @@ class Actions:
         save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: Actions.test_add_company(add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}, {company_street_number.get() } {company_street_floor.get()} {company_city_entry.get()}, ({company_province_entry.get()}) {company_postal_code_entry.get()}"  , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
         save_company_button.grid(row = 5 , column = 0 , pady = 10)
         
-
         Actions.center_window(Actions , add_company_frame)
-        #et(), "Dirección: " : f"{company_street.get()}, {company_street_number.get() } {company_street_floor.get()} {company_city_entry.get()} ({company_province_entry.get()}) {company_postal_code_entry.get()}"
-        #entry_company_name.insert(0 , data["Nombre Empresa: "])
-        #entry_company_nif.insert(0 , data["N.I.F.: "])
-        #company_street.insert(0 , data["Dirección: "].split(",")[0])
-        #company_street_number.insert(0 , data["Dirección: "].split(",")[1])      
-        #company_street_floor.insert(0 , data["Dirección: "].split(",")[1].split(" ")[0])
-        #entry_company_web.insert(0 , data["Web: "])
-        #entry_company_mail.insert(0 , data["Mail Empresa: "])      
-        #entry_company_phone.insert(0 , data["Teléfono Empresa: "])
-        #entry_company_phone2.insert(0 , data["Teléfono2 Empresa: "])
-        #entry_name.insert(0 , data["Nombre Contacto: "])
-        #entry_surname.insert(0 , data["Apellidos Contacto: "])
-        #entry_mail.insert(0 , data["Mail Contacto: "])
-        #entry_phone.insert(0 , data["Teléfono Contacto: "])
-        #entry_job_title.insert(0 , data["Cargo: "])
-        #entry_mobile.insert(0 , data["Móvil Contacto: "])
-        
-        
+    
                     
     def test_add_company(add_company_frame , data):
 
@@ -744,9 +728,11 @@ class Actions:
     
     # CAMBIAR_CLASE_1
     def load_comments(self , nif):
+        frame_log = customtkinter.CTkScrollableFrame(self.frame_tree, fg_color = "lightgrey")
+        frame_log.grid(row = 3 , sticky = 'nsew')
         
         try:
-            for log in self.contact_log.winfo_children():
+            for log in frame_log.winfo_children():
                 log.destroy()
             
             print("destroyed")
@@ -762,8 +748,8 @@ class Actions:
             label_info = f"label_{str(i)}"
             label_content = f"content_{str(i)}"
             
-            log_frame = tk.Frame(self.contact_log , bg = "white" , height = 10 , bd = 1 , relief = "solid")
-            log_frame.pack(fill = "x" , expand = True , padx = 10 , pady = 5)
+            log_frame = tk.Frame(frame_log , bg = "white" , height = 10 , bd = 1 , relief = "solid")
+            log_frame.pack(fill = "x" , expand = True , pady = 2)
             
             label_info = tk.Label(log_frame , text = f"{Actions.load_info_log(comment.client_id , comment.last_contact_date)}" , bg = "black" , fg = "white")
             label_info.pack(fill = "x" , expand = True)
@@ -780,8 +766,7 @@ class Actions:
         employee = db.session.get(Employee , client.employee_id)
         return f"{datetime.strptime(last_contact, '%Y-%m-%d %H:%M').strftime('%d %B %Y %H:%M').title()} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}]"
         
-        
 
 
 
-  
+    
