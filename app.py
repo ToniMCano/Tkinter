@@ -9,7 +9,7 @@ from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
 from sqlalchemy import and_ , or_  
-from actions import Actions as act
+from actions import Actions as act , MyCalendar as mc
 from datetime import datetime
 import locale
 from tkinter import messagebox as mb
@@ -36,7 +36,7 @@ class Main:
         self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan=3)
         self.frame_tree.grid_columnconfigure(0, weight=1)
         
-        self.info = ttk.Treeview(self.frame_tree,height = 20 , style="mystyle.Treeview")
+        self.info = ttk.Treeview(self.frame_tree , height = 20 , style="mystyle.Treeview")
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
         
         self.info["columns"] = ( "#0" , "#1" , "#2" , "#3" ,  "#4")
@@ -58,7 +58,7 @@ class Main:
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
-        self.info.bind("<ButtonRelease-1>" , lambda event: act.get_client_id(self , event))
+        self.info.bind("<ButtonRelease-1>" , lambda event: act.get_client_name(self , event))
         act.login(self)
         #act.load_contacts(self , "")
         
@@ -120,11 +120,11 @@ class Main:
         # Crear un Frame que se mostrará/ocultará self.frame_button
         self.frame_calendar = tk.Frame(self.ventana_principal , bd = 1 ,  relief = 'solid')
         self.fecha = StringVar()
-        act.calendar(self.frame_calendar, "general" , self.fecha)
+        mc.calendar(self.frame_calendar, "general" , self.fecha)
         self.frame_calendar_next = tk.Frame(self.ventana_principal , bd = 1 ,  relief = 'solid')
-        act.calendar(self.frame_calendar_next , "next")
+        mc.calendar(self.frame_calendar_next , "next")
         self.frame_calendar_pop = tk.Frame(self.ventana_principal , bd = 1 ,  relief = 'solid')
-        act.calendar(self.frame_calendar_pop , "pop")
+        mc.calendar(self.frame_calendar_pop , "pop")
         
                   
 
@@ -141,7 +141,7 @@ class Main:
         self.label_calendar_button.config(width = 15 , height = 1)
         self.label_calendar_button.grid(row = 0, column = 6)
         
-        self.boton_fecha = tk.Button(self.frame_calendar_button, image = self.icon_calendar, command = lambda: act.toggle_frame_visibility(self.frame_calendar, "general"))
+        self.boton_fecha = tk.Button(self.frame_calendar_button, image = self.icon_calendar, command = lambda: mc.toggle_frame_visibility(self.frame_calendar, "general"))
         self.boton_fecha.config(cursor = 'arrow')
         self.boton_fecha.grid(row=0, column=1, sticky="ew")
 
@@ -156,7 +156,7 @@ class Main:
         self.pool.config(height=2 ,width=5)
         self.pool.grid(row = 0 , column = 1 , padx = 5)
         
-        login_button = ttk.Button(self.header , text = "Login" , command = act.login)
+        login_button = ttk.Button(self.header , text = "Login" , command = lambda: act.login(self))
         login_button.grid(row = 0 , column = 10 , sticky = E)
         
         self.pop_up = tk.Button(self.header, text = "PopUp")
@@ -167,27 +167,38 @@ class Main:
         
         # LOG
 
-        self.frame_log = Frame(self.frame_tree , borderwidth = 1 , relief = 'solid')
-        self.frame_log.grid(row = 2, column = 0 , sticky = W+E)
+        self.frame_log = Frame(self.frame_tree )
+        self.frame_log.grid(row = 2, column = 0 , padx = 5 , sticky = W+E)
         self.frame_log.grid_columnconfigure(1, weight=1)
         
         self.text_log =Text(self.frame_log)
         self.text_log.config(height = 3 , width = 80)
-        self.text_log.grid(row = 1 , column = 1, rowspan = 2 , sticky = W+E, padx = 5    , pady = 5)
+        self.text_log.grid(row = 1 , column = 1, rowspan = 2 , sticky = W+E, padx = 5)
         
-        self.next_contact = ttk.Button(self.frame_log , text = "Next Contact" , command = lambda: act.toggle_frame_visibility(self.frame_calendar_next , "next"))
+        self.next_contact = ttk.Button(self.frame_log , text = "Next Contact" , command = lambda: mc.toggle_frame_visibility(self.frame_calendar_next , "next"))
         self.next_contact.config(cursor = 'arrow')
         self.next_contact.grid(row = 1, column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
-        self.boton_pop_up = ttk.Button(self.frame_log , text = "Pop Up", command = lambda: act.toggle_frame_visibility(self.frame_calendar_pop , "pop"))
+        self.boton_pop_up = ttk.Button(self.frame_log , text = "Pop Up", command = lambda: mc.toggle_frame_visibility(self.frame_calendar_pop , "pop"))
         self.boton_pop_up.config(cursor = 'arrow')
         self.boton_pop_up.grid(row = 2 , column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
-        self.boton_log = ttk.Button(self.frame_log , text = "Log")
+        self.boton_log = ttk.Button(self.frame_log , text = "Log" , command = lambda: act.load_comments(self))
         self.boton_log.config(cursor = 'arrow')
         self.boton_log.grid(row = 1 , column = 7, padx = 2 , pady= 2 , sticky = "nswe" , rowspan = 2)
-        self.contact_log = Frame(self.frame_tree , bg = 'red')
+        
+        self.contact_log = Frame(self.frame_tree)
         self.contact_log.grid(row = 3 , column = 0, sticky  = W+E , pady = 5)
+        
+        self.scroll_log = ttk.Scrollbar(self.frame_tree , orient = "vertical" , command=self.info.yview) 
+        self.scroll_log.grid(row = 0 , column= 1 , sticky = N+S)
+        self.info.configure(yscrollcommand = self.scroll_log.set)
+        
+        """
+        scroll = ttk.Scrollbar(self.frame_productos, orient="vertical", command=self.tree.yview)
+        scroll.grid(row = 1 , column = 1 , sticky = N+S)
+        self.tree.configure(yscrollcommand=scroll.set)
+        """
         
         # NÚMERO DE CONTACTOS/ESTADO
         
@@ -203,8 +214,8 @@ class Main:
        
         # FRAME EMPRESA
         
-        self.frame_company = tk.Frame(self.ventana_principal  , borderwidth=1, relief="solid") 
-        self.frame_company.grid(row = 1 , column = 5 , pady = 0 , sticky = "nswe" , columnspan = 4, rowspan = 2) # sticky="nswe" Se expande en todas las driecciones.
+        self.frame_company = tk.Frame(self.ventana_principal) 
+        self.frame_company.grid(row = 1 , column = 5 , pady = 0 , padx = 5 , sticky = "nswe" , columnspan = 4, rowspan = 2) # sticky="nswe" Se expande en todas las driecciones.
         
         self.frame_company.grid_columnconfigure(1, weight=1)
         self.frame_company.grid_columnconfigure(0, weight=1)
@@ -293,8 +304,8 @@ class Main:
         
         #FRAME CONTACTO
         
-        self.contact_frame = ttk.Frame(self.ventana_principal , borderwidth = 1, relief = 'solid')
-        self.contact_frame.grid(row = 3 , column = 5  , columnspan=2 , rowspan = 2 , sticky='nsew')
+        self.contact_frame = ttk.Frame(self.ventana_principal)
+        self.contact_frame.grid(row = 3 , column = 5  , padx = 5 , columnspan=2 , rowspan = 2 , sticky='nsew')
         
         self.contact_frame.grid_columnconfigure(1, weight=1)
         self.contact_frame.grid_columnconfigure(0, weight=1)
@@ -368,9 +379,9 @@ class Main:
         self.notes.config(padx = 2 , pady = 2 ,width = 30 , height = 3)
         self.notes.grid(row = 8, column = 0, columnspan = 2 , sticky = W+E ,ipady = 10, ipadx=15)
         
-        self.margin_bottom_contacto = Label(self.contact_frame , text = "id: 45612" , bg = 'black' , fg = 'white')
+        self.margin_bottom_contacto = Label(self.contact_frame , text = "ID: {act.get_company_id()}" , bg = 'black' , fg = 'white')
         #self.margin_bottom_contacto.config(height= 0)
-        self.margin_bottom_contacto.grid(row = 9 , column = 0 , columnspan = 2 , sticky = W+E)
+        self.margin_bottom_contacto.grid(row = 9 , column = 0 , pady = 5 , columnspan = 2 , sticky = W+E)
              
         
         
@@ -406,66 +417,7 @@ class Main:
             item = self.combo_state.get()
             print(item)
 
-        
     
-            
-    
-  
-employee = "AMC"
-
-
-        
-lista_datos = [
-    ["Empresa 1", "01-01-2023", 50, "15-03-2024", 300, 10],
-    ["Empresa 2", "20-07-2023", 75, "05-05-2024", 500, 25],
-    ["Empresa 3", "10-02-2023", 20, "30-04-2024", 200, 5],
-    ["Empresa 4", "12-09-2023", 90, "10-06-2024", 400, 15],
-    ["Empresa 5", "05-05-2023", 40, "20-02-2024", 100, 30],
-    ["Empresa 6", "15-11-2023", 60, "25-08-2024", 600, 20],
-    ["Empresa 7", "25-03-2023", 10, "12-12-2023", 50, 35],
-    ["Empresa 8", "08-06-2023", 85, "02-07-2024", 450, 40],
-    ["Empresa 9", "30-04-2023", 30, "01-01-2024", 150, 45],
-    ["Empresa 10", "18-12-2023", 70, "08-09-2024", 700, 50],
-    ["Empresa 11", "21-08-2023", 55, "14-11-2024", 550, 12],
-    ["Empresa 12", "02-03-2023", 25, "19-12-2023", 250, 27],
-    ["Empresa 13", "29-10-2023", 80, "07-10-2024", 800, 8],
-    ["Empresa 14", "17-06-2023", 45, "23-03-2024", 450, 33],
-    ["Empresa 15", "07-01-2023", 15, "28-05-2024", 150, 18],
-    ["Empresa 16", "13-05-2023", 65, "09-01-2024", 650, 22],
-    ["Empresa 17", "26-09-2023", 95, "03-08-2024", 950, 38],
-    ["Empresa 18", "11-04-2023", 35, "16-06-2024", 350, 42],
-    ["Empresa 19", "24-12-2023", 75, "20-09-2024", 750, 47],
-    ["Empresa 20", "19-07-2023", 50, "31-07-2024", 500, 9],
-    ["Empresa 21", "03-02-2023", 10, "26-11-2023", 100, 15],
-    ["Empresa 22", "08-11-2023", 60, "04-04-2024", 600, 31],
-    ["Empresa 23", "14-05-2023", 40, "29-12-2024", 400, 17],
-    ["Empresa 24", "23-10-2023", 85, "06-03-2024", 850, 23],
-    ["Empresa 25", "06-06-2023", 30, "22-10-2024", 300, 28],
-    ["Empresa 26", "16-01-2023", 20, "18-09-2024", 200, 36],
-    ["Empresa 27", "22-08-2023", 70, "13-02-2024", 700, 41],
-    ["Empresa 28", "04-03-2023", 45, "11-07-2024", 450, 46],
-    ["Empresa 29", "01-11-2023", 55, "05-05-2024", 550, 48],
-    ["Empresa 30", "18-06-2023", 65, "27-01-2024", 650, 3],
-    ["Empresa 31", "20-01-2023", 5, "21-08-2024", 50, 11],
-    ["Empresa 32", "13-07-2023", 80, "03-06-2024", 800, 19],
-    ["Empresa 33", "11-02-2023", 15, "09-04-2024", 150, 26],
-    ["Empresa 34", "05-09-2023", 35, "28-12-2023", 350, 34],
-    ["Empresa 35", "24-04-2023", 90, "26-10-2024", 900, 39],
-    ["Empresa 36", "30-11-2023", 25, "17-09-2024", 250, 44],
-    ["Empresa 37", "22-06-2023", 75, "01-03-2024", 750, 49],
-    ["Empresa 38", "02-01-2023", 50, "04-11-2024", 500, 7],
-    ["Empresa 39", "09-08-2023", 60, "23-02-2024", 600, 14],
-    ["Empresa 40", "28-03-2023", 45, "30-08-2024", 450, 21],
-    ["Empresa 41", "15-10-2023", 30, "10-10-2024", 300, 29],
-    ["Empresa 42", "27-05-2023", 70, "15-01-2024", 700, 37],
-    ["Empresa 43", "12-12-2023", 20, "06-07-2024", 200, 43],
-    ["Empresa 44", "10-07-2023", 40, "24-05-2024", 400, 1],
-    ["Empresa 45", "06-02-2023", 85, "12-09-2024", 850, 13],
-    ["Empresa 46", "23-09-2023", 10, "11-11-2023", 100, 16],
-    ["Empresa 47", "14-04-2023", 55, "07-01-2024", 550, 24],
-    ["Empresa 48", "18-11-2023", 65, "20-06-2024", 650, 32]]
- 
-     
 
 if __name__ == "__main__":
     

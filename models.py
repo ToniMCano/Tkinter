@@ -143,3 +143,6 @@ class Contact(Base):
         self.contact_employee_id = contact_employee_id
         self.contact_person_id = contact_person_id
         self.pop_up = pop_up
+
+    def __str__(self):
+        return F"{self.last_contact_date} {self.log} {self.contact_employee_id} {self.contact_person_id}"

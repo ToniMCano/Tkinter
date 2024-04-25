@@ -114,7 +114,7 @@ def empleados():
      
     for i , x in enumerate(range(3)):
         
-        employee = Employee(f"EA{str(i)}", f"Name{str(i)}" , f"Surname{str(i)}" , f"ea{str(i)}@company.com", int(f"9652293{str(i)}") ,"Comercial" , 1234 , 1)
+        employee = Employee(f"EA{str(i+1)}", f"Name{str(i+1)}" , f"Surname{str(i+1)}" , f"ea{str(i+1)}@company.com", int(f"9652293{str(i+1)}") ,"Comercial" , 1234 , 1)
         db.session.add(employee)
         db.session.commit()
     db.session.close()
@@ -166,9 +166,23 @@ def test3():
             y.contact_counter = x.counter
         
 
-#datos_muestra()
-#contact()
-#contacts()
-#empleados()
 
-d
+def load_comments():
+        comments = db.session.query(Contact).filter(Contact.client_id == 1).order_by(Contact.last_contact_date.desc())
+        comments_counter = 0
+        
+        for comment in comments:
+            print(comment)
+            comments_counter += 1
+        print (comments_counter)
+        
+        
+def info_log():
+        contact_date = f"{datetime.now().strftime('%d %B %Y %H:%M')}"
+        return f"{contact_date} Pepito Grillo [EA1]"
+
+
+datos_muestra()
+empleados()
+contact()
+contacts()
