@@ -183,6 +183,7 @@ def info_log():
         contact_date = f"{datetime.now().strftime('%d %B %Y %H:%M')}"
         return f"{contact_date} Pepito Grillo [EA1]"
 
+<<<<<<< HEAD
 
 def test_ctk():
     root = customtkinter.CTk()
@@ -205,3 +206,22 @@ def test_ctk():
 test_ctk()
     
     
+=======
+def ctk():
+    root = customtkinter.CTk()
+    root.title("CTK")
+    root.geometry("600x600")
+    
+    frame = customtkinter.CTkScrollableFrame(root)
+    frame.pack(fill = "both")
+    
+    for x in range(30):
+      test =   Frame(frame)
+      test.pack(fill = "x" , expand = True)
+      
+      test_label = Label(test , text = f"test{x}")
+      test_label.pack(fill = "x" , expand = True)
+      
+    root.mainloop()
+ctk()
+>>>>>>> e212a1726379d8d42a1dab3bb670f41f4b6fd679
