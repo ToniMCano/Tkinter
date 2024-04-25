@@ -10,6 +10,7 @@ from datetime import datetime , timedelta
 import os
 from tkinter import *
 import customtkinter
+from actions import GetInfo
 
 
 
@@ -35,8 +36,10 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
     starts = start_date()
 
 
+
     for x in excel["Hoja 1"]:
-        nace.append(x[0].value)
+        if len(x[0].value.split(" - ")[0]) >= 2:
+            nace.append(x[0].value)
             
     for employee_id in range(3):
         for data_row in range(50):
@@ -71,7 +74,7 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
     for x in data: 
         active_sheet.append(x) # Añadimos las filas
         
-    wb.save("data.xlsx")    
+    wb.save("data2.xlsx")    
     
     
 def start_date():
@@ -183,45 +186,21 @@ def info_log():
         contact_date = f"{datetime.now().strftime('%d %B %Y %H:%M')}"
         return f"{contact_date} Pepito Grillo [EA1]"
 
-<<<<<<< HEAD
 
-def test_ctk():
-    root = customtkinter.CTk()
-    root.title("Test")
-    root.geometry("800X300")
+def index():  
+    alias = 'EA1'
+    index = GetInfo.employees_list().index(alias)
+                        
+    print (index , alias)
     
-    scroll = customtkinter.CTkScrollableFrame(root)
-    scroll.pack(fill = "both" , expand = True)
+def muestra(): 
 
-    
-    for x in range(30):
-        frame = Frame(scroll)
-        frame.pack(fill = "x" , expand = True)
-        
-        label = Label(scroll , text = f"Test{x}")
-        label.pack(fill = "x" , expand = True)
-        
-    root.mainloop()
-    
-test_ctk()
-    
-    
-=======
-def ctk():
-    root = customtkinter.CTk()
-    root.title("CTK")
-    root.geometry("600x600")
-    
-    frame = customtkinter.CTkScrollableFrame(root)
-    frame.pack(fill = "both")
-    
-    for x in range(30):
-      test =   Frame(frame)
-      test.pack(fill = "x" , expand = True)
-      
-      test_label = Label(test , text = f"test{x}")
-      test_label.pack(fill = "x" , expand = True)
-      
-    root.mainloop()
-ctk()
->>>>>>> e212a1726379d8d42a1dab3bb670f41f4b6fd679
+    excel = openpyxl.load_workbook("recursos/NACE.xlsx")
+    nace = []
+
+    for x in excel["Hoja 1"]:
+        if len(x[0].value.split("-")[0].strip(" ")) > 1:
+            nace.append(x[0].value)
+    print(nace[0])
+datos_muestra()
+            

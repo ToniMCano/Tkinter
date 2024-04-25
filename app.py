@@ -9,21 +9,23 @@ from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
 from sqlalchemy import and_ , or_  
-from actions import Actions as act
+from actions import LoadInfo as li , GetInfo as gi , MyCalendar as mc , Pops as pw
 from datetime import datetime
 #import locale
 from tkinter import messagebox as mb
+ 
 #locale.setlocale(locale.LC_ALL, '')
 
 
 
 class Main:
+    
     def __init__(self, root):
         self.ventana_principal = root
         self.ventana_principal.title("MyCRM")
         self.ventana_principal.resizable(1,1)
         self.ventana_principal.geometry('1200x800')
-        act.center_window(self, self.ventana_principal)
+        pw.center_window(self, self.ventana_principal)
         
         
         # INFO LISTA
@@ -60,9 +62,8 @@ class Main:
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
-        self.info.bind("<ButtonRelease-1>" , lambda event: act.get_client_name(self , event))
-        act.login(self)
-        #act.load_contacts(self , "")
+        self.info.bind("<ButtonRelease-1>" , lambda event: li.get_client_name(self , event))
+        pw.login(self)
         
         
         #IMAGENES 
@@ -100,33 +101,33 @@ class Main:
      
         # LEAD, CANDIDATE , CONTACT
         
-        self.selected_option = StringVar()
-        self.selected_option.set("Contact")
+        #self.selected_option = StringVar()
+        #self.selected_option.set("Contact")
         
-        self.employee = ttk.Combobox(self.header ,state = "readonly",values=["AMC", "MMG", "ITL"] , width= 10)
+        
+        self.employee = ttk.Combobox(self.header ,state = "readonly", values =  gi.employees_list() , width= 10)
         self.employee.configure(background='lightblue')
-        self.employee.current(newindex=0)
                
         self.employee.grid(row = 0 , column = 3 , padx = 5)
         self.employee.bind("<<ComboboxSelected>>" , self.test)
 
-        self.combo_state = ttk.Combobox(self.header ,state = "readonly",values=["Lead", "Candidate", "Contact"] , width= 10)
+        self.combo_state = ttk.Combobox(self.header ,state = "readonly",values=["Lead", "Candidate", "Contact" , 'All'] , width= 10)
         self.combo_state.configure(background='lightblue')
         self.combo_state.current(newindex=0)
-        #self.combo_state.config(background = 'white')
+
         self.combo_state.grid(row = 0 , column = 4 , padx = 5)
-        self.combo_state.bind("<<ComboboxSelected>>" , self.state)
+        self.combo_state.bind("<<ComboboxSelected>>" , self.companies_state)
 
         # CALENDAR
         
         # Crear un Frame que se mostrará/ocultará self.frame_button
         self.frame_calendar = tk.Frame(self.ventana_principal , bd = 1 ,  relief = 'solid')
         self.fecha = StringVar()
-        act.calendar(self.frame_calendar, "general" , self.fecha)
+        mc.calendar(self.frame_calendar, "general" , self.fecha)
         self.frame_calendar_next = tk.Frame(self.ventana_principal , bd = 1 ,  relief = 'solid')
-        act.calendar(self.frame_calendar_next , "next")
+        mc.calendar(self.frame_calendar_next , "next")
         self.frame_calendar_pop = tk.Frame(self.ventana_principal , bd = 1 ,  relief = 'solid')
-        act.calendar(self.frame_calendar_pop , "pop")
+        mc.calendar(self.frame_calendar_pop , "pop")
         
                   
 
@@ -143,13 +144,13 @@ class Main:
         self.label_calendar_button.config(width = 15 , height = 1)
         self.label_calendar_button.grid(row = 0, column = 6)
         
-        self.boton_fecha = tk.Button(self.frame_calendar_button, image = self.icon_calendar, command = lambda: act.toggle_frame_visibility(self.frame_calendar, "general"))
+        self.boton_fecha = tk.Button(self.frame_calendar_button, image = self.icon_calendar, command = lambda: mc.calendar_toggle_frame(self.frame_calendar, "general"))
         self.boton_fecha.config(cursor = 'arrow')
         self.boton_fecha.grid(row=0, column=1, sticky="ew")
 
         # AÑADIR CONTACTOS DESDE POOL
         
-        self.new_company = tk.Button(self.header , text = 'Add\nCompany' , font = ("Calibri" , 9 ,'bold') , command = lambda: act.new_company()) 
+        self.new_company = tk.Button(self.header , text = 'Add\nCompany' , font = ("Calibri" , 9 ,'bold') , command = lambda: pw.new_company()) 
         #self.new_company.config(height = 47, width = 47)
         self.new_company.grid(row = 0 , column = 0 , padx = 5) 
         
@@ -158,14 +159,13 @@ class Main:
         self.pool.config(height=2 ,width=5)
         self.pool.grid(row = 0 , column = 1 , padx = 5)
         
-        login_button = ttk.Button(self.header , text = "Login" , command = lambda: act.login(self))
+        login_button = ttk.Button(self.header , text = "Login" , command = lambda: pw.login(self))
         login_button.grid(row = 0 , column = 10 , sticky = E)
         
         self.pop_up = tk.Button(self.header, text = "PopUp")
         self.pop_up.config(cursor = 'arrow')
         self.pop_up.config(height = 2, width = 5)
         self.pop_up.grid(row = 0 , column = 11 , padx = 5 , sticky = E)
-        
         
         # LOG
 
@@ -178,21 +178,18 @@ class Main:
         self.text_log.config(height = 3 , width = 80)
         self.text_log.grid(row = 1 , column = 1, rowspan = 2 , sticky = W+E, padx = 5)
         
-        self.next_contact = ttk.Button(self.frame_log , text = "Next Contact" , command = lambda: act.toggle_frame_visibility(self.frame_calendar_next , "next"))
+        self.next_contact = ttk.Button(self.frame_log , text = "Next Contact" , command = lambda: mc.calendar_toggle_frame(self.frame_calendar_next , "next"))
         self.next_contact.config(cursor = 'arrow')
         self.next_contact.grid(row = 1, column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
-        self.boton_pop_up = ttk.Button(self.frame_log , text = "Pop Up", command = lambda: act.toggle_frame_visibility(self.frame_calendar_pop , "pop"))
+        self.boton_pop_up = ttk.Button(self.frame_log , text = "Pop Up", command = lambda: mc.calendar_toggle_frame(self.frame_calendar_pop , "pop"))
         self.boton_pop_up.config(cursor = 'arrow')
         self.boton_pop_up.grid(row = 2 , column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
-        self.boton_log = ttk.Button(self.frame_log , text = "Log" , command = lambda: act.load_comments(self))
+        self.boton_log = ttk.Button(self.frame_log , text = "Log" , command = lambda: gi.load_comments(self , self.entry_nif.get()))
         self.boton_log.config(cursor = 'arrow')
         self.boton_log.grid(row = 1 , column = 7, padx = 2 , pady= 2 , sticky = "nswe" , rowspan = 2)
-        
-        #self.contact_log = Frame(self.frame_tree)
-        #self.contact_log.grid(row = 3 , column = 0, sticky  = W+E , pady = 5)
-        #
+
         # NÚMERO DE CONTACTOS/ESTADO
         
         self.contacts = StringVar()
@@ -203,8 +200,6 @@ class Main:
         self.contacts_var = tk.Label(self.contacts_number , textvariable = self.contacts , font = ("" , 10 , 'bold'))
         self.contacts_var.pack(fill = "both" , expand = True, side = "top")
         
-        
-       
         # FRAME EMPRESA
         
         self.frame_company = tk.Frame(self.ventana_principal) 
@@ -238,15 +233,13 @@ class Main:
         self.label_activity = ttk.Label(self.frame_company , text = "Actividad", font = ("Calibri" , 9 , 'bold'))
         self.label_activity.grid(row = 5 , column = 0, sticky=W+E , padx = 2 , pady = 2)
         
-        self.entry_activity = ttk.Combobox(self.frame_company , values = act.nace_list() , font = ("Calibri" , 9 , 'bold'))
-        # self.entry_activity.current(newindex =     ) Capturaré el alor con lista.index(nace)
+        self.entry_activity = ttk.Combobox(self.frame_company , values = li.nace_list() , font = ("Calibri" , 9 , 'bold'))
         self.entry_activity.grid(row = 6 , column = 0 , sticky = W+E , padx = 2  , pady = 2) 
         
         self.label_employees = ttk.Label(self.frame_company , text = "Empleados", font = ("Calibri" , 9 , 'bold'))
         self.label_employees.grid(row = 5 , column = 1, sticky=W+E , padx = 2 , pady = 2)
         
         self.entry_employees = ttk.Combobox(self.frame_company , values = [" < 10" , "10 - 50" , "50 - 250" , " > 250"], font = ("Calibri" , 9 , 'bold'))
-        # self.entry_employees .current(newindex =     ) Capturaré el alor con lista.index(nace)
         self.entry_employees.grid(row = 6 , column = 1 , sticky = W+E , padx = 2  , pady = 2) 
         
         self.label_web = ttk.Label(self.frame_company , text = "Web", font = ("Calibri" , 9 , 'bold'))
@@ -264,8 +257,6 @@ class Main:
         
         self.entry_mail_empresa = ttk.Entry(self.frame_company)
         self.entry_mail_empresa.grid(row = 8 , column = 1,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
-        
-        
         
         self.mail_button = ttk.Button(self.entry_mail_empresa, image = self.mail_icon)
         self.mail_button.config(cursor = 'arrow')
@@ -307,7 +298,7 @@ class Main:
         self.contact_header = Label(self.contact_frame , text = "Contacto" ,bg = "black" , fg = 'white')
         self.contact_header.grid(row = 0 , column = 0 , columnspan = 2  ,sticky=W+E)
         
-        self.new_contact = tk.Button(self.contact_header , text = "+"  , font = ("", 12 , "bold") , bg = "white" , bd =0 , command = lambda: act.create_contact(self))
+        self.new_contact = tk.Button(self.contact_header , text = "+"  , font = ("", 12 , "bold") , bg = "white" , bd =0 , command = lambda: pw.create_contact(self))
         self.new_contact.config(cursor = 'arrow')
         self.new_contact.config(height=1 , padx=1 , pady = 1)
         self.new_contact.pack(side = "right")
@@ -381,13 +372,7 @@ class Main:
     def on_heading_click(self , e):
         
         print(f"funciona {e}")
-        
-        
-    def update_selected(self,option):
-        
-        self.selected_option.set(option)
-        print("ha entrado")
-        
+
         
     def capturar(self):
         
@@ -396,7 +381,7 @@ class Main:
         
     def test(self, event):
         
-        item = self.combo_state.get()
+        item = self.employee.get()
         print(item)
         
         
@@ -405,7 +390,7 @@ class Main:
          webbrowser.open_new('https://chat.openai.com/c/2220aa72-de48-497a-b191-203933de98d3')
            
             
-    def state(self, event):  # Recibir valor del Combobox
+    def companies_state(self, event):  # Recibir valor del Combobox
         
             item = self.combo_state.get()
             print(item)
