@@ -13,6 +13,8 @@ import locale
 from tkinter import messagebox as mb
 import os
 from sqlalchemy.exc import IntegrityError
+from tkinter.scrolledtext import ScrolledText
+import customtkinter
 
 locale.setlocale(locale.LC_ALL, '')
    
@@ -34,11 +36,11 @@ hours_list = [
               ]
 
 
-active_employee = int()
+employee = int()
  
 class Actions:
 
-    global active_employee
+    global employee
     
     def center_window(self, window):
         
@@ -54,8 +56,10 @@ class Actions:
             
         login_window = Toplevel()
         login_window.title("Login")
+        #login.geometry("300x200")
         
         login_window.grid_columnconfigure(0 , weight = 1)
+        #login.grid_rowconfigure(0 , weight = 1)
         
         frame = ttk.Labelframe(login_window , text = "Login")
         frame.grid(row = 0 , column = 0 , padx = 10 , pady = 5 , sticky = "we")
@@ -89,25 +93,29 @@ class Actions:
             if employee.employee_alias == alias and employee.password == str(employee_password):
                 
                 exists = True
-                #print(exists , employee.employee_alias  , employee.id_employee )
                 window.destroy()
                 
                 Actions.load_contacts(root , employee.id_employee)
                 
         if not exists:
             mb.showwarning("Login Error" , "El usuario o la contraseña no son correctos")
-            window.lift()
+            top.focus_set()
+            top.wait_window()
+            
+
 
     # CAMBIAR_CLASE
-    def load_contacts(self , employee_id_sended ):         
+    def load_contacts(self , employee_id_sended ): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
         
+        #state == "Contact")).order_by(Contact.last_contact_date.desc()).group_by(Contact.client_id).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
         contacts = 0
         clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == employee_id_sended)).all()
-        
+        # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
+
         for client in clients:
             contact = db.session.query(Contact).filter(Contact.contact_person_id == client.contact_person).order_by(Contact.last_contact_date.desc()).group_by(Contact.contact_person_id).first()
             
-            self.info.insert("" , 0 , text = client.state , values = (MyCalendar.get_days(client) , client.name, contact.last_contact_date   , contact.next_contact , client.adress[-5:]))
+            self.info.insert("" , 0 , text = client.state , values = (Actions.get_days(client) , client.name, contact.last_contact_date   , contact.next_contact , client.adress[-5:]))
             contacts += 1
         self.contacts.set(f"Contactos: {contacts}")
         
@@ -187,7 +195,7 @@ class Actions:
         entry_mobile = ttk.Entry(frame_contact_person)
         entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
         
-        save_button = ttk.Button(frame_info, text = "Guardar")  # Cambiar función
+        save_button = ttk.Button(frame_info, text = "Guardar" , command=Actions.olvidar)  # Cambiar función
         save_button.grid(row = 6 , column = 0 , columnspan = 2 , padx = 200 , pady = 5 , sticky = W+E)
         
         
@@ -368,8 +376,8 @@ class Actions:
         save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: Actions.test_add_company(add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}, {company_street_number.get() } {company_street_floor.get()} {company_city_entry.get()}, ({company_province_entry.get()}) {company_postal_code_entry.get()}"  , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
         save_company_button.grid(row = 5 , column = 0 , pady = 10)
         
-        Actions.center_window(Actions , add_company_frame)        
-        
+        Actions.center_window(Actions , add_company_frame)
+    
                     
     def test_add_company(add_company_frame , data):
 
@@ -432,7 +440,7 @@ class Actions:
             
             vcontact_person = Actions.add_contact(data , employee_adder)
             
-            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , active_employee , "Pool", data["Empleados: "])
+            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee , "Pool", data["Empleados: "])
             vcontact_person.client_id = vcontact_person.id_person
             
             db.session.add(company)
@@ -460,7 +468,7 @@ class Actions:
             add_company_frame.destroy()    
             Actions.new_company(data)
  
-   
+    # CAMBIAR_CLASE 
     def add_contact(data , employee_adder):
         
         try:                                                                                                                                                                                                # TO-DO sustituir por la empresa adminstradora
@@ -476,7 +484,7 @@ class Actions:
         except Exception as e:
             mb.showerror("Error al añadir Persona de Contacto" , f"{e}")
         
-            
+    # CAMBIAR_CLASE porque va unida  a una operación en la DB        
     def show_new_company(company_name , contact_name , contact_surname , contact_job):
         
         show = Toplevel()
@@ -507,7 +515,7 @@ class Actions:
         
         Actions.center_window(Actions , show)
         
-    
+    # CAMBIAR_CLASE
     def load_companies():
         
         excel_paht = filedialog.askopenfilename(title = "Cargar desde Excel" , filetypes = (("Ficheros Excel" , "*.xlsx"),))
@@ -542,12 +550,112 @@ class Actions:
             
             mb.showwarning("Errores en la inserción de Empresas" , f"Empresas que no han podido ser insertadas: {errores}")    
         
- 
+        
+    def calendar(frame , place , date = "" ):  
+        
+        header_calendar = StringVar(value = "View")
+        
+        label_calendar = tk.Label(frame , textvariable = header_calendar , bg = "black" , fg = "white")
+        
+        label_calendar.pack(fill = "x" , expand = True)
+        
+        frame.calendar = Calendar(frame , selectedmode = "day" , date_pattern = "yyyy-mm-dd") # Para poder ordenarlo en la DB "YYYY-MM-DD"
+        frame.calendar.pack()
+        
+        if place == "general":
+            
+            frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>", lambda e: Actions.general_calendar_date(frame , place , date , e))
+       
+        elif place != "general":
+            
+            if place == "next":
+                header_calendar.set("Next Contact")
+                
+            else:
+                header_calendar.set("Pop Up")
+                
+            hour = ttk.Combobox(frame , justify = "left" , values = hours_list , width = 10)
+            hour.current(newindex = 0)
+            hour.config(justify=CENTER)
+            hour.pack(fill = "x" , expand = True , anchor = "center")
+            #frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>")
+            send = ttk.Button(frame , text = "Save" , command = lambda: Actions.tst(frame , place , hour = hour.get()) )
+            send.pack(pady = 5)
+
+
+    def toggle_frame_visibility(frame , place):
+        
+        if frame.winfo_ismapped(): # Comprueba si self.frame_container_calendar es visible, si es visible lo oculta con self.frame_container_calendar.grid_forget()
+            frame.place_forget()
+
+        else:
+            if place == "general":
+                frame.place(x = 320, y = 50) 
+                frame.lift()  # Elevar el Frame al frente 
+                
+            elif place == 'next':
+                frame.place(x = 0, y = 242) 
+                frame.lift() 
+            
+            elif place == "pop":
+                frame.place(x = 0, y = 272) 
+                frame.lift() 
+
+
+    def general_calendar_date(self , place , date , event):
+        
+        try:
+            fecha_seleccionada = self.calendar.get_date() ## Para poder ordenarlo en la DB "YYYY-MM-DD" 
+            
+            month = int(fecha_seleccionada[5:7])
+            year = int(fecha_seleccionada[0:4])
+            
+            if int(fecha_seleccionada[-2]) == 0:
+                day = int(fecha_seleccionada[-1])
+                
+            else:
+                day = int(fecha_seleccionada[-2:])
+            
+            date.set(datetime(year,month,day).strftime("%d %B")) 
+            
+            Actions.toggle_frame_visibility(self , place)
+            
+        except Exception as e:
+            print(e)
+            mb.showwarning("Error" , f"Ha habido un problema con las fechas {e}")
+                     
+    # CAMBIAR_CLASE     
+    def olvidar():
+       #app.grid_forget()
+       vcontact_person = db.session.query(ContactPerson).order_by(ContactPerson.id_person.desc()).first()
+       print(vcontact_person.id_person , employee)
+       
+    # CAMBIAR_CLASE 
+    def tst(self , place , hour): #  (YYYY-MM-DD HH:MM:SS)  Para poder ordenarlo en la DB 
+        print(f"Date From: {place} - {self.calendar.get_date()} {hour}") 
+        Actions.toggle_frame_visibility(self , place)
+
+    # CAMBIAR_CLASE va con load_contacts
+    def get_days(client):
+        
+        today = datetime.now()
+        
+        try:
+            date = client.start_contact_date
+            
+            days = str(today - datetime.strptime(date, "%Y-%m-%d %H:%M:%S")).split(" ")[0] 
+        
+        except Exception as e:
+            print(e) 
+            days = 0
+            
+        return days
+                
+                
     def get_client_name(tree , event):
 
         row = tree.info.focus()
         item = tree.info.item(row)
-        print(item)
         client_name = item['values'][1]
         
         Actions.load_client_info(tree , client_name)
@@ -603,7 +711,7 @@ class Actions:
         tree.entry_mobile.delete(0 , END)
         tree.entry_mobile.insert(0 , contact_person.contact_mobile)
         
-        Comments.load_comments(tree , client.nif)
+        Actions.load_comments(tree , client.nif)
         
         
         #tree.notes.delete(0 , END)
@@ -618,115 +726,16 @@ class Actions:
             
         return (index)   
     
-
-
-class MyCalendar():
-      
-    def calendar(frame , place , date = "" ):  
-        
-        header_calendar = StringVar(value = "View")
-        
-        label_calendar = tk.Label(frame , textvariable = header_calendar , bg = "black" , fg = "white")
-        
-        label_calendar.pack(fill = "x" , expand = True)
-        
-        frame.calendar = Calendar(frame , selectedmode = "day" , date_pattern = "yyyy-mm-dd") # Para poder ordenarlo en la DB "YYYY-MM-DD"
-        frame.calendar.pack()
-        
-        if place == "general":
-            
-            frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>", lambda e: MyCalendar.general_calendar_date(frame , place , date , e))
-       
-        elif place != "general":
-            
-            if place == "next":
-                header_calendar.set("Next Contact")
-                
-            else:
-                header_calendar.set("Pop Up")
-                
-            hour = ttk.Combobox(frame , justify = "left" , values = hours_list , width = 10)
-            hour.current(newindex = 0)
-            hour.config(justify=CENTER)
-            hour.pack(fill = "x" , expand = True , anchor = "center")
-            #frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>")
-            send = ttk.Button(frame , text = "Save" , command = lambda: MyCalendar.tst(frame , place , hour = hour.get()) )
-            send.pack(pady = 5)
-            
-
-
-    def toggle_frame_visibility(frame , place):
-        
-        if frame.winfo_ismapped(): # Comprueba si self.frame_container_calendar es visible, si es visible lo oculta con self.frame_container_calendar.grid_forget()
-            frame.place_forget()
-
-        else:
-            if place == "general":
-                frame.place(x = 320, y = 50) 
-                frame.lift()  # Elevar el Frame al frente 
-                
-            elif place == 'next':
-                frame.place(x = 0, y = 242) 
-                frame.lift() 
-            
-            elif place == "pop":
-                frame.place(x = 0, y = 272) 
-                frame.lift() 
-
-
-    def general_calendar_date(self , place , date , event):
-        
-        try:
-            fecha_seleccionada = self.calendar.get_date() ## Para poder ordenarlo en la DB "YYYY-MM-DD" 
-            
-            month = int(fecha_seleccionada[5:7])
-            year = int(fecha_seleccionada[0:4])
-            
-            if int(fecha_seleccionada[-2]) == 0:
-                day = int(fecha_seleccionada[-1])
-                
-            else:
-                day = int(fecha_seleccionada[-2:])
-            
-            date.set(datetime(year,month,day).strftime("%d %B")) 
-            
-            MyCalendar.toggle_frame_visibility(self , place)
-            
-        except Exception as e:
-            print(e)
-            mb.showwarning("Error" , f"Ha habido un problema con las fechas {e}")
-                     
-       
-
-    def tst(self , place , hour): #  (YYYY-MM-DD HH:MM:SS)  Para poder ordenarlo en la DB 
-        print(f"Date From: {place} - {self.calendar.get_date()} {hour}") 
-        MyCalendar.toggle_frame_visibility(self , place)
-
-   
-    def get_days(client):
-        
-        today = datetime.now()
-        
-        try:
-            date = client.start_contact_date
-            
-            days = str(today - datetime.strptime(date, "%Y-%m-%d %H:%M:%S")).split(" ")[0] 
-        
-        except Exception as e:
-            print(e) 
-            days = 0
-            
-        return days
-    
-
-class Comments():
-    
+    # CAMBIAR_CLASE_1
     def load_comments(self , nif):
+        frame_log = customtkinter.CTkScrollableFrame(self.frame_tree, fg_color = "lightgrey")
+        frame_log.grid(row = 3 , sticky = 'nsew')
         
         try:
-            for log in self.contact_log.winfo_children():
+            for log in frame_log.winfo_children():
                 log.destroy()
             
+            print("destroyed")
         except UnboundLocalError:
             print("NOT destroyed")
 
@@ -734,22 +743,19 @@ class Comments():
         comments = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).all()
         comments_counter = 0
         
-        listbox = tk.Listbox(self.contact_log)
-        listbox.grid(row = 0 , column = 0 , sticky = W+E)
-        
         for i, comment in enumerate(comments):
             log_frame = f"log_{str(i)}"
             label_info = f"label_{str(i)}"
             label_content = f"content_{str(i)}"
             
-            log_frame = tk.Frame(bg = "white" , height = 10 , bd = 1 , relief = "solid")
-            log_frame.grid(row = 0 , column = 0 , sticky = W+E)
+            log_frame = tk.Frame(frame_log , bg = "white" , height = 10 , bd = 1 , relief = "solid")
+            log_frame.pack(fill = "x" , expand = True , pady = 2)
             
-            label_info = tk.Label(log_frame , text = f"{Comments.load_info_log(comment.client_id , comment.last_contact_date)}" , bg = "black" , fg = "white")
-            label_info.grid(row = 0 , column = 0 , sticky = W+E)
+            label_info = tk.Label(log_frame , text = f"{Actions.load_info_log(comment.client_id , comment.last_contact_date)}" , bg = "black" , fg = "white")
+            label_info.pack(fill = "x" , expand = True)
             
             label_content = tk.Label(log_frame , text = f"{comment.log}" , bg = "White")
-            label_content.grid(row = 1 , column = 0 , sticky = W+E)
+            label_content.pack(fill = "x" , expand = True)
             
             comments_counter += 1
         print(comments_counter)
@@ -758,9 +764,9 @@ class Comments():
         client = db.session.get(Client , client_by_id)
         contact_person = db.session.get(ContactPerson , client.contact_person)
         employee = db.session.get(Employee , client.employee_id)
+        return f"{datetime.strptime(last_contact, '%Y-%m-%d %H:%M').strftime('%d %B %Y %H:%M').title()} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}]"
         
-        try:    
-            return f"{datetime.strptime(last_contact, '%Y-%m-%d %H:%M').strftime('%d %B %Y %H:%M').title()} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}]"
-        
-        except Exception as e:
-            print(e)
+
+
+
+    

@@ -180,9 +180,13 @@ def load_comments():
 def info_log():
         contact_date = f"{datetime.now().strftime('%d %B %Y %H:%M')}"
         return f"{contact_date} Pepito Grillo [EA1]"
+<<<<<<< HEAD
 
 
 datos_muestra()
 empleados()
 contact()
 contacts()
+=======
+print(info_log())
+>>>>>>> fb9b52c3fcd3b3fbfcf2ecd272a13f4e54013999
