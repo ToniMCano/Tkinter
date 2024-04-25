@@ -8,6 +8,8 @@ import db
 from models import Client , ContactPerson , Employee , Contact
 from datetime import datetime , timedelta
 import os
+from tkinter import *
+import customtkinter
 
 
 
@@ -180,4 +182,21 @@ def load_comments():
 def info_log():
         contact_date = f"{datetime.now().strftime('%d %B %Y %H:%M')}"
         return f"{contact_date} Pepito Grillo [EA1]"
-print(info_log())
+
+def ctk():
+    root = customtkinter.CTk()
+    root.title("CTK")
+    root.geometry("600x600")
+    
+    frame = customtkinter.CTkScrollableFrame(root)
+    frame.pack(fill = "both")
+    
+    for x in range(30):
+      test =   Frame(frame)
+      test.pack(fill = "x" , expand = True)
+      
+      test_label = Label(test , text = f"test{x}")
+      test_label.pack(fill = "x" , expand = True)
+      
+    root.mainloop()
+ctk()
