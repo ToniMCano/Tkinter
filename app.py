@@ -62,7 +62,7 @@ class Main:
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
-        self.info.bind("<ButtonRelease-1>" , lambda event: li.get_client_name(self , event))
+        #self.info.bind("<ButtonRelease-1>" , lambda event: li.get_client_name(self , event))
         pw.login(self)
         
         
@@ -101,10 +101,6 @@ class Main:
      
         # LEAD, CANDIDATE , CONTACT
         
-        #self.selected_option = StringVar()
-        #self.selected_option.set("Contact")
-        
-        
         self.employee = ttk.Combobox(self.header ,state = "readonly", values =  gi.employees_list() , width= 10)
         self.employee.configure(background='lightblue')
                
@@ -113,7 +109,7 @@ class Main:
 
         self.combo_state = ttk.Combobox(self.header ,state = "readonly",values=["Lead", "Candidate", "Contact" , 'All'] , width= 10)
         self.combo_state.configure(background='lightblue')
-        self.combo_state.current(newindex=0)
+        
 
         self.combo_state.grid(row = 0 , column = 4 , padx = 5)
         self.combo_state.bind("<<ComboboxSelected>>" , self.companies_state)
@@ -123,11 +119,11 @@ class Main:
         # Crear un Frame que se mostrará/ocultará self.frame_button
         self.frame_calendar = tk.Frame(self.ventana_principal , bd = 1 ,  relief = 'solid')
         self.fecha = StringVar()
-        mc.calendar(self.frame_calendar, "general" , self.fecha)
+        mc.calendar(self , "general" , self.fecha)
         self.frame_calendar_next = tk.Frame(self.ventana_principal , bd = 1 ,  relief = 'solid')
-        mc.calendar(self.frame_calendar_next , "next")
+        mc.calendar(self  , "next")
         self.frame_calendar_pop = tk.Frame(self.ventana_principal , bd = 1 ,  relief = 'solid')
-        mc.calendar(self.frame_calendar_pop , "pop")
+        mc.calendar(self  , "pop")
         
                   
 
@@ -144,7 +140,7 @@ class Main:
         self.label_calendar_button.config(width = 15 , height = 1)
         self.label_calendar_button.grid(row = 0, column = 6)
         
-        self.boton_fecha = tk.Button(self.frame_calendar_button, image = self.icon_calendar, command = lambda: mc.calendar_toggle_frame(self.frame_calendar, "general"))
+        self.boton_fecha = tk.Button(self.frame_calendar_button, image = self.icon_calendar, command = lambda: mc.calendar_toggle_frame(self , "general"))
         self.boton_fecha.config(cursor = 'arrow')
         self.boton_fecha.grid(row=0, column=1, sticky="ew")
 
@@ -178,11 +174,11 @@ class Main:
         self.text_log.config(height = 3 , width = 80)
         self.text_log.grid(row = 1 , column = 1, rowspan = 2 , sticky = W+E, padx = 5)
         
-        self.next_contact = ttk.Button(self.frame_log , text = "Next Contact" , command = lambda: mc.calendar_toggle_frame(self.frame_calendar_next , "next"))
+        self.next_contact = ttk.Button(self.frame_log , text = "Next Contact" , command = lambda: mc.calendar_toggle_frame(self , "next"))
         self.next_contact.config(cursor = 'arrow')
         self.next_contact.grid(row = 1, column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
-        self.boton_pop_up = ttk.Button(self.frame_log , text = "Pop Up", command = lambda: mc.calendar_toggle_frame(self.frame_calendar_pop , "pop"))
+        self.boton_pop_up = ttk.Button(self.frame_log , text = "Pop Up", command = lambda: mc.calendar_toggle_frame(self , "pop"))
         self.boton_pop_up.config(cursor = 'arrow')
         self.boton_pop_up.grid(row = 2 , column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
@@ -363,8 +359,8 @@ class Main:
         self.notes.config(padx = 2 , pady = 2 ,width = 30 , height = 3)
         self.notes.grid(row = 8, column = 0, columnspan = 2 , sticky = W+E ,ipady = 10, ipadx=15)
         
-        self.margin_bottom_contacto = Label(self.contact_frame , text = "ID: {act.get_company_id()}" , bg = 'black' , fg = 'white')
-        #self.margin_bottom_contacto.config(height= 0)
+        self.company_id = StringVar()
+        self.margin_bottom_contacto = Label(self.contact_frame , textvariable = self.company_id , bg = 'black' , fg = 'white')
         self.margin_bottom_contacto.grid(row = 9 , column = 0 , pady = 5 , columnspan = 2 , sticky = W+E)
              
         

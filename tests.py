@@ -202,5 +202,6 @@ def muestra():
         if len(x[0].value.split("-")[0].strip(" ")) > 1:
             nace.append(x[0].value)
     print(nace[0])
-datos_muestra()
+
+print(datetime(2024,4,27,8,27,0) >= datetime.now())
             

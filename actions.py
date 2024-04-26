@@ -340,26 +340,30 @@ class Pops:
  
 class MyCalendar():
     
-    def calendar_toggle_frame(frame , place):
+    def calendar_toggle_frame(self , place):
+        
+        if place == "general":
+            frame = self.frame_calendar
+            frame.place(x = 320, y = 50) 
+            
+        elif place == 'next':
+            frame = self.frame_calendar_next
+            frame.place(x = 0, y = 242) 
+            
+        
+        elif place == "pop":
+            frame = self.frame_calendar_pop
+            frame.place(x = 0, y = 272) 
+            
+        frame.lift() 
         
         if frame.winfo_ismapped(): # Comprueba si self.frame_container_calendar es visible, si es visible lo oculta con self.frame_container_calendar.grid_forget()
             frame.place_forget()
-
-        else:
-            if place == "general":
-                frame.place(x = 320, y = 50) 
-                frame.lift()  # Elevar el Frame al frente 
-                
-            elif place == 'next':
-                frame.place(x = 0, y = 242) 
-                frame.lift() 
-            
-            elif place == "pop":
-                frame.place(x = 0, y = 272) 
-                frame.lift() 
                 
     
-    def calendar(frame , place , date = "" ):  
+    def calendar(self , place , date = "" ):  
+        
+        frame = MyCalendar.place_to_frame(self , place)
         
         hours_list = [
             "8:00", "8:15", "8:30", "8:45", "9:00",
@@ -388,7 +392,7 @@ class MyCalendar():
         
         if place == "general":
             
-            frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>", lambda e: MyCalendar.general_calendar_date(frame , place , date , e))
+            frame = frame.calendar.bind("<<CalendarSelected>>", lambda e: MyCalendar.general_calendar_date(self , place , date , e))
        
         elif place != "general":
             
@@ -402,16 +406,16 @@ class MyCalendar():
             hour.current(newindex = 0)
             hour.config(justify=CENTER)
             hour.pack(fill = "x" , expand = True , anchor = "center")
-            #frame.calendar_date = frame.calendar.bind("<<CalendarSelected>>")
-            send = ttk.Button(frame , text = "Save" , command = lambda: MyCalendar.format_date(frame , place , hour = hour.get()) )
+            send = ttk.Button(frame , text = "Save" , command = lambda: MyCalendar.format_date(self , place , hour = hour.get()) )
             send.pack(pady = 5)
             
 
     def general_calendar_date(self , place , date , event):
         
+        frame = MyCalendar.place_to_frame(self , place)
+        
         try:
-            fecha_seleccionada = self.calendar.get_date() ## Para poder ordenarlo en la DB "YYYY-MM-DD" 
-            
+            fecha_seleccionada = frame.calendar.get_date() ## Para poder ordenarlo en la DB "YYYY-MM-DD" 
             month = int(fecha_seleccionada[5:7])
             year = int(fecha_seleccionada[0:4])
             
@@ -420,7 +424,9 @@ class MyCalendar():
                 
             else:
                 day = int(fecha_seleccionada[-2:])
-            
+                
+            LoadInfo.load_contacts(self , self.employee.get() , fecha_seleccionada)
+            print(self.employee.get() , fecha_seleccionada , "enviado")
             date.set(datetime(year,month,day).strftime("%d %B")) 
             
             MyCalendar.calendar_toggle_frame(self , place)
@@ -431,10 +437,28 @@ class MyCalendar():
                    
     
     def format_date(self , place , hour): #  (YYYY-MM-DD HH:MM:SS)  Para poder ordenarlo en la DB 
-        print(f"Date From: {place} - {self.calendar.get_date()} {hour}") 
-        MyCalendar.calendar_toggle_frame(self , place)
+        frame = MyCalendar.place_to_frame(self , place)
+        print(f"Date From: {place} - {frame.calendar.get_date()} {hour}") 
+        MyCalendar.calendar_toggle_frame(self  , place)
 
-    
+
+    def place_to_frame(self , place):
+        
+        try:
+            if place == "general":
+                frame = self.frame_calendar 
+            
+            elif place == "next":
+                frame = self.frame_calendar_next 
+            
+            elif place == "pop":
+                frame = self.frame_calendar_pop 
+
+            return frame
+        
+        except Exception as e:
+            print("PlaceTo.." , e)
+            
 
 class LoadInfo():
 
@@ -450,12 +474,13 @@ class LoadInfo():
                 exists = True
                 window.destroy()
                 
-                LoadInfo.load_contacts(root , employee.id_employee)
+                LoadInfo.load_contacts(root , employee.id_employee , date = datetime.now())
                 print(f" Empleado {employee.id_employee}")
                 
                 alias = GetInfo.employees_list().index(alias)
                     
                 root.employee.current(newindex = alias)
+                root.combo_state.current(newindex=2)
                 
                
         if not exists:
@@ -463,18 +488,22 @@ class LoadInfo():
             window.lift()
 
 
-    def load_contacts(self , employee_id_sended ): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
+    def load_contacts(self , employee_id_sended , date): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
         
-        #state == "Contact")).order_by(Contact.last_contact_date.desc()).group_by(Contact.client_id).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
+        if not date:
+            date = datetime.now()
+            
+        print("load_contacts" , date)
+        
         contacts = 0
         clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == employee_id_sended)).all()
         # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
 
         for client in clients:
-            contact = db.session.query(Contact).filter(Contact.contact_person_id == client.contact_person).order_by(Contact.last_contact_date.desc()).group_by(Contact.contact_person_id).first()
-            
+            contact = db.session.query(Contact).filter(and_(Contact.contact_person_id == client.contact_person , Contact.next_contact <= date )).order_by(Contact.last_contact_date.desc()).group_by(Contact.contact_person_id).first()
             self.info.insert("" , 0 , text = client.state , values = (LoadInfo.get_days(client) , client.name, contact.last_contact_date   , contact.next_contact , client.adress[-5:]))
             contacts += 1
+                
         self.contacts.set(f"Contactos: {contacts} ID: Empleado: {employee_id_sended}")
     
     
@@ -496,11 +525,16 @@ class LoadInfo():
     
     def get_client_name(tree , event):
 
-        row = tree.info.focus()
-        item = tree.info.item(row)
-        client_name = item['values'][1]
-        
-        GetInfo.load_client_info(tree , client_name)
+        try:
+            row = tree.info.focus()
+            item = tree.info.item(row)
+            client_name = item['values'][1]
+            
+            GetInfo.load_client_info(tree , client_name)
+            
+        except Exception as e:
+            print(e)
+            mb.showerror("Error en Get Client Name" ,  e)
         
         
     def nace_list():
@@ -544,9 +578,6 @@ class GetInfo():
         comments_counter = 0
         
         for i, comment in enumerate(comments):
-            log_frame = f"log_{str(i)}"
-            label_info = f"label_{str(i)}"
-            label_content = f"content_{str(i)}"
             
             log_frame = tk.Frame(frame_log , bg = "white" , height = 10 , bd = 1 , relief = "solid")
             log_frame.pack(fill = "x" , expand = True , pady = 2)
@@ -558,8 +589,9 @@ class GetInfo():
             label_content.pack(fill = "x" , expand = True)
             
             comments_counter += 1
-        print(comments_counter)
-        
+            
+        self.company_id.set(f"ID:{client.id_client}")
+
         
     def load_info_log(client_by_id , last_contact):
         
