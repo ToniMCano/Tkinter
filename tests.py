@@ -131,14 +131,21 @@ def contact():
         
     for i , company in enumerate(range(150)):
         for contact in range(25):
-            contact_random = Contact(company_state = "Contact" , last_contact_date = f"{date()} {str(random.randint(8,19))}:00" , next_contact = f"{date()} {str(random.randint(8,19))}:00"  , log =  "No localizado, estará a parir de las 16:00" ,client_id =  i+1 , contact_counter = random.randint(0,3) , contact_employee_id = random.randint(1,3) , contact_person_id =  i+1)
+            contact_random = Contact(company_state = "Contact" , last_contact_date = f"{date()} {str(random.randint(8,19))}:00" , next_contact = f"{date(True)} {str(random.randint(8,19))}:00"  , log =  "No localizado, estará a parir de las 16:00" ,client_id =  i+1 , contact_counter = random.randint(0,3) , contact_employee_id = random.randint(1,3) , contact_person_id =  i+1)
             db.session.add(contact_random)
             db.session.commit()
     db.session.close()
 
-def date():
-    day = str(random.randint(1 , 30))
-    month = str(random.randint(1 , 12))
+def date(end = False):
+    
+    if end:
+        day = str(random.randint(15 , 30))
+        month = str(random.randint(1 , 12))
+        
+    else:
+        day = str(random.randint(1 , 15))
+        month = str(random.randint(1 , 4))
+    
     
     if len(day) < 2:
         day =f"0{day}"
@@ -146,7 +153,7 @@ def date():
     if len(month) < 2:
         month =f"0{month}"
         
-
+    
         
     return f"2024-{month}-{day}"
         
@@ -203,5 +210,7 @@ def muestra():
             nace.append(x[0].value)
     print(nace[0])
 
-print(datetime(2024,4,27,8,27,0) >= datetime.now())
-            
+#datos_muestra()
+empleados()
+#contact()
+#contacts()

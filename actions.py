@@ -424,13 +424,17 @@ class MyCalendar():
                 
             else:
                 day = int(fecha_seleccionada[-2:])
-                
+            
+            print(self.employee.get() , fecha_seleccionada , "enviado")    
             LoadInfo.load_contacts(self , self.employee.get() , fecha_seleccionada)
-            print(self.employee.get() , fecha_seleccionada , "enviado")
+            
             date.set(datetime(year,month,day).strftime("%d %B")) 
             
             MyCalendar.calendar_toggle_frame(self , place)
-            
+        
+        except AttributeError:
+            pass  
+        
         except Exception as e:
             print(e)
             mb.showwarning("Error" , f"Ha habido un problema con las fechas {e}") 
@@ -490,19 +494,40 @@ class LoadInfo():
 
     def load_contacts(self , employee_id_sended , date): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
         
+        if str(employee_id_sended).isdigit():
+            pass
+        
+        else:
+            employee_id_sended = db.session.query(Employee).filter(Employee.employee_alias == employee_id_sended).first()
+            employee_id_sended = employee_id_sended.id_employee
+            #print(employee_id_sended)
+        
         if not date:
-            date = datetime.now()
+            date = datetime.now()    
             
-        print("load_contacts" , date)
+        #print("load_contacts" , date , type(date))
+        
+        try:
+            clear = self.info.get_children()
+            
+            for x in clear: 
+                self.info.delete(x)
+                print(f'Eliminado {x}')
+                
+        except Exception as e:
+            print(e)
         
         contacts = 0
-        clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == employee_id_sended)).all()
-        # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
+        clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == int(employee_id_sended))).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
+        
 
         for client in clients:
-            contact = db.session.query(Contact).filter(and_(Contact.contact_person_id == client.contact_person , Contact.next_contact <= date )).order_by(Contact.last_contact_date.desc()).group_by(Contact.contact_person_id).first()
-            self.info.insert("" , 0 , text = client.state , values = (LoadInfo.get_days(client) , client.name, contact.last_contact_date   , contact.next_contact , client.adress[-5:]))
-            contacts += 1
+            
+            contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.next_contact.desc()).first()
+            #print(contacts , contact.client_id , contact.next_contact)
+            if contact.next_contact <= str(date):
+                self.info.insert("" , 0 , text = client.state , values = (LoadInfo.get_days(client) , client.name, contact.last_contact_date   , contact.next_contact , client.adress[-5:]))
+                contacts += 1
                 
         self.contacts.set(f"Contactos: {contacts} ID: Empleado: {employee_id_sended}")
     
@@ -596,9 +621,9 @@ class GetInfo():
     def load_info_log(client_by_id , last_contact):
         
         try:
-            client = db.session.get(Client , client_by_id)
-            contact_person = db.session.get(ContactPerson , client.contact_person)
-            employee = db.session.get(Employee , client.employee_id)
+            comment = db.session.query(Contact).filter(Contact.last_contact_date == last_contact).first()
+            contact_person = db.session.get(ContactPerson , comment.contact_person_id)
+            employee = db.session.get(Employee , comment.contact_employee_id)
             return f"{datetime.strptime(last_contact, '%Y-%m-%d %H:%M').strftime('%d %B %Y %H:%M').title()} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}]"
             
         except Exception as e:

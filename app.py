@@ -62,7 +62,7 @@ class Main:
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
-        #self.info.bind("<ButtonRelease-1>" , lambda event: li.get_client_name(self , event))
+        self.info.bind("<ButtonRelease-1>" , lambda event: li.get_client_name(self , event))
         pw.login(self)
         
         
@@ -401,3 +401,4 @@ if __name__ == "__main__":
     app = Main(root)
     root.mainloop()
     
+Tengo que crear las fechas en los contacts con coherencia, si no no va a coincidir el último contacto de los logs con el del treeview
