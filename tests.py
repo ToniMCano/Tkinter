@@ -136,6 +136,7 @@ def contact():
             db.session.commit()
     db.session.close()
 
+
 def date(end = False):
     
     if end:
@@ -152,10 +153,9 @@ def date(end = False):
         
     if len(month) < 2:
         month =f"0{month}"
-        
-    
-        
+  
     return f"2024-{month}-{day}"
+     
         
 def load_contacts():
     contacts = db.session.query(Contact).filter(and_(Contact.company_state == "Contact" , Contact.contact_employee_id == 1 )).all()
@@ -164,9 +164,6 @@ def load_contacts():
         company_name = db.session.query(Client).filter(Client.contact_person == client.contact_person_id).first()
         print(company_name.name)
                
-#print ((str(datetime(2024,6,19 ) - datetime.now())[:3]))
-
-
 
 def test3():
     clientes = db.session.query(Client)
@@ -176,8 +173,7 @@ def test3():
         contactss = db.session.query(Contact).filter(Contact.contact_person_id == x.id_client ).all()
         for y in contactss:
             y.contact_counter = x.counter
-        
-
+            
 
 def load_comments():
         comments = db.session.query(Contact).filter(Contact.client_id == 1).order_by(Contact.last_contact_date.desc())
@@ -200,6 +196,7 @@ def index():
                         
     print (index , alias)
     
+    
 def muestra(): 
 
     excel = openpyxl.load_workbook("recursos/NACE.xlsx")
@@ -211,6 +208,6 @@ def muestra():
     print(nace[0])
 
 #datos_muestra()
-empleados()
+#empleados()
 #contact()
 #contacts()

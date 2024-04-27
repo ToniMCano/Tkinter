@@ -383,7 +383,7 @@ class MyCalendar():
         
         header_calendar = StringVar(value = "View")
         
-        label_calendar = tk.Label(frame , textvariable = header_calendar , bg = "black" , fg = "white")
+        label_calendar = tk.Label(frame , textvariable = header_calendar , bg = "dark slate gray" , fg = "white")
         
         label_calendar.pack(fill = "x" , expand = True)
         
@@ -468,7 +468,7 @@ class LoadInfo():
 
     
     def check_employee(root , employee_password , alias , window):
-        
+                
         employees =  db.session.query(Employee).all()
         exists = False
         
@@ -494,6 +494,10 @@ class LoadInfo():
 
     def load_contacts(self , employee_id_sended , date): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
         
+        bell = '◉'  # ASCII
+        dot = '🔔'
+        alert = ""
+        
         if str(employee_id_sended).isdigit():
             pass
         
@@ -508,28 +512,45 @@ class LoadInfo():
         #print("load_contacts" , date , type(date))
         
         try:
-            clear = self.info.get_children()
+            clean = self.info.get_children()
             
-            for x in clear: 
+            for x in clean: 
                 self.info.delete(x)
-                print(f'Eliminado {x}')
+                
                 
         except Exception as e:
             print(e)
         
         contacts = 0
         clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == int(employee_id_sended))).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
+        self.info.tag_configure("odd", background="snow3" )
+        self.info.tag_configure("even", background="white")
+        self.info.tag_configure("font_red", foreground="red")
         
-
-        for client in clients:
-            
+        #self.treeview.insert("", "end", text="Fila 3", tags=("odd",))
+        
+        for i , client in enumerate(clients):
+            if i % 2 == 0:
+                color= "odd"
+                
+            else:
+                color= "even"
+                
             contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.next_contact.desc()).first()
             #print(contacts , contact.client_id , contact.next_contact)
             if contact.next_contact <= str(date):
-                self.info.insert("" , 0 , text = client.state , values = (LoadInfo.get_days(client) , client.name, contact.last_contact_date   , contact.next_contact , client.adress[-5:]))
+                
+                if int(LoadInfo.get_days(client)) > 110:
+                    font = "font_red"
+                    
+                else:
+                    font = ""
+
+                self.info.insert("" , 0 , text = client.state , values = (LoadInfo.get_days(client) , client.name, contact.last_contact_date   , f'{contact.next_contact}' 
+ , client.adress[-5:]) , tags=(color, font) )
                 contacts += 1
                 
-        self.contacts.set(f"Contactos: {contacts} ID: Empleado: {employee_id_sended}")
+        self.contacts.set(f"Contactos: {contacts}")
     
     
     def get_days(client):
@@ -556,9 +577,12 @@ class LoadInfo():
             client_name = item['values'][1]
             
             GetInfo.load_client_info(tree , client_name)
-            
+        
+        except IndexError:
+            pass
+        
         except Exception as e:
-            print(e)
+            print(e , type(e))
             mb.showerror("Error en Get Client Name" ,  e)
         
         
@@ -604,10 +628,10 @@ class GetInfo():
         
         for i, comment in enumerate(comments):
             
-            log_frame = tk.Frame(frame_log , bg = "white" , height = 10 , bd = 1 , relief = "solid")
+            log_frame = customtkinter.CTkFrame(frame_log )
             log_frame.pack(fill = "x" , expand = True , pady = 2)
             
-            label_info = tk.Label(log_frame , text = f"{GetInfo.load_info_log(comment.client_id , comment.last_contact_date)}" , bg = "black" , fg = "white")
+            label_info = tk.Label(log_frame , text = f"{GetInfo.load_info_log(comment.client_id , comment.last_contact_date)}" , bg = "dark slate gray" , fg = "white")
             label_info.pack(fill = "x" , expand = True)
             
             label_content = tk.Label(log_frame , text = f"{comment.log}" , bg = "White")
@@ -615,8 +639,9 @@ class GetInfo():
             
             comments_counter += 1
             
-        self.company_id.set(f"ID:{client.id_client}")
-
+        self.company_id.set(f"ID Empresa: {client.id_client}")
+        self.active_employee_id.set(f"Responsable: {db.session.get(Employee , client.employee_id).employee_alias}")
+        print('client ID' , client.id_client)
         
     def load_info_log(client_by_id , last_contact):
         
