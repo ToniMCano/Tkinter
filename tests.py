@@ -100,9 +100,11 @@ def contacts():   # UN CONTACTO PARA CADA EMPRESA
     
     registro = []
     
-    for i , person in enumerate(range(150)):
+    clients = db.session.query(Client).all()
+    
+    for i , person in enumerate(clients):
                                                                                                                                                                                                       # added_by
-        contact = ContactPerson(f"Name{str(i+1)}" , f"Surname{str(i+1)}" , f"General Manager" , int(f"9{''.join(random.choices(nif , k = 8))}") , "" , f"contact{str(i+1)}@mail.com" , i+1 , "Notes" , 0 )        
+        contact = ContactPerson(f"Name{str(person.id_client)}" , f"Surname{str(person.id_client)}" , f"General Manager" , int(f"9{''.join(random.choices(nif , k = 8))}") , "" , f"contact{str(person.id_client)}@mail.com" , person.id_client , "Notes" , 0 )        
         try:
             db.session.add(contact)
             db.session.commit()
@@ -128,33 +130,47 @@ def empleados():
 
  
 def contact(): 
-        
-    for i , company in enumerate(range(150)):
-        for contact in range(25):
-            contact_random = Contact(company_state = "Contact" , last_contact_date = f"{date()} {str(random.randint(8,19))}:00" , next_contact = f"{date(True)} {str(random.randint(8,19))}:00"  , log =  "No localizado, estará a parir de las 16:00" ,client_id =  i+1 , contact_counter = random.randint(0,3) , contact_employee_id = random.randint(1,3) , contact_person_id =  i+1)
-            db.session.add(contact_random)
-            db.session.commit()
+    
+    clients = db.session.query(Client).all()
+    last , next = date()
+    
+    for company in clients:
+            
+        if company.state == "Contact":
+            print(company.state , company.id_client)
+            for i, contact in enumerate(range(25)):
+                print(contact)
+                contact_random = Contact(company_state = company.state, last_contact_date = f"{last[i]} {str(random.randint(8,19))}:00" , next_contact = f"{next[i]} {str(random.randint(8,19))}:00"  , log =  "No localizado, estará a parir de las 16:00" ,client_id =  company.id_client , contact_counter = 1 , contact_employee_id = company.employee_id , contact_person_id =  company.contact_person)
+            
+                db.session.add(contact_random)
+                db.session.commit()
+    
     db.session.close()
 
 
-def date(end = False):
+def date():
     
-    if end:
-        day = str(random.randint(15 , 30))
-        month = str(random.randint(1 , 12))
+    last = []
+    next = []
+    
+    for x in range(25):
         
-    else:
         day = str(random.randint(1 , 15))
         month = str(random.randint(1 , 4))
-    
-    
-    if len(day) < 2:
-        day =f"0{day}"
         
-    if len(month) < 2:
+        if len(day) < 2:
+            day =f"0{day}"
+            
         month =f"0{month}"
-  
-    return f"2024-{month}-{day}"
+        
+        last.append(f"2024-{month}-{day}")
+        
+        day = str(random.randint(15 , 30))
+        
+        next.append(f"2024-{month}-{day}")
+        
+        
+    return last , next
      
         
 def load_contacts():
@@ -209,5 +225,5 @@ def muestra():
 
 #datos_muestra()
 #empleados()
-#contact()
+contact()
 #contacts()

@@ -526,6 +526,9 @@ class LoadInfo():
         self.info.tag_configure("odd", background="snow3" )
         self.info.tag_configure("even", background="white")
         self.info.tag_configure("font_red", foreground="red")
+        scrollbar = ttk.Scrollbar(self.frame_tree, orient="vertical", command=self.info.yview)
+        scrollbar.grid(row = 0, column = 1 , sticky = "ns")
+        self.info.configure(yscroll=scrollbar.set)
         
         #self.treeview.insert("", "end", text="Fila 3", tags=("odd",))
         
@@ -536,7 +539,7 @@ class LoadInfo():
             else:
                 color= "even"
                 
-            contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.next_contact.desc()).first()
+            contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first()
             #print(contacts , contact.client_id , contact.next_contact)
             if contact.next_contact <= str(date):
                 
@@ -621,12 +624,12 @@ class GetInfo():
             
         except UnboundLocalError:
             print("NOT destroyed")
-
+        #contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date).first()
         client = db.session.query(Client).filter(Client.nif == nif).first()
         comments = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).all()
         comments_counter = 0
         
-        for i, comment in enumerate(comments):
+        for comment in comments:
             
             log_frame = customtkinter.CTkFrame(frame_log )
             log_frame.pack(fill = "x" , expand = True , pady = 2)
@@ -642,6 +645,7 @@ class GetInfo():
         self.company_id.set(f"ID Empresa: {client.id_client}")
         self.active_employee_id.set(f"Responsable: {db.session.get(Employee , client.employee_id).employee_alias}")
         print('client ID' , client.id_client)
+        
         
     def load_info_log(client_by_id , last_contact):
         
