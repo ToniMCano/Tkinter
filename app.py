@@ -26,7 +26,7 @@ class Main:
         self.ventana_principal.title("MyCRM")
         self.ventana_principal.resizable(1,1)
         self.ventana_principal.geometry('1200x800')
-        self.ventana_principal.configure(bg="azure") 
+        self.ventana_principal.configure(bg="#f4f4f4") 
         pw.center_window(self, self.ventana_principal)
         
         
@@ -49,12 +49,12 @@ class Main:
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
         
         self.info["columns"] = ( "#0" , "#1" , "#2" , "#3" ,  "#4")
-        self.info.heading("#0" , text = "Estado" , command = lambda: self.on_heading_click("state"))
-        self.info.heading("#1" , text = "Días" , command = lambda: self.on_heading_click("client"))
-        self.info.heading("#2" , text  ="Cliente" , command = lambda: self.on_heading_click("last_contact"))
-        self.info.heading("#3" , text = "Último Contacto" , command = lambda: self.on_heading_click("amount"))
-        self.info.heading("#4" , text = "Próximo Contacto" , command = lambda: self.on_heading_click("days_contact"))
-        self.info.heading("#5" , text = "Código Postal" , command = lambda: self.on_heading_click("percentage"))
+        self.info.heading("#0" , text = "Estado" , command = lambda: li.on_heading_click(self , "state"))
+        self.info.heading("#1" , text = "Días" , command = lambda: li.on_heading_click(self , "days"))
+        self.info.heading("#2" , text  ="Cliente" , command = lambda: li.on_heading_click(self , "client"))
+        self.info.heading("#3" , text = "Último Contacto" , command = lambda: li.on_heading_click(self , "last_contact"))
+        self.info.heading("#4" , text = "Próximo Contacto" , command = lambda: li.on_heading_click(self , "next_contact"))
+        self.info.heading("#5" , text = "Código Postal" , command = lambda: li.on_heading_click(self , "postal_code"))
         
         self.info.column("#0" , width = 35 , anchor="center")
         self.info.column("#1" , width = 10 , anchor="center")
@@ -68,6 +68,8 @@ class Main:
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
         self.info.bind("<ButtonRelease-1>" , lambda event: li.get_client_name(self , event))
+        self.active_employee_id = StringVar()
+        self.fecha = StringVar()
         pw.login(self)
         
         
@@ -114,8 +116,6 @@ class Main:
 
         self.combo_state = ttk.Combobox(self.header ,state = "readonly",values=["Lead", "Candidate", "Contact" , 'All'] , width= 10)
         self.combo_state.configure(background='lightblue')
-        
-
         self.combo_state.grid(row = 0 , column = 4 , padx = 5)
         self.combo_state.bind("<<ComboboxSelected>>" , self.companies_state)
 
@@ -123,7 +123,6 @@ class Main:
         
         # Crear un Frame que se mostrará/ocultará self.frame_button
         self.frame_calendar = tk.Frame(self.ventana_principal , highlightbackground = 'LightBlue4' , highlightthickness = 1)
-        self.fecha = StringVar()
         mc.calendar(self , "general" , self.fecha)
         self.frame_calendar_next = tk.Frame(self.ventana_principal , highlightbackground = 'LightBlue4' , highlightthickness = 1)
         mc.calendar(self  , "next")
@@ -151,7 +150,7 @@ class Main:
 
         # AÑADIR CONTACTOS DESDE POOL
         
-        self.new_company = ttk.Button(self.header , text = 'Add Company' , command = lambda: pw.new_company()) 
+        self.new_company = ttk.Button(self.header , text = 'Add Company' , command = lambda: pw.new_company(self)) 
         #self.new_company.config(height = 47, width = 47)
         self.new_company.grid(row = 0 , column = 0 , padx = 5) 
         
@@ -177,7 +176,7 @@ class Main:
         
         self.text_log =Text(self.frame_log)
         self.text_log.config(height = 3 , width = 80)
-        self.text_log.grid(row = 1 , column = 1, rowspan = 2 , sticky = W+E, padx = 5)
+        self.text_log.grid(row = 1 , column = 1, rowspan = 2 , sticky = 'nswe', padx = 5 , pady = 2)
         
         self.next_contact = ttk.Button(self.frame_log , text = "Next Contact" , command = lambda: mc.calendar_toggle_frame(self , "next"))
         self.next_contact.config(cursor = 'arrow')
@@ -203,13 +202,13 @@ class Main:
         
         # FRAME EMPRESA
         
-        self.frame_company = CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = 'azure4') 
-        self.frame_company.grid(row = 1 , column = 5 , sticky = "nswe" , columnspan = 4, rowspan = 2) 
+        self.frame_company = CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray") 
+        self.frame_company.grid(row = 1 , column = 5 , sticky = "nswe" , columnspan = 4, rowspan = 2 , padx = 5) 
         
         self.frame_company.grid_columnconfigure(1, weight=1)
         self.frame_company.grid_columnconfigure(0, weight=1)
         
-        self.header_company = CTkLabel(self.frame_company, text="Empresa", bg_color='LightBlue4')
+        self.header_company = CTkLabel(self.frame_company, text="Empresa", bg_color='LightBlue4' , text_color = "white")
         self.header_company.grid(row = 0 , column = 0 , columnspan = 3  , sticky=W+E)
         
         self.margin_frame_company = ttk.Frame(self.frame_company) 
@@ -290,8 +289,8 @@ class Main:
         
         #FRAME CONTACTO
         
-        self.contact_frame = CTkFrame(self.ventana_principal , border_width = 1 , border_color = "azure4" , fg_color= "azure") 
-        self.contact_frame.grid(row = 3 , column = 5 , columnspan=2 , rowspan = 2 , pady = 5 ,  sticky='nsew')
+        self.contact_frame = CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray" ) 
+        self.contact_frame.grid(row = 3 , column = 5 , columnspan=2 , rowspan = 2 , pady = 5 ,  padx = 5 , sticky='nsew')
         
         self.contact_frame.grid_columnconfigure(1, weight=1)
         self.contact_frame.grid_columnconfigure(0, weight=1)
@@ -302,16 +301,14 @@ class Main:
         
         self.new_contact = ttk.Button(self.contact_header , text = "+"  ,  command = lambda: pw.create_contact(self))
         self.new_contact.config(cursor = 'arrow')
-        #self.new_contact.config(height=1 , padx=1 , pady = 1)
         self.new_contact.pack(side = "right")
         
         self.other_contact = ttk.Button(self.contact_header , image = self.triangle_icon)
         self.other_contact.config(cursor = 'arrow')
-        #self.other_contact.config(height=9 , padx=5)
         self.other_contact.pack(side = "left" , fill = "y")
         
         self.margin_frame_contact = tk.Frame(self.contact_frame) 
-        self.margin_frame_contact.configure(bg = 'azure')
+        self.margin_frame_contact.configure(bg = "#f4f4f4")
         self.margin_frame_contact.grid(row = 1, column = 0 , sticky = "nswe" , columnspan = 4, rowspan = 2 ,padx = 5 , pady = 5) 
         self.margin_frame_contact.grid_columnconfigure(1, weight=1)
         self.margin_frame_contact.grid_columnconfigure(0, weight=1)
@@ -369,21 +366,16 @@ class Main:
         
         self.notes = Text(self.contact_frame)
         self.notes.config(height = 3)
-        self.notes.grid(row = 7, column = 0 , rowspan = 2 , columnspan = 2 , sticky = 'nswe' , padx = 5 , pady = 2)
+        self.notes.grid(row = 8, column = 0  , columnspan = 2 , sticky = 'we' , padx = 5 , pady = 2)
         
         self.company_id = StringVar()
         self.lcontact_label_bottom = Label(self.contact_frame , textvariable = self.company_id, bg = 'LightBlue4' , fg = 'white')
         self.lcontact_label_bottom.grid(row = 9 , column = 0 , sticky = W+E)
 
-        self.active_employee_id = StringVar()
+        
         self.rcontact_label_bottom = Label(self.contact_frame , textvariable = self.active_employee_id , bg = 'LightBlue4' , fg = 'white')
         self.rcontact_label_bottom.grid(row = 9 , column = 1 , sticky = W+E)
-            
-        
-        
-    def on_heading_click(self , e):
-        
-        print(f"funciona {e}")
+
 
         
     def capturar(self):

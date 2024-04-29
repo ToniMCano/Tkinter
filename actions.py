@@ -12,7 +12,7 @@ from datetime import datetime
 #import locale
 from tkinter import messagebox as mb
 import os
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError , SQLAlchemyError
 import customtkinter
 
 #locale.setlocale(locale.LC_ALL, '')   Si uso Locale customtkinter da problemas.  ----- "TO-DO"
@@ -37,7 +37,7 @@ class Pops:
                 
         login_window = Toplevel()
         login_window.title("Login")
-        login_window.configure(bg="azure") 
+        login_window.configure(bg="#f4f4f4") 
         
         login_window.grid_columnconfigure(0 , weight = 1)
         
@@ -69,7 +69,7 @@ class Pops:
         frame = tk.Toplevel()
         frame.title("New Contact")
         frame.geometry("600x180")   
-        frame.configure(bg = 'azure')
+        frame.configure(bg = "#f4f4f4")
         frame.grid_columnconfigure(0 , weight = 1)
         
         Pops.center_window(Pops , frame)
@@ -121,7 +121,7 @@ class Pops:
         save_button.grid(row = 6 , column = 0 , columnspan = 2 , padx = 200 , pady = 5 , sticky = W+E)
         
         
-    def new_company(data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección: " : ""  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}):
+    def new_company(self, data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección: " : ""  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}):
     
         #load_image= Image.open("recursos/upload.png")
         #load_image.resize((6,6))
@@ -129,11 +129,11 @@ class Pops:
 
         add_company_frame = Toplevel()
         add_company_frame.title("Add Company")
-        add_company_frame.configure(bg = 'azure')
+        add_company_frame.configure(bg = "#f4f4f4")
         add_company_frame.grid_columnconfigure(0 , weight = 1)
         
         files_frame = tk.Frame(add_company_frame)
-        files_frame.configure(bg = 'azure')
+        files_frame.configure(bg = "#f4f4f4")
         files_frame.grid(row = 0 , column = 0 , columnspan = 2 , sticky = W+E)
         files_frame.grid_columnconfigure(0, weight=1)
         
@@ -294,7 +294,7 @@ class Pops:
         entry_mobile = ttk.Entry(frame_contact_person)
         entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
         
-        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: AddInfo.test_add_company(add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}, {company_street_number.get() } {company_street_floor.get()} {company_city_entry.get()}, ({company_province_entry.get()}) {company_postal_code_entry.get()}"  , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
+        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: AddInfo.test_add_company(self , add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}, {company_street_number.get() } {company_street_floor.get()} {company_city_entry.get()}, ({company_province_entry.get()})" , "Código Postal": company_postal_code_entry.get() , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
         save_company_button.grid(row = 5 , column = 0 , pady = 10)
         
         Pops.center_window(Pops , add_company_frame)
@@ -304,7 +304,7 @@ class Pops:
         
         show = Toplevel()
         show.title("Se ha creado una nueva Empresa") 
-        show.configure(bg = 'azure')
+        show.configure(bg = "#f4f4f4")
         show.resizable(0,0)
 
         
@@ -392,7 +392,7 @@ class MyCalendar():
         
         label_calendar.pack(fill = "x" , expand = True)
         
-        frame.calendar = Calendar(frame , selectedmode = "day" , date_pattern = "yyyy-mm-dd") # Para poder ordenarlo en la DB "YYYY-MM-DD"
+        frame.calendar = Calendar(frame , selectedmode = "day" , date_pattern = "yyyy-mm-dd" , selectbackground = 'LightBlue4') # Para poder ordenarlo en la DB "YYYY-MM-DD"
         frame.calendar.pack()
         
         if place == "general":
@@ -483,7 +483,7 @@ class LoadInfo():
                 exists = True
                 window.destroy()
                 
-                LoadInfo.load_contacts(root , employee.id_employee , date = datetime.now())
+                LoadInfo.load_contacts(root , employee.id_employee , date = datetime.now() , query = Contact.last_contact_date.desc())
                 print(f" Empleado {employee.id_employee}")
                 
                 alias = GetInfo.employees_list().index(alias)
@@ -491,13 +491,36 @@ class LoadInfo():
                 root.employee.current(newindex = alias)
                 root.combo_state.current(newindex=2)
                 
+                root.active_employee_id.set(employee.id_employee)
+                
                
         if not exists:
             mb.showwarning("Login Error" , "El usuario o la contraseña no son correctos")
             window.lift()
 
+    
+    
+    def on_heading_click(self , q):
+        
+        if q == 'state':
+            q = Client.state
+        elif q == 'days':
+            q = Contact.last_contact_date
+        elif q == 'client':
+            q = Client.name
+        elif q == 'last_contact':
+            q = Contact.last_contact_date
+        elif q == 'next_contact':
+            q = Contact.next_contact
+        elif q == 'postal_code':
+            q = Client.postal_code 
+        
+        employee_id = self.active_employee_id.get()
+        
+        LoadInfo.load_contacts(self , employee_id[-1] , self.fecha.get() , q)
 
-    def load_contacts(self , employee_id_sended , date): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
+
+    def load_contacts(self , employee_id_sended , date , query): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
         
         bell = '◉'  # ASCII
         dot = '🔔'
@@ -527,8 +550,9 @@ class LoadInfo():
             print(e)
         
         contacts = 0
+        bgcolor = 0
         clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == int(employee_id_sended))).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
-        self.info.tag_configure("odd", background="snow3" )
+        self.info.tag_configure("odd", background="lightgray" )
         self.info.tag_configure("even", background="white")
         self.info.tag_configure("font_red", foreground="red")
         scrollbar = ttk.Scrollbar(self.frame_tree, orient="vertical", command=self.info.yview)
@@ -538,25 +562,31 @@ class LoadInfo():
         #self.treeview.insert("", "end", text="Fila 3", tags=("odd",))
         
         for i , client in enumerate(clients):
-            if i % 2 == 0:
-                color= "odd"
-                
-            else:
-                color= "even"
-                
-            contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first()
-            #print(contacts , contact.client_id , contact.next_contact)
+            
+             # ALERT #######################EL fallo lo proboca que no puedo ordenar por cliente si la consulta es de Contact.
+             reparar la entrada manual de empesas
+           
+            contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(query).first()
+            
             if contact.next_contact <= str(date):
+                
                 
                 if int(LoadInfo.get_days(client)) > 110:
                     font = "font_red"
                     
                 else:
                     font = ""
+                
+                if bgcolor % 2 == 0:
+                    color= "odd"
+                
+                else:
+                    color= "even"
 
                 self.info.insert("" , 0 , text = client.state , values = (LoadInfo.get_days(client) , client.name, contact.last_contact_date   , f'{contact.next_contact}' 
- , client.adress[-5:]) , tags=(color, font) )
+ , client.postal_code) , tags=(color, font) )
                 contacts += 1
+                bgcolor += 1
                 
         self.contacts.set(f"Contactos: {contacts}")
     
@@ -648,7 +678,7 @@ class GetInfo():
             comments_counter += 1
             
         self.company_id.set(f"ID Empresa: {client.id_client}")
-        self.active_employee_id.set(f"Responsable: {db.session.get(Employee , client.employee_id).employee_alias}")
+        self.active_employee_id.set(client.employee_id)
         print('client ID' , client.id_client)
         
 
@@ -676,7 +706,7 @@ class GetInfo():
         tree.entry_nif.insert(0, client.nif)
         
         tree.entry_adress.delete(0 , END)
-        tree.entry_adress.insert(0 , client.adress)
+        tree.entry_adress.insert(0 , client.adress + str(client.postal_code))
         
         tree.entry_activity.current(newindex = Pops.current_combo(client.activity , LoadInfo.nace_list()))
         
@@ -730,7 +760,7 @@ class GetInfo():
         
 class AddInfo():
     
-    def test_add_company(add_company_frame , data):
+    def test_add_company(self , add_company_frame , data):
         
         nif_check = ['a','b','c','e','f','g','h','j','p','q','r','s','u','v' , 'w' , 'n']
 
@@ -745,7 +775,7 @@ class AddInfo():
                         if (str(data['Teléfono Contacto: ']).isdigit() and len(data['Teléfono Contacto: ']) == 9)  and (str(data["Teléfono Empresa: "]).isdigit() and len(data["Teléfono Empresa: "]) == 9):
                 
                         
-                            AddInfo.add_company(data , add_company_frame)
+                            AddInfo.add_company(self , data , add_company_frame)
                         
                         else:
                             mb.showwarning("Teléfono" , f"El formato del Teléfono no es correcto, comprueba Teléfono Empras y Teléfono Contacto.")
@@ -787,14 +817,14 @@ class AddInfo():
             Pops.new_company(data)
       
     
-    def add_company(data , add_company_frame , employee_adder = 0 , company_to_add = 0):
+    def add_company(self, data , add_company_frame , employee_adder = 0 , company_to_add = 0):
         
         
         try:
             
             vcontact_person = AddInfo.add_contact(data , employee_adder)
             
-            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , active_employee , "Pool", data["Empleados: "])
+            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , self.active_employee_id.get()  , "Pool", data["Empleados: "])
             vcontact_person.client_id = vcontact_person.id_person
             
             db.session.add(company)
@@ -813,13 +843,17 @@ class AddInfo():
             
             if isinstance(e, IntegrityError):
                 print(e)
-                db.session.close()
                 mb.showerror("Error de Integridad" , f"La empresa ya existe, el Nombre o el N.I.F. ya existen en la Base de Datos.")
                 
             else:
                 print(e)
                 mb.showerror("Ha ocurrido un error inesperado" , f"{e}")
+                
+            db.session.delete(vcontact_person.id_person)
+            db.session.close()
+            
             add_company_frame.destroy()    
+            
             Pops.new_company(data)
  
             

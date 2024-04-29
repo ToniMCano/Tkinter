@@ -44,6 +44,7 @@ class Client(Base):                                                      # Defin
     name = Column(String , nullable = False , unique = True)
     nif = Column(String , unique = True)
     adress = Column(String , nullable = False)
+    postal_code = Column(Integer , nullable = False)
     web = Column(String)
     mail = Column(String , nullable = False)
     phone = Column(Integer , nullable = False)
@@ -58,12 +59,13 @@ class Client(Base):                                                      # Defin
     created_by = Column(Integer , ForeignKey("employee.id_employee")) # Persona que añadió la empresa.
     
     
-    def __init__(self , name , nif , adress , web , mail , phone , phone2 , activity , contact_person , employee_id = 0 , state = "Terminated" , number_of_employees = "1" , start_contact_date = "" , counter = 0 , created_by = 0): # Creamos el constructor para capturar los valores de cada 
+    def __init__(self , name , nif , adress , postal_code , web , mail , phone , phone2 , activity , contact_person , employee_id = 0 , state = "Terminated" , number_of_employees = "1" , start_contact_date = "" , counter = 0 , created_by = 0): # Creamos el constructor para capturar los valores de cada 
                                                                                                                               # columna el id se autogenera, por eso no lo incluimos
         
         self.name = name
         self.nif = nif
         self.adress = adress
+        self.postal_code = postal_code
         self.web = web
         self.mail = mail
         self.phone = phone
@@ -79,7 +81,7 @@ class Client(Base):                                                      # Defin
         
     
     def __str__(self):
-        return f"Se ha creado el Cliente:\nNombre: {self.name}\nN.I.F: {self.nif}\nDirección: {self.adress}\nWeb: {self.web}\nMail: {self.mail}\nTeléfono: {self.phone}\nOtro Teléfono: {self.phone2}\nActividad: {self.activity}\nPresona de contacto: {self.contact_person}\nEstado: {self.name}\nEmpleado al cargo: {self.employee_id}"
+        return f"{self.postal_code} - Se ha creado el Cliente:\nNombre: {self.name}\nN.I.F: {self.nif}\nDirección: {self.adress}\nWeb: {self.web}\nMail: {self.mail}\nTeléfono: {self.phone}\nOtro Teléfono: {self.phone2}\nActividad: {self.activity}\nPresona de contacto: {self.contact_person}\nEstado: {self.name}\nEmpleado al cargo: {self.employee_id}"
     
     
     

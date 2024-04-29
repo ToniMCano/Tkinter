@@ -46,9 +46,10 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
             start = start_date()
             row.append("Company".lower() + str(alias))
             row.append(random.choice(nif_check).capitalize() + "".join(random.choices(nif , k=8)))
-            row.append(f"adress{str(alias)},{str(alias)} {str(random.randint(1,20))} - {random.choice(nif_check).capitalize()}  City{str(alias)}, (Province{str(alias)}) {''.join(random.choices(nif , k = 5))}")
+            row.append(f"adress{str(alias)},{str(alias)} {str(random.randint(1,20))} - {random.choice(nif_check).capitalize()}  City{str(alias)}, (Province{str(alias)})")
+            row.append(''.join(random.choices(nif , k = 5)))
             row.append(f"www.web{str(alias)}.com")  
-            row.append(f"{row[0]}@{row[3][4:]}")
+            row.append(f"{row[0]}@{row[4][4:]}")
             row.append(int("9" + ''.join(random.choices(nif , k = 8)) )) 
             row.append("")
             row.append(random.choice(nace))
@@ -225,5 +226,8 @@ def muestra():
 
 #datos_muestra()
 #empleados()
-contact()
+#contact()
 #contacts()
+
+aver = db.session.query(Client).filter(Client.id_client == 5).first()
+print(aver)
