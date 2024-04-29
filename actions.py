@@ -37,6 +37,7 @@ class Pops:
                 
         login_window = Toplevel()
         login_window.title("Login")
+        login_window.configure(bg="azure") 
         
         login_window.grid_columnconfigure(0 , weight = 1)
         
@@ -68,6 +69,7 @@ class Pops:
         frame = tk.Toplevel()
         frame.title("New Contact")
         frame.geometry("600x180")   
+        frame.configure(bg = 'azure')
         frame.grid_columnconfigure(0 , weight = 1)
         
         Pops.center_window(Pops , frame)
@@ -127,9 +129,11 @@ class Pops:
 
         add_company_frame = Toplevel()
         add_company_frame.title("Add Company")
+        add_company_frame.configure(bg = 'azure')
         add_company_frame.grid_columnconfigure(0 , weight = 1)
         
         files_frame = tk.Frame(add_company_frame)
+        files_frame.configure(bg = 'azure')
         files_frame.grid(row = 0 , column = 0 , columnspan = 2 , sticky = W+E)
         files_frame.grid_columnconfigure(0, weight=1)
         
@@ -300,6 +304,7 @@ class Pops:
         
         show = Toplevel()
         show.title("Se ha creado una nueva Empresa") 
+        show.configure(bg = 'azure')
         show.resizable(0,0)
 
         
@@ -383,7 +388,7 @@ class MyCalendar():
         
         header_calendar = StringVar(value = "View")
         
-        label_calendar = tk.Label(frame , textvariable = header_calendar , bg = "dark slate gray" , fg = "white")
+        label_calendar = tk.Label(frame , textvariable = header_calendar , bg = 'LightBlue4' , fg = "white")
         
         label_calendar.pack(fill = "x" , expand = True)
         
@@ -615,7 +620,7 @@ class GetInfo():
     
     def load_comments(self , nif):
         
-        frame_log = customtkinter.CTkScrollableFrame(self.frame_tree, fg_color = "lightgrey")
+        frame_log = customtkinter.CTkScrollableFrame(self.frame_tree, fg_color = "lightgray")
         frame_log.grid(row = 3 , pady = 5 , padx = 3 , sticky = 'nsew')
         
         try:
@@ -631,10 +636,10 @@ class GetInfo():
         
         for comment in comments:
             
-            log_frame = customtkinter.CTkFrame(frame_log )
+            log_frame = ttk.Frame(frame_log )
             log_frame.pack(fill = "x" , expand = True , pady = 2)
             
-            label_info = tk.Label(log_frame , text = f"{GetInfo.load_info_log(comment.client_id , comment.last_contact_date)}" , bg = "dark slate gray" , fg = "white")
+            label_info = tk.Label(log_frame , text = f"{GetInfo.load_info_log(comment.client_id , comment.last_contact_date)}" , bg = 'LightBlue4' , fg = "white")
             label_info.pack(fill = "x" , expand = True)
             
             label_content = tk.Label(log_frame , text = f"{comment.log}" , bg = "White")
@@ -646,7 +651,7 @@ class GetInfo():
         self.active_employee_id.set(f"Responsable: {db.session.get(Employee , client.employee_id).employee_alias}")
         print('client ID' , client.id_client)
         
-        
+
     def load_info_log(client_by_id , last_contact):
         
         try:
