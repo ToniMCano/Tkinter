@@ -501,33 +501,40 @@ class LoadInfo():
 
     
     
-    def on_heading_click(self , q):
+    def on_heading_click(self , query):
         
-        if q == 'state':
-            q = Client.state
-        elif q == 'days':
-            q = Contact.last_contact_date
-        elif q == 'client':
-            q = Client.name
-        elif q == 'last_contact':
-            q = Contact.last_contact_date
-        elif q == 'next_contact':
-            q = Contact.next_contact
-        elif q == 'postal_code':
-            q = Client.postal_code 
+        if query == 'state':
+            query = "estado"
+        elif query == 'days':
+            query = "días"
+        elif query == 'client':
+            query = "nombre"
+        elif query == 'last_contact':
+            query = "último"
+        elif query == 'next_contact':
+            query = "próximo"
+        elif query == 'postal_code':
+            query = 'cp'
         
         employee_id = self.active_employee_id.get()
+        date = datetime.strptime(self.fecha.get() + f' {datetime.now().year}' , '%d %B %Y')
         
-        LoadInfo.load_contacts(self , employee_id[-1] , self.fecha.get() , q)
+        LoadInfo.load_contacts(self , employee_id , date , query)
+        
 
 
-    def load_contacts(self , employee_id_sended , date): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
+    def load_contacts(self , employee_id_sended , date , query = 'último'): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
         
         bell = '◉'  # ASCII
         dot = '🔔'
         alert = ""
         dataframe = {"estado" : [] , "días" : [] , "nombre" : [] , "último" : [] , "próximo" : [] , "cp" : []}
+        pd_filter = query
+        ascending_value = False
         
+        if query == "días":
+            ascending_value = True
+            
         if str(employee_id_sended).isdigit():
             pass
         
@@ -559,7 +566,7 @@ class LoadInfo():
   
         for i , client in enumerate(clients):
             
-            contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.next_contact.desc()).first()
+            contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first()
             
             dataframe["estado"].append(client.state)
             dataframe["días"].append(LoadInfo.get_days(client))
@@ -569,12 +576,12 @@ class LoadInfo():
             dataframe["cp"].append(client.postal_code)  
             
             oredenado = pd.DataFrame(dataframe)
-            ordenado = oredenado.sort_values(by = ["cp"])
+            ordenado = oredenado.sort_values(by = pd_filter , ascending = ascending_value)
             ordenado = ordenado.reset_index(drop = True)
             
         for i , client in enumerate(clients):
   
-            if ordenado.at[i, 'próximo'][:10] <= str(date)[:10]:               
+            if ordenado.at[i, 'próximo'] <= str(date)[:10] + "23:59":               
               
                 if int(ordenado.at[i, 'días']) > 110:
                     font = "font_red"

@@ -313,6 +313,25 @@ def load_contacts(): # last_gestion =db.session.query(func.max(Contact.contact_c
     print(ordenado)
     print(ordenado.iat[0,-1])
     print(len(ordenado))
+
+
     
+print(datetime(2024,5,1,9,0))
     
-load_contacts()
+print('2024-04-30 9:00' , len ('2024-04-30 9:00'))
+print(('2024-04-30 9:00').replace(" " , " 0"))
+
+replace_date = db.session.query(Contact).all()
+
+for new in replace_date:
+    if len(new.next_contact) == 15:
+        print(new.next_contact)
+        new.next_contact = new.next_contact.replace(" " , " 0")
+        print(new.next_contact)
+        
+    if len(new.last_contact_date) == 15:
+        print(new.last_contact_date)
+        new.last_contact_date = new.last_contact_date.replace(" " , " 0")
+        print(new.last_contact_date)
+db.session.commit()
+db.session.close()
