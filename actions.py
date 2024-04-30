@@ -14,6 +14,7 @@ from tkinter import messagebox as mb
 import os
 from sqlalchemy.exc import IntegrityError , SQLAlchemyError
 import customtkinter
+import pandas as pd
 
 #locale.setlocale(locale.LC_ALL, '')   Si uso Locale customtkinter da problemas.  ----- "TO-DO"
  
@@ -483,7 +484,7 @@ class LoadInfo():
                 exists = True
                 window.destroy()
                 
-                LoadInfo.load_contacts(root , employee.id_employee , date = datetime.now() , query = Contact.last_contact_date.desc())
+                LoadInfo.load_contacts(root , employee.id_employee , date = datetime.now())
                 print(f" Empleado {employee.id_employee}")
                 
                 alias = GetInfo.employees_list().index(alias)
@@ -520,11 +521,12 @@ class LoadInfo():
         LoadInfo.load_contacts(self , employee_id[-1] , self.fecha.get() , q)
 
 
-    def load_contacts(self , employee_id_sended , date , query): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
+    def load_contacts(self , employee_id_sended , date): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
         
         bell = '◉'  # ASCII
         dot = '🔔'
         alert = ""
+        dataframe = {"estado" : [] , "días" : [] , "nombre" : [] , "último" : [] , "próximo" : [] , "cp" : []}
         
         if str(employee_id_sended).isdigit():
             pass
@@ -532,20 +534,16 @@ class LoadInfo():
         else:
             employee_id_sended = db.session.query(Employee).filter(Employee.employee_alias == employee_id_sended).first()
             employee_id_sended = employee_id_sended.id_employee
-            #print(employee_id_sended)
-        
+
         if not date:
-            date = datetime.now()    
-            
-        #print("load_contacts" , date , type(date))
-        
+            date = str(datetime.now()) + " 23:59"    
+
         try:
             clean = self.info.get_children()
             
             for x in clean: 
                 self.info.delete(x)
-                
-                
+                        
         except Exception as e:
             print(e)
         
@@ -558,20 +556,27 @@ class LoadInfo():
         scrollbar = ttk.Scrollbar(self.frame_tree, orient="vertical", command=self.info.yview)
         scrollbar.grid(row = 0, column = 1 , sticky = "ns")
         self.info.configure(yscroll=scrollbar.set)
-        
-        #self.treeview.insert("", "end", text="Fila 3", tags=("odd",))
-        
+  
         for i , client in enumerate(clients):
             
-             # ALERT #######################EL fallo lo proboca que no puedo ordenar por cliente si la consulta es de Contact.
-             reparar la entrada manual de empesas
-           
-            contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(query).first()
+            contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.next_contact.desc()).first()
             
-            if contact.next_contact <= str(date):
-                
-                
-                if int(LoadInfo.get_days(client)) > 110:
+            dataframe["estado"].append(client.state)
+            dataframe["días"].append(LoadInfo.get_days(client))
+            dataframe["nombre"].append(client.name)
+            dataframe["último"].append(contact.last_contact_date)
+            dataframe["próximo"].append(f'{contact.next_contact}')
+            dataframe["cp"].append(client.postal_code)  
+            
+            oredenado = pd.DataFrame(dataframe)
+            ordenado = oredenado.sort_values(by = ["cp"])
+            ordenado = ordenado.reset_index(drop = True)
+            
+        for i , client in enumerate(clients):
+  
+            if ordenado.at[i, 'próximo'][:10] <= str(date)[:10]:               
+              
+                if int(ordenado.at[i, 'días']) > 110:
                     font = "font_red"
                     
                 else:
@@ -583,12 +588,12 @@ class LoadInfo():
                 else:
                     color= "even"
 
-                self.info.insert("" , 0 , text = client.state , values = (LoadInfo.get_days(client) , client.name, contact.last_contact_date   , f'{contact.next_contact}' 
- , client.postal_code) , tags=(color, font) )
+                self.info.insert("" , 0 , text = ordenado.at[i, 'estado'] , values = (ordenado.at[i, 'días'] , ordenado.at[i, 'nombre'] , ordenado.at[i, 'último'] , ordenado.at[i, 'próximo'] , ordenado.at[i, 'cp']) , tags=(color, font) )
                 contacts += 1
                 bgcolor += 1
                 
         self.contacts.set(f"Contactos: {contacts}")
+        print(ordenado)
     
     
     def get_days(client):
