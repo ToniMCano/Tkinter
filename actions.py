@@ -412,7 +412,7 @@ class MyCalendar():
             hour.current(newindex = 0)
             hour.config(justify=CENTER)
             hour.pack(fill = "x" , expand = True , anchor = "center")
-            send = ttk.Button(frame , text = "Save" , command = lambda: MyCalendar.format_date(self , place , hour = hour.get()) )
+            send = ttk.Button(frame , text = "Save" , command = lambda: AddInfo.add_log(self , hour , frame.calendar.get_date()))#lambda: MyCalendar.format_date(self , place , hour = hour.get()) )
             send.pack(pady = 5)
             
 
@@ -459,7 +459,7 @@ class MyCalendar():
                 frame = self.frame_calendar 
             
             elif place == "next":
-                frame = self.frame_calendar_next 
+                frame = self.frame_calendar_next
             
             elif place == "pop":
                 frame = self.frame_calendar_pop 
@@ -595,7 +595,7 @@ class LoadInfo():
                 else:
                     color= "even"
 
-                self.info.insert("" , 0 , text = ordenado.at[i, 'estado'] , values = (ordenado.at[i, 'días'] , ordenado.at[i, 'nombre'] , ordenado.at[i, 'último'] , ordenado.at[i, 'próximo'] , ordenado.at[i, 'cp']) , tags=(color, font) )
+                self.info.insert("" , 0 , text = ordenado.at[i, 'estado'] , values = (ordenado.at[i, 'días'] , ordenado.at[i, 'nombre'] , datetime.strptime(ordenado.at[i, 'último'],'%Y-%m-%d %H:%M').strftime("%d %B %Y %H:%M") , datetime.strptime(ordenado.at[i, 'próximo'],'%Y-%m-%d %H:%M').strftime("%d %B %Y %H:%M") , ordenado.at[i, 'cp']) , tags=(color, font) )
                 contacts += 1
                 bgcolor += 1
                 
@@ -689,9 +689,9 @@ class GetInfo():
             
             comments_counter += 1
             
-        self.company_id.set(f"ID Empresa: {client.id_client}")
+        self.company_id.set(client.id_client)
         self.active_employee_id.set(client.employee_id)
-        print('client ID' , client.id_client)
+        #print('client ID' , client.id_client)
         
 
     def load_info_log(client_by_id , last_contact):
@@ -918,4 +918,26 @@ class AddInfo():
         
         except Exception as e:
             mb.showerror("Error al añadir Persona de Contacto" , f"{e}")
+            
+    
+    def add_log(self , hour , calendar_date):
+        
+        log = self.text_log.get(1.0, "end")
+        date = f'{calendar_date} {hour.get()}'
+        client = self.company_id.get()
+        company_info = db.session.get(Client , client)
+        employee = self.active_employee_id.get() 
+        
+        print(log , calendar_date , hour.get() , self.active_employee_id.get() , self.company_id.get())
+        self.text_log.delete(1.0 , 'end')
+        
+        MyCalendar.calendar_toggle_frame(self , 'next')
+        #last_contact_date , next_contact , log , client_id , contact_employee_id , contact_person_id , company_state = 'pool' ,  contact_counter = 0 , pop_up = False):
+        new_comment = Contact(str(datetime.now())[:16] , date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
+        
+        db.session.add(new_comment)
+        db.session.commit()
+        db.session.close()
+        
+        GetInfo.load_comments(self , self.entry_nif.get())
             

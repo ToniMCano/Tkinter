@@ -70,6 +70,7 @@ class Main:
         self.info.bind("<ButtonRelease-1>" , lambda event: li.get_client_name(self , event))
         self.active_employee_id = StringVar()
         self.fecha = StringVar()
+        self.company_id = StringVar()
         pw.login(self)
         
         
@@ -368,13 +369,24 @@ class Main:
         self.notes.config(height = 3)
         self.notes.grid(row = 8, column = 0  , columnspan = 2 , sticky = 'we' , padx = 5 , pady = 2)
         
-        self.company_id = StringVar()
-        self.lcontact_label_bottom = Label(self.contact_frame , textvariable = self.company_id, bg = 'LightBlue4' , fg = 'white')
-        self.lcontact_label_bottom.grid(row = 9 , column = 0 , sticky = W+E)
-
+        self.ids_frame = ttk.Frame(self.contact_frame)
+        self.ids_frame.grid(row = 9 , column = 0 , columnspan = 2 , sticky = W+E)
+        self.ids_frame .grid_columnconfigure(0,weight=1)
+        self.ids_frame .grid_columnconfigure(1,weight=1)
+        self.ids_frame .grid_columnconfigure(2,weight=1)
+        self.ids_frame .grid_columnconfigure(3,weight=1)
         
-        self.rcontact_label_bottom = Label(self.contact_frame , textvariable = self.active_employee_id , bg = 'LightBlue4' , fg = 'white')
-        self.rcontact_label_bottom.grid(row = 9 , column = 1 , sticky = W+E)
+        self.lcontact_label_bottom = Label(self.ids_frame , text = 'ID Empresa: ', bg = 'LightBlue4' , fg = 'white' , anchor = 'e')
+        self.lcontact_label_bottom.grid(row = 0 , column = 0 , sticky = W+E)
+        
+        self.lcontact_label_company_id = Label(self.ids_frame , textvariable = self.company_id , bg = 'LightBlue4' , fg = 'white' , anchor = "w")
+        self.lcontact_label_company_id.grid(row = 0 , column = 1 , sticky = W+E)
+
+        self.rcontact_label_bottom = Label(self.ids_frame , text = 'ID Responsable: ', bg = 'LightBlue4' , fg = 'white' , anchor = 'e')
+        self.rcontact_label_bottom.grid(row = 0 , column = 2 , sticky = W+E)
+        
+        self.rcontact_label_responsable_id = Label(self.ids_frame , textvariable = self.active_employee_id , bg = 'LightBlue4' , fg = 'white' , anchor = "w")
+        self.rcontact_label_responsable_id.grid(row = 0 , column = 3 , sticky = W+E)
 
 
         
