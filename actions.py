@@ -13,14 +13,15 @@ from datetime import datetime
 from tkinter import messagebox as mb
 import os
 from sqlalchemy.exc import IntegrityError , SQLAlchemyError
-import customtkinter
+from customtkinter import *
 import pandas as pd
+import time
 
 #locale.setlocale(locale.LC_ALL, '')   Si uso Locale customtkinter da problemas.  ----- "TO-DO"
  
 
 
-
+alerts = []
  
 class Pops:
     
@@ -537,7 +538,7 @@ class LoadInfo():
         dot = '◉'  # ASCII
         bell = '🔔'
         alert = ""
-        dataframe = {"estado" : [] , "días" : [] , "nombre" : [] , "último" : [] , "próximo" : [] , "cp" : []}
+        dataframe = {"estado" : [] , "días" : [] , "nombre" : [] , "último" : [] , "próximo" : [] , "cp" : [] , "pop" : []}
         pd_filter = query
         ascending_value = False
         
@@ -583,16 +584,16 @@ class LoadInfo():
             dataframe["último"].append(contact.last_contact_date)
             dataframe["próximo"].append(f'{contact.next_contact}')
             dataframe["cp"].append(client.postal_code)  
+            dataframe["pop"].append(contact.pop_up)
             
             oredenado = pd.DataFrame(dataframe)
             ordenado = oredenado.sort_values(by = pd_filter , ascending = ascending_value)
             ordenado = ordenado.reset_index(drop = True)
-            
+            #pop_up = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first()
                        
         for i , client in enumerate(clients):
-            
-            pop_up = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first() 
-  
+
+            print(f'[2]ID Cliente: {client.id_client} - ID CLiente Contacto: {contact.client_id}')
   
             if ordenado.at[i, 'próximo'] <= str(date)[:10] + "23:59":               
               
@@ -608,20 +609,21 @@ class LoadInfo():
                 else:
                     color= "even"
                 
-                if pop_up.pop_up == True:
-                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'próximo'])}{dot}"
-                    print(f"{pop_up} - {next_contact}")
+                if ordenado.at[i, 'pop'] == True:
+                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'próximo'])} {dot}"
+                    print(f"{ordenado.at[i, 'pop']} - {next_contact} - {client.id_client}")
                 
                 else:
                     next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'próximo'])}"
-                    print('NO Pop Up' , contact.pop_up , type(contact.pop_up) ,"[" ,  pop_up.pop_up , "]")
-                    print(f"{pop_up.pop_up} - True")
+                    #print('NO Pop Up' , contact.pop_up , type(contact.pop_up) ,"[" ,  pop_up.pop_up , "]")
+                    #print(f"{pop_up.pop_up} - True")
                 self.info.insert("" , 0 , text = ordenado.at[i, 'estado'] , values = (ordenado.at[i, 'días'] , ordenado.at[i, 'nombre'] , MyCalendar.format_date_to_show(ordenado.at[i, 'último'])  , next_contact , ordenado.at[i, 'cp']) , tags=(color, font) )
                 contacts += 1
                 bgcolor += 1
                 
         self.contacts.set(f"Contactos: {contacts}")
         #print(ordenado)
+        Alerts.check_pop_ups(self , employee_id_sended , date )
     
     
     def get_days(client):
@@ -638,6 +640,9 @@ class LoadInfo():
             days = 0
             
         return days
+    
+    
+    
     
     
     def get_client_name(tree , event):
@@ -981,3 +986,45 @@ class AddInfo():
         GetInfo.load_comments(self , self.entry_nif.get())
         
             
+
+class Alerts():
+    
+    def check_pop_ups(self = "", employee_id = 1  , date = datetime.now()):
+        
+        old_alerts = alerts       
+        
+        search = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee_id , Contact.next_contact <= date , Contact.pop_up == True)).all()
+
+        for alert in search:
+            #print(alert)
+            
+            if alert.id_contact not in alerts:
+                alerts.append(alert.id_contact)
+                
+        new_alerts = alerts
+        
+        if new_alerts != old_alerts:
+            Alerts.pop_up_alert(self, employee_id , date , new_alerts)
+            
+            old_alerts = new_alerts
+            
+        time.sleep(300)
+        
+        Alerts.check_pop_ups(self , employee_id)    
+    
+    
+    def pop_up_alert(self, employee_id , date , now_alerts):
+        window = Toplevel()
+        window.title(f"Pop Ups [{len(alerts)}]")
+        #CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray") 
+        main_frame = CTkFrame(window)
+        main_frame.pack(fill = 'both' , expand = True)
+        
+        for alerts in now_alerts:
+            show_alert = CtkFrame(main_frame)
+            show_alert.pack(fill = 'x' , expand = True)
+        
+
+    def alert_info(id_contact):
+        pass
+        

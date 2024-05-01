@@ -147,4 +147,4 @@ class Contact(Base):
         self.pop_up = pop_up
 
     def __str__(self):
-        return F"{self.last_contact_date} {self.log} {self.contact_employee_id} {self.contact_person_id}"
+        return F"Last Contact: {self.last_contact_date} - Log: {self.log.strip("\n")} - ID Employee: {self.contact_employee_id} - Next Contact: {self.next_contact} - Client ID: {self.client_id}"

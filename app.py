@@ -9,7 +9,7 @@ from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
 from sqlalchemy import and_ , or_  
-from actions import LoadInfo as li , GetInfo as gi , MyCalendar as mc , Pops as pw
+from actions import LoadInfo as li , GetInfo as gi , MyCalendar as mc , Pops as pw , Alerts as als
 from datetime import datetime
 #import locale
 from tkinter import messagebox as mb
@@ -60,7 +60,7 @@ class Main:
         self.info.column("#1" , width = 10 , anchor="center")
         self.info.column("#2" , width = 150)
         self.info.column("#3" , width = 50 , anchor="center")
-        self.info.column("#4" , width = 50 , anchor="w")
+        self.info.column("#4" , width = 50 , anchor="center")
         self.info.column("#5" , width = 10 , anchor="center")
         
         
@@ -72,6 +72,9 @@ class Main:
         self.fecha = StringVar()
         self.company_id = StringVar()
         pw.login(self)
+        
+        
+        
         
         
         #IMAGENES 

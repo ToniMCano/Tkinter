@@ -337,3 +337,25 @@ def dates(date = "2024-05-25 19:00"):
     date = datetime.strptime(date,'%Y-%m-%d %H:%M').strftime("%d %B %Y %H:%M")
     
     return date
+
+def check_pop_ups(self = "", employee_id = 1  , date = "2024-05-31 08:00"):
+        
+    search = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee_id , Contact.next_contact <= date , Contact.pop_up == True)).all()
+
+    for alert in search:
+        print(f'\n\n{alert.id_contact}\n\n')
+        
+
+        
+            
+def listas():
+    lista1 = ["2024-05-31 08:00" , "2024-05-21 08:00"]
+    lista2 = [1, 2, 3, 4, 5]
+    
+    print()
+    print(lista1)
+    lista1 = sorted(lista1)
+    lista1.remove("2024-05-31 08:00")
+    print(lista1)
+    
+listas()
