@@ -404,15 +404,17 @@ class MyCalendar():
             
             if place == "next":
                 header_calendar.set("Next Contact")
+                log_type = "next"
                 
             else:
                 header_calendar.set("Pop Up")
+                log_type = "pop"
                 
             hour = ttk.Combobox(frame , justify = "left" , values = hours_list , width = 10)
             hour.current(newindex = 0)
             hour.config(justify=CENTER)
             hour.pack(fill = "x" , expand = True , anchor = "center")
-            send = ttk.Button(frame , text = "Save" , command = lambda: AddInfo.add_log(self , hour , frame.calendar.get_date()))#lambda: MyCalendar.format_date(self , place , hour = hour.get()) )
+            send = ttk.Button(frame , text = "Save" , command = lambda: AddInfo.add_log(self , hour , frame.calendar.get_date() , log_type))#lambda: MyCalendar.format_date(self , place , hour = hour.get()) )
             send.pack(pady = 5)
             
 
@@ -532,8 +534,8 @@ class LoadInfo():
 
     def load_contacts(self , employee_id_sended , date , query = 'último'): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
         
-        bell = '◉'  # ASCII
-        dot = '🔔'
+        dot = '◉'  # ASCII
+        bell = '🔔'
         alert = ""
         dataframe = {"estado" : [] , "días" : [] , "nombre" : [] , "último" : [] , "próximo" : [] , "cp" : []}
         pd_filter = query
@@ -570,7 +572,7 @@ class LoadInfo():
         scrollbar = ttk.Scrollbar(self.frame_tree, orient="vertical", command=self.info.yview)
         scrollbar.grid(row = 0, column = 1 , sticky = "ns")
         self.info.configure(yscroll=scrollbar.set)
-  
+        
         for i , client in enumerate(clients):
             
             contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first()
@@ -586,7 +588,11 @@ class LoadInfo():
             ordenado = oredenado.sort_values(by = pd_filter , ascending = ascending_value)
             ordenado = ordenado.reset_index(drop = True)
             
+                       
         for i , client in enumerate(clients):
+            
+            pop_up = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first() 
+  
   
             if ordenado.at[i, 'próximo'] <= str(date)[:10] + "23:59":               
               
@@ -601,13 +607,21 @@ class LoadInfo():
                 
                 else:
                     color= "even"
-
-                self.info.insert("" , 0 , text = ordenado.at[i, 'estado'] , values = (ordenado.at[i, 'días'] , ordenado.at[i, 'nombre'] , MyCalendar.format_date_to_show(ordenado.at[i, 'último'])  , MyCalendar.format_date_to_show(ordenado.at[i, 'próximo']) , ordenado.at[i, 'cp']) , tags=(color, font) )
+                
+                if pop_up.pop_up == True:
+                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'próximo'])}{dot}"
+                    print(f"{pop_up} - {next_contact}")
+                
+                else:
+                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'próximo'])}"
+                    print('NO Pop Up' , contact.pop_up , type(contact.pop_up) ,"[" ,  pop_up.pop_up , "]")
+                    print(f"{pop_up.pop_up} - True")
+                self.info.insert("" , 0 , text = ordenado.at[i, 'estado'] , values = (ordenado.at[i, 'días'] , ordenado.at[i, 'nombre'] , MyCalendar.format_date_to_show(ordenado.at[i, 'último'])  , next_contact , ordenado.at[i, 'cp']) , tags=(color, font) )
                 contacts += 1
                 bgcolor += 1
                 
         self.contacts.set(f"Contactos: {contacts}")
-        print(ordenado)
+        #print(ordenado)
     
     
     def get_days(client):
@@ -704,7 +718,7 @@ class GetInfo():
     def load_info_log(client_by_id , last_contact):
         
         try:
-            comment = db.session.query(Contact).filter(Contact.last_contact_date == last_contact).first()
+            comment = db.session.query(Contact).filter(and_(Contact.client_id == client_by_id) , Contact.last_contact_date == last_contact).first()
             contact_person = db.session.get(ContactPerson , comment.contact_person_id)
             employee = db.session.get(Employee , comment.contact_employee_id)
             return f"{MyCalendar.format_date_to_show(last_contact)} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}]"
@@ -927,7 +941,7 @@ class AddInfo():
             mb.showerror("Error al añadir Persona de Contacto" , f"{e}")
             
     
-    def add_log(self , hour , calendar_date):
+    def add_log(self , hour , calendar_date , log_type):
         
         log = self.text_log.get(1.0, "end")
         date = f'{calendar_date} {hour.get()}'
@@ -935,23 +949,33 @@ class AddInfo():
         company_info = db.session.get(Client , client)
         employee = self.active_employee_id.get() 
         row_id = self.info.focus()
+        dot = '◉' 
         
         self.text_log.delete(1.0 , 'end')
-        
-        MyCalendar.calendar_toggle_frame(self , 'next')
-        
-        new_comment = Contact(str(datetime.now())[:16] , date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
-        
-        db.session.add(new_comment)
-        db.session.commit()
-        db.session.close()
         
         row_to_change_values = self.info.item(row_id, 'values')
         row_to_change_text = self.info.item(row_id, 'text')
         
         row_to_change_values = list(row_to_change_values)
-        row_to_change_values[3] = MyCalendar.format_date_to_show(date)
         
+        if log_type == 'next':
+            MyCalendar.calendar_toggle_frame(self , 'next')
+            
+            new_comment = Contact(str(datetime.now())[:16] , date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
+            
+            row_to_change_values[3] = MyCalendar.format_date_to_show(date)
+       
+        else:
+            MyCalendar.calendar_toggle_frame(self , 'pop')
+            
+            new_comment = Contact(str(datetime.now())[:16] , date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , True)
+             
+            row_to_change_values[3] = f'{MyCalendar.format_date_to_show(date)} {dot}'
+                  
+        db.session.add(new_comment)
+        db.session.commit()
+        db.session.close()
+
         self.info.item(row_id , text = row_to_change_text , values = row_to_change_values)
         
         GetInfo.load_comments(self , self.entry_nif.get())

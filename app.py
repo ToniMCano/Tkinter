@@ -60,7 +60,7 @@ class Main:
         self.info.column("#1" , width = 10 , anchor="center")
         self.info.column("#2" , width = 150)
         self.info.column("#3" , width = 50 , anchor="center")
-        self.info.column("#4" , width = 50 , anchor="center")
+        self.info.column("#4" , width = 50 , anchor="w")
         self.info.column("#5" , width = 10 , anchor="center")
         
         
