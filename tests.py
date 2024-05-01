@@ -316,22 +316,24 @@ def load_contacts(): # last_gestion =db.session.query(func.max(Contact.contact_c
 
 
     
-print(datetime(2024,5,1,9,0))
+def optimizar():
+    replace_date = db.session.query(Contact).all()
+
+    for new in replace_date:
+        if len(new.next_contact) == 15:
+            print(new.next_contact)
+            new.next_contact = new.next_contact.replace(" " , " 0")
+            print(new.next_contact)
+            
+        if len(new.last_contact_date) == 15:
+            print(new.last_contact_date)
+            new.last_contact_date = new.last_contact_date.replace(" " , " 0")
+            print(new.last_contact_date)
+    db.session.commit()
+    db.session.close()
     
-print('2024-04-30 9:00' , len ('2024-04-30 9:00'))
-print(('2024-04-30 9:00').replace(" " , " 0"))
-
-replace_date = db.session.query(Contact).all()
-
-for new in replace_date:
-    if len(new.next_contact) == 15:
-        print(new.next_contact)
-        new.next_contact = new.next_contact.replace(" " , " 0")
-        print(new.next_contact)
-        
-    if len(new.last_contact_date) == 15:
-        print(new.last_contact_date)
-        new.last_contact_date = new.last_contact_date.replace(" " , " 0")
-        print(new.last_contact_date)
-db.session.commit()
-db.session.close()
+def dates(date = "2024-05-25 19:00"):
+    
+    date = datetime.strptime(date,'%Y-%m-%d %H:%M').strftime("%d %B %Y %H:%M")
+    
+    return date

@@ -445,8 +445,9 @@ class MyCalendar():
             print(e)
             mb.showwarning("Error" , f"Ha habido un problema con las fechas {e}") 
                    
-    
-    def format_date(self , place , hour): #  (YYYY-MM-DD HH:MM:SS)  Para poder ordenarlo en la DB 
+    #  (YYYY-MM-DD HH:MM:SS)  Para poder ordenarlo en la DB ####comprobar si se está usando####
+        frame = MyCalendar.place_to_frame(self , place)
+    def format_date(self , place , hour): 
         frame = MyCalendar.place_to_frame(self , place)
         print(f"Date From: {place} - {frame.calendar.get_date()} {hour}") 
         MyCalendar.calendar_toggle_frame(self  , place)
@@ -469,6 +470,12 @@ class MyCalendar():
         except Exception as e:
             print("PlaceTo.." , e)
             
+            
+    def format_date_to_show(date):
+        
+        date = datetime.strptime(date,'%Y-%m-%d %H:%M').strftime("%d %B %Y %H:%M")
+    
+        return date
 
 class LoadInfo():
 
@@ -595,7 +602,7 @@ class LoadInfo():
                 else:
                     color= "even"
 
-                self.info.insert("" , 0 , text = ordenado.at[i, 'estado'] , values = (ordenado.at[i, 'días'] , ordenado.at[i, 'nombre'] , datetime.strptime(ordenado.at[i, 'último'],'%Y-%m-%d %H:%M').strftime("%d %B %Y %H:%M") , datetime.strptime(ordenado.at[i, 'próximo'],'%Y-%m-%d %H:%M').strftime("%d %B %Y %H:%M") , ordenado.at[i, 'cp']) , tags=(color, font) )
+                self.info.insert("" , 0 , text = ordenado.at[i, 'estado'] , values = (ordenado.at[i, 'días'] , ordenado.at[i, 'nombre'] , MyCalendar.format_date_to_show(ordenado.at[i, 'último'])  , MyCalendar.format_date_to_show(ordenado.at[i, 'próximo']) , ordenado.at[i, 'cp']) , tags=(color, font) )
                 contacts += 1
                 bgcolor += 1
                 
@@ -700,7 +707,7 @@ class GetInfo():
             comment = db.session.query(Contact).filter(Contact.last_contact_date == last_contact).first()
             contact_person = db.session.get(ContactPerson , comment.contact_person_id)
             employee = db.session.get(Employee , comment.contact_employee_id)
-            return f"{datetime.strptime(last_contact, '%Y-%m-%d %H:%M').strftime('%d %B %Y %H:%M').title()} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}]"
+            return f"{MyCalendar.format_date_to_show(last_contact)} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}]"
             
         except Exception as e:
             print(e)
@@ -927,17 +934,26 @@ class AddInfo():
         client = self.company_id.get()
         company_info = db.session.get(Client , client)
         employee = self.active_employee_id.get() 
+        row_id = self.info.focus()
         
-        print(log , calendar_date , hour.get() , self.active_employee_id.get() , self.company_id.get())
         self.text_log.delete(1.0 , 'end')
         
         MyCalendar.calendar_toggle_frame(self , 'next')
-        #last_contact_date , next_contact , log , client_id , contact_employee_id , contact_person_id , company_state = 'pool' ,  contact_counter = 0 , pop_up = False):
+        
         new_comment = Contact(str(datetime.now())[:16] , date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
         
         db.session.add(new_comment)
         db.session.commit()
         db.session.close()
         
+        row_to_change_values = self.info.item(row_id, 'values')
+        row_to_change_text = self.info.item(row_id, 'text')
+        
+        row_to_change_values = list(row_to_change_values)
+        row_to_change_values[3] = MyCalendar.format_date_to_show(date)
+        
+        self.info.item(row_id , text = row_to_change_text , values = row_to_change_values)
+        
         GetInfo.load_comments(self , self.entry_nif.get())
+        
             
