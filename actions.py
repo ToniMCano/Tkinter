@@ -993,6 +993,8 @@ class AddInfo():
             
         elif log_type == 'log':
             try:
+                oll_ok = True   
+            
                 new_comment = Contact(str(datetime.now())[:16] , calendar_date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
             
             except Exception as e:
@@ -1076,22 +1078,29 @@ class Alerts():
         main_frame.grid(row = 0 , column = 0 , sticky = 'nswe')
         main_frame.grid_columnconfigure(0 , weight = 1)
         
+        names = []
+        dates = []
+            
         for i, id_contact in enumerate(now_alerts):
+            
             show_alert_frame = CTkFrame(main_frame , fg_color = 'lightgray' , corner_radius = 3)
             show_alert_frame.grid(row = i , column = 0 , sticky = 'we' , padx = 10 , pady = 5)
             show_alert_frame.grid_columnconfigure(0 , weight = 1)
             
             alert_content = Alerts.alert_info(self , id_contact)
+            names.append(alert_content[0])
+            dates.append(alert_content[1])
+            print("hecho" , i)
             
-            label_alert_name = ttk.Label(show_alert_frame , text = alert_content[0])
+            label_alert_name = ttk.Label(show_alert_frame , text = names[i])
             label_alert_name.configure(background = "lightgray")
             label_alert_name.grid(row = 0 , column = 0 , sticky = 'we' , padx = 10 , pady = 5)
             
-            label_alert_date = ttk.Label(show_alert_frame , text = alert_content[1])
+            label_alert_date = ttk.Label(show_alert_frame , text = dates[i])
             label_alert_date.configure(background = "lightgray")
             label_alert_date.grid(row = 0 , column = 1 , sticky = 'we' , padx = 10 , pady = 5)
             
-            show_client_button = CTkButton(show_alert_frame , text = 'Ver' , corner_radius = 2 , fg_color = '#f4f4f4' , text_color = 'snow3' , hover_color = 'LightBlue4' , width = 60)
+            show_client_button = CTkButton(show_alert_frame , text = 'Ver' , corner_radius = 2 , fg_color = '#f4f4f4' , text_color = 'snow3' , hover_color = 'LightBlue4' , width = 60 , command = lambda name = names[i]: Alerts.view_alert(self , name , window))
             show_client_button.grid(row = 0 , column = 2 , padx = 10 , pady = 5)          
             
             Pops.center_window(self , window)
@@ -1116,4 +1125,39 @@ class Alerts():
             exit()
 
         
+    def view_alert(self , name , window):
+        print(name)
+        tree = self.info.get_children()
+        
+        for item in tree:
+            if self.info.item(item , 'values')[1]== name:
+                
+                print("ROWid" , item ,self.info.item(item , 'values')[1] )
+                
+                self.info.focus(item)
+                
+                window.destroy()
+                
+        
+                #row_id = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.next_contact.desc()).first()
+       
+        
+                #row = tree.info.focus(focus)  item = tree.info.item(row)  client_name = item['values'][1]  load_client_info(tree , client_name)
+        
     
+''' def get_client_name(tree , event):
+
+        try:
+            row = tree.info.focus()
+            item = tree.info.item(row)
+            client_name = item['values'][1]
+            
+            GetInfo.load_client_info(tree , client_name)
+        
+        except IndexError:
+            pass
+        
+        except Exception as e:
+            print(e , type(e))
+            mb.showerror("Error en Get Client Name" ,  e)
+        '''
