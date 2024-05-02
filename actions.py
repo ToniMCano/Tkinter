@@ -17,6 +17,7 @@ from customtkinter import *
 import pandas as pd
 import time
 import threading
+import threading
 #locale.setlocale(locale.LC_ALL, '')   Si uso Locale customtkinter da problemas.  ----- "TO-DO"
  
 
@@ -575,6 +576,7 @@ class LoadInfo():
         bgcolor = 0
         clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == int(employee_id_sended))).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
         self.info.tag_configure("odd", background="snow2" )
+        self.info.tag_configure("odd", background="snow2" )
         self.info.tag_configure("even", background="white")
         self.info.tag_configure("font_red", foreground="red")
         scrollbar = ttk.Scrollbar(self.frame_tree, orient="vertical", command=self.info.yview)
@@ -690,6 +692,7 @@ class GetInfo():
     
     def load_comments(self , nif):
         
+        frame_log = CTkScrollableFrame(self.frame_tree, fg_color = "lightgray")
         frame_log = CTkScrollableFrame(self.frame_tree, fg_color = "lightgray")
         frame_log.grid(row = 3 , pady = 5 , padx = 3 , sticky = 'nsew')
         
@@ -1062,6 +1065,7 @@ class Alerts():
     def pop_up_alert(self , now_alerts = alerts , focus_id = 0):
         
         window = Toplevel()
+        window.configure(bg = "#f4f4f4")
         window.configure(bg = "#f4f4f4")
         window.title(f"Pop Ups [{len(alerts)}]")
 
