@@ -166,7 +166,7 @@ class Main:
         login_button = ttk.Button(self.header , text = "Login" , command = lambda: pw.login(self))
         login_button.grid(row = 0 , column = 10 , sticky = E)
         
-        self.pop_up = ttk.Button(self.header, text = "PopUp")
+        self.pop_up = ttk.Button(self.header, text = "PopUp" , command = lambda: als.check_pop_ups(self , self.active_employee_id.get()))
         self.pop_up.config(cursor = 'arrow')
         #self.pop_up.config(height = 2, width = 5)
         self.pop_up.grid(row = 0 , column = 11 , padx = 5 , sticky = E)

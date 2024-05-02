@@ -16,7 +16,7 @@ from sqlalchemy.exc import IntegrityError , SQLAlchemyError
 from customtkinter import *
 import pandas as pd
 import time
-
+import threading
 #locale.setlocale(locale.LC_ALL, '')   Si uso Locale customtkinter da problemas.  ----- "TO-DO"
  
 
@@ -567,7 +567,7 @@ class LoadInfo():
         contacts = 0
         bgcolor = 0
         clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == int(employee_id_sended))).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
-        self.info.tag_configure("odd", background="lightgray" )
+        self.info.tag_configure("odd", background="snow2" )
         self.info.tag_configure("even", background="white")
         self.info.tag_configure("font_red", foreground="red")
         scrollbar = ttk.Scrollbar(self.frame_tree, orient="vertical", command=self.info.yview)
@@ -622,8 +622,8 @@ class LoadInfo():
                 bgcolor += 1
                 
         self.contacts.set(f"Contactos: {contacts}")
-        #print(ordenado)
-        Alerts.check_pop_ups(self , employee_id_sended , date )
+        print(ordenado)
+        Alerts.refresh_alerts(self , employee_id_sended )
     
     
     def get_days(client):
@@ -688,7 +688,7 @@ class GetInfo():
     
     def load_comments(self , nif):
         
-        frame_log = customtkinter.CTkScrollableFrame(self.frame_tree, fg_color = "lightgray")
+        frame_log = CTkScrollableFrame(self.frame_tree, fg_color = "lightgray")
         frame_log.grid(row = 3 , pady = 5 , padx = 3 , sticky = 'nsew')
         
         try:
@@ -989,16 +989,16 @@ class AddInfo():
 
 class Alerts():
     
-    def check_pop_ups(self = "", employee_id = 1  , date = datetime.now()):
+    def check_pop_ups(self , employee_id  , date = str(datetime.now())):
+        print(f'\n\nAlerts sin Actualizar [{alerts}] Empleado: {employee_id} , Fecha: {date})\n\n')
+        old_alerts = alerts[:]     
         
-        old_alerts = alerts       
-        
-        search = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee_id , Contact.next_contact <= date , Contact.pop_up == True)).all()
-
+        search = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee_id , Contact.pop_up == True)).all()
+        print(search)
         for alert in search:
-            #print(alert)
+            print(alert)
             
-            if alert.id_contact not in alerts:
+            if str(alert.next_contact ) <= str(date)  and alert.id_contact not in alerts:
                 alerts.append(alert.id_contact)
                 
         new_alerts = alerts
@@ -1006,25 +1006,51 @@ class Alerts():
         if new_alerts != old_alerts:
             Alerts.pop_up_alert(self, employee_id , date , new_alerts)
             
-            old_alerts = new_alerts
-            
-        time.sleep(300)
-        
-        Alerts.check_pop_ups(self , employee_id)    
+            print(f'\n\nAlerts Actualizadas [{new_alerts}] Empleado: {employee_id} , Fecha: {date})\n\n')
+        print(alerts , 'Alerts' , 'fuera')   
     
     
     def pop_up_alert(self, employee_id , date , now_alerts):
+        
         window = Toplevel()
+        window.configure(bg = "#f4f4f4")
         window.title(f"Pop Ups [{len(alerts)}]")
-        #CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray") 
-        main_frame = CTkFrame(window)
-        main_frame.pack(fill = 'both' , expand = True)
-        
-        for alerts in now_alerts:
-            show_alert = CtkFrame(main_frame)
-            show_alert.pack(fill = 'x' , expand = True)
-        
 
-    def alert_info(id_contact):
-        pass
+        main_frame = CTkScrollableFrame(window , width = 600 , fg_color = "transparent")
+        main_frame.grid(row = 0 , column = 0 , sticky = 'nswe')
+        main_frame.grid_columnconfigure(0 , weight = 1)
         
+        for i, id_contact in enumerate(now_alerts):
+            show_alert_frame = CTkFrame(main_frame , fg_color = 'lightgray' , corner_radius = 3)
+            show_alert_frame.grid(row = i , column = 0 , sticky = 'we' , padx = 10 , pady = 5)
+            show_alert_frame.grid_columnconfigure(0 , weight = 1)
+            
+            alert_content = Alerts.alert_info(self , id_contact)
+            
+            label_alert_name = ttk.Label(show_alert_frame , text = alert_content[0])
+            label_alert_name.configure(background = "lightgray")
+            label_alert_name.grid(row = 0 , column = 0 , sticky = 'we' , padx = 10 , pady = 5)
+            
+            label_alert_date = ttk.Label(show_alert_frame , text = alert_content[1])
+            label_alert_date.configure(background = "lightgray")
+            label_alert_date.grid(row = 0 , column = 1 , sticky = 'we' , padx = 10 , pady = 5)
+            
+            show_client_button = CTkButton(show_alert_frame , text = 'Ver' , corner_radius = 2 , fg_color = '#f4f4f4' , text_color = 'snow3' , hover_color = 'LightBlue4' , width = 60)
+            show_client_button.grid(row = 0 , column = 2 , padx = 10 , pady = 5)          
+            
+            Pops.center_window(self , window)
+
+
+    def alert_info(self , id_contact):
+        
+        contact_info = db.session.get(Contact , id_contact)
+        client = db.session.get(Client , contact_info.client_id)
+        text_to_label_alert = [client.name , MyCalendar.format_date_to_show(contact_info.next_contact)]
+        
+        return text_to_label_alert
+    
+    
+    def refresh_alerts(self , employee_id ):
+        
+        Alerts.check_pop_ups(self, employee_id)
+        threading.Timer(60, Alerts.refresh_alerts, args=[self , employee_id]).start()

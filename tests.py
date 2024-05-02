@@ -338,7 +338,7 @@ def dates(date = "2024-05-25 19:00"):
     
     return date
 
-def check_pop_ups(self = "", employee_id = 1  , date = "2024-05-31 08:00"):
+def check_pop_ups(self , employee_id , date = "2024-05-31 08:00"):
         
     search = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee_id , Contact.next_contact <= date , Contact.pop_up == True)).all()
 
@@ -358,4 +358,28 @@ def listas():
     lista1.remove("2024-05-31 08:00")
     print(lista1)
     
-listas()
+alerts = []    
+    
+class Alerts():
+    
+    def check_pop_ups(self , employee_id  , date = str(datetime.now())):
+        print(f'\n\nAlerts sin Actualizar [{alerts}] Empleado: {employee_id} , Fecha: {date})\n\n')
+        old_alerts = alerts[:]     
+        
+        search = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee_id , Contact.pop_up == True)).all()
+        print(search)
+        for alert in search:
+            print(alert)
+            
+            if str(alert.next_contact ) <= str(date)  and alert.id_contact not in alerts:
+                alerts.append(alert.id_contact)
+                
+        new_alerts = alerts
+        
+        if new_alerts != old_alerts:
+            print(f"Alerta en POP [{new_alerts}]")
+            
+            print(f'\n\nAlerts Actualizadas [{old_alerts}] Empleado: {employee_id} , Fecha: {date})\n\n')
+        print(alerts , 'Alerts' , 'fuera')   
+        
+Alerts.check_pop_ups()
