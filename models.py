@@ -134,8 +134,9 @@ class Contact(Base):
     contact_employee_id = Column(Integer , ForeignKey('employee.id_employee'))
     contact_person_id = Column(Integer , ForeignKey('contact_person.id_person'))
     pop_up = Column(Boolean)
+    treeview_id = Column(String)
 
-    def __init__(self , last_contact_date , next_contact , log , client_id , contact_employee_id , contact_person_id , company_state = 'pool' ,  contact_counter = 0 , pop_up = False):
+    def __init__(self , last_contact_date , next_contact , log , client_id , contact_employee_id , contact_person_id , company_state = 'pool' ,  contact_counter = 0 , pop_up = False , treeview_id = "focus"):
         self.last_contact_date = last_contact_date
         self.next_contact = next_contact
         self.log = log
@@ -145,6 +146,7 @@ class Contact(Base):
         self.contact_employee_id = contact_employee_id
         self.contact_person_id = contact_person_id
         self.pop_up = pop_up
+        self.treeview_id = treeview_id
 
     def __str__(self):
-        return F"Last Contact: {self.last_contact_date} - Log: {self.log.strip("\n")} - ID Employee: {self.contact_employee_id} - Next Contact: {self.next_contact} - Client ID: {self.client_id}"
+        return F"Last Contact: {self.last_contact_date} - Log: {self.log} - ID Employee: {self.contact_employee_id} - Next Contact: {self.next_contact} - Client ID: {self.client_id}"

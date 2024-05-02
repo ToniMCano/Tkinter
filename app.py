@@ -9,8 +9,8 @@ from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
 from sqlalchemy import and_ , or_  
-from actions import LoadInfo as li , GetInfo as gi , MyCalendar as mc , Pops as pw , Alerts as als
-from datetime import datetime
+from actions import LoadInfo as li , GetInfo as gi , MyCalendar as mc , Pops as pw , Alerts as als , AddInfo as ai
+from datetime import datetime , timedelta
 #import locale
 from tkinter import messagebox as mb
 from ttkthemes import ThemedTk
@@ -27,8 +27,9 @@ class Main:
         self.ventana_principal.resizable(1,1)
         self.ventana_principal.geometry('1200x800')
         self.ventana_principal.configure(bg="#f4f4f4") 
+        #self.ventana_principal.protocol("WM_DELETE_WINDOW", lambda: als.refresh_alerts(self , self.active_employee_id)) #Sirve para vincular un evento al cierre de una ventana.
         pw.center_window(self, self.ventana_principal)
-        
+        print("estoy")
         
         
         # INFO LISTA
@@ -54,14 +55,14 @@ class Main:
         self.info.heading("#2" , text  ="Cliente" , command = lambda: li.on_heading_click(self , "client"))
         self.info.heading("#3" , text = "Último Contacto" , command = lambda: li.on_heading_click(self , "last_contact"))
         self.info.heading("#4" , text = "Próximo Contacto" , command = lambda: li.on_heading_click(self , "next_contact"))
-        self.info.heading("#5" , text = "Código Postal" , command = lambda: li.on_heading_click(self , "postal_code"))
+        self.info.heading("#5" , text = "C. Postal" , command = lambda: li.on_heading_click(self , "postal_code"))
         
-        self.info.column("#0" , width = 35 , anchor="center")
+        self.info.column("#0" , width = 25 , anchor="center")
         self.info.column("#1" , width = 10 , anchor="center")
         self.info.column("#2" , width = 150)
-        self.info.column("#3" , width = 50 , anchor="center")
-        self.info.column("#4" , width = 50 , anchor="center")
-        self.info.column("#5" , width = 10 , anchor="center")
+        self.info.column("#3" , width = 70 , anchor="center")
+        self.info.column("#4" , width = 70 , anchor="w")
+        self.info.column("#5" , width = 10 , anchor="w")
         
         
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
@@ -166,7 +167,7 @@ class Main:
         login_button = ttk.Button(self.header , text = "Login" , command = lambda: pw.login(self))
         login_button.grid(row = 0 , column = 10 , sticky = E)
         
-        self.pop_up = ttk.Button(self.header, text = "PopUp")
+        self.pop_up = ttk.Button(self.header, text = "PopUp" , command = lambda: als.pop_up_alert(self))
         self.pop_up.config(cursor = 'arrow')
         #self.pop_up.config(height = 2, width = 5)
         self.pop_up.grid(row = 0 , column = 11 , padx = 5 , sticky = E)
@@ -190,7 +191,7 @@ class Main:
         self.boton_pop_up.config(cursor = 'arrow')
         self.boton_pop_up.grid(row = 2 , column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
-        self.boton_log = ttk.Button(self.frame_log , text = "Log" , command = lambda: gi.load_comments(self , self.entry_nif.get()))
+        self.boton_log = ttk.Button(self.frame_log , text = "Log" , command = lambda: ai.add_log(self , 'hour' , str(datetime.now() + timedelta(days = 1))[:16] , "log"))
         self.boton_log.config(cursor = 'arrow')
         self.boton_log.grid(row = 1 , column = 7, padx = 2 , pady= 2 , sticky = "nswe" , rowspan = 2)
 
@@ -414,7 +415,12 @@ class Main:
             item = self.combo_state.get()
             print(item)
 
+
+    def stop_all(self):
+        self.ventana_principal.quit()
+         
     
+           
 
 if __name__ == "__main__":
     

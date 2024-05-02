@@ -8,7 +8,7 @@ from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
 from sqlalchemy import and_ , or_ , func ,asc , desc
-from datetime import datetime
+from datetime import datetime , timedelta
 #import locale
 from tkinter import messagebox as mb
 import os
@@ -16,7 +16,7 @@ from sqlalchemy.exc import IntegrityError , SQLAlchemyError
 from customtkinter import *
 import pandas as pd
 import time
-
+import threading
 #locale.setlocale(locale.LC_ALL, '')   Si uso Locale customtkinter da problemas.  ----- "TO-DO"
  
 
@@ -373,19 +373,19 @@ class MyCalendar():
         frame = MyCalendar.place_to_frame(self , place)
         
         hours_list = [
-            "8:00", "8:15", "8:30", "8:45", "9:00",
-            "9:00", "9:15", "9:30", "9:45", "10:00",
-            "10:00", "10:15", "10:30", "10:45", "11:00",
-            "11:00", "11:15", "11:30", "11:45", "12:00",
-            "12:00", "12:15", "12:30", "12:45", "13:00",
-            "13:00", "13:15", "13:30", "13:45", "14:00",
-            "14:00", "14:15", "14:30", "14:45", "15:00",
-            "15:00", "15:15", "15:30", "15:45", "16:00",
-            "16:00", "16:15", "16:30", "16:45", "17:00",
-            "17:00", "17:15", "17:30", "17:45", "18:00",
-            "18:00", "18:15", "18:30", "18:45", "19:00",
-            "19:00", "19:15", "19:30", "19:45", "20:00",
-            "20:00", "20:15", "20:30", "20:45", "20:00",
+            "08:00", "08:15", "08:30", "08:45",
+            "09:00", "09:15", "09:30", "09:45",
+            "10:00", "10:15", "10:30", "10:45",
+            "11:00", "11:15", "11:30", "11:45",
+            "12:00", "12:15", "12:30", "12:45",
+            "13:00", "13:15", "13:30", "13:45",
+            "14:00", "14:15", "14:30", "14:45",
+            "15:00", "15:15", "15:30", "15:45",
+            "16:00", "16:15", "16:30", "16:45",
+            "17:00", "17:15", "17:30", "17:45",
+            "18:00", "18:15", "18:30", "18:45",
+            "19:00", "19:15", "19:30", "19:45",
+            "20:00", "20:15", "20:30", "20:45",
               ]
         
         header_calendar = StringVar(value = "View")
@@ -448,8 +448,9 @@ class MyCalendar():
             print(e)
             mb.showwarning("Error" , f"Ha habido un problema con las fechas {e}") 
                    
-    #  (YYYY-MM-DD HH:MM:SS)  Para poder ordenarlo en la DB ####comprobar si se está usando####
         frame = MyCalendar.place_to_frame(self , place)
+        
+        
     def format_date(self , place , hour): 
         frame = MyCalendar.place_to_frame(self , place)
         print(f"Date From: {place} - {frame.calendar.get_date()} {hour}") 
@@ -475,10 +476,16 @@ class MyCalendar():
             
             
     def format_date_to_show(date):
+        try:
+            date = datetime.strptime(date,'%Y-%m-%d %H:%M').strftime("%d %B %Y %H:%M")
+            
+            return date
+
+        except Exception as e:
+            mb.showwarning("Error al Introducir la Hora" , f'\nFecha introducida: {date[-5:]}\n\nFormato Válid: 08:25 (HH:MM)')
         
-        date = datetime.strptime(date,'%Y-%m-%d %H:%M').strftime("%d %B %Y %H:%M")
-    
-        return date
+
+
 
 class LoadInfo():
 
@@ -567,7 +574,7 @@ class LoadInfo():
         contacts = 0
         bgcolor = 0
         clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == int(employee_id_sended))).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
-        self.info.tag_configure("odd", background="lightgray" )
+        self.info.tag_configure("odd", background="snow2" )
         self.info.tag_configure("even", background="white")
         self.info.tag_configure("font_red", foreground="red")
         scrollbar = ttk.Scrollbar(self.frame_tree, orient="vertical", command=self.info.yview)
@@ -592,9 +599,7 @@ class LoadInfo():
             #pop_up = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first()
                        
         for i , client in enumerate(clients):
-
-            print(f'[2]ID Cliente: {client.id_client} - ID CLiente Contacto: {contact.client_id}')
-  
+            #print(f'[2]ID Cliente: {client.id_client} - ID CLiente Contacto: {contact.client_id}')
             if ordenado.at[i, 'próximo'] <= str(date)[:10] + "23:59":               
               
                 if int(ordenado.at[i, 'días']) > 110:
@@ -623,7 +628,7 @@ class LoadInfo():
                 
         self.contacts.set(f"Contactos: {contacts}")
         #print(ordenado)
-        Alerts.check_pop_ups(self , employee_id_sended , date )
+        Alerts.refresh_alerts(self , employee_id_sended )
     
     
     def get_days(client):
@@ -640,9 +645,6 @@ class LoadInfo():
             days = 0
             
         return days
-    
-    
-    
     
     
     def get_client_name(tree , event):
@@ -688,7 +690,7 @@ class GetInfo():
     
     def load_comments(self , nif):
         
-        frame_log = customtkinter.CTkScrollableFrame(self.frame_tree, fg_color = "lightgray")
+        frame_log = CTkScrollableFrame(self.frame_tree, fg_color = "lightgray")
         frame_log.grid(row = 3 , pady = 5 , padx = 3 , sticky = 'nsew')
         
         try:
@@ -710,7 +712,7 @@ class GetInfo():
             label_info = tk.Label(log_frame , text = f"{GetInfo.load_info_log(comment.client_id , comment.last_contact_date)}" , bg = 'LightBlue4' , fg = "white")
             label_info.pack(fill = "x" , expand = True)
             
-            label_content = tk.Label(log_frame , text = f"{comment.log}" , bg = "White")
+            label_content = tk.Label(log_frame , text = f"{comment.log}" , bg = "White" , anchor = 'w')
             label_content.pack(fill = "x" , expand = True)
             
             comments_counter += 1
@@ -794,6 +796,7 @@ class GetInfo():
             employees_list.append(alias.employee_alias)
         
         return employees_list
+        
         
         
 class AddInfo():
@@ -947,15 +950,15 @@ class AddInfo():
             
     
     def add_log(self , hour , calendar_date , log_type):
-        
+        print(hour , 'antes')
         log = self.text_log.get(1.0, "end")
-        date = f'{calendar_date} {hour.get()}'
         client = self.company_id.get()
         company_info = db.session.get(Client , client)
         employee = self.active_employee_id.get() 
         row_id = self.info.focus()
         dot = '◉' 
-        
+        hour , oll_ok = AddInfo.check_hour(hour.get())   
+
         self.text_log.delete(1.0 , 'end')
         
         row_to_change_values = self.info.item(row_id, 'values')
@@ -964,67 +967,146 @@ class AddInfo():
         row_to_change_values = list(row_to_change_values)
         
         if log_type == 'next':
-            MyCalendar.calendar_toggle_frame(self , 'next')
+            date = f'{calendar_date} {hour}'
             
-            new_comment = Contact(str(datetime.now())[:16] , date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
+            try:
+                MyCalendar.calendar_toggle_frame(self , 'next')
             
-            row_to_change_values[3] = MyCalendar.format_date_to_show(date)
-       
+            except Exception as e:
+                mb.showerror("Datos No Válidos" , f"\n\nDatos incompletos o erróneos.\n\n")
+                oll_ok = False   
+            
+            try:
+                new_comment = Contact(str(datetime.now())[:16] , date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
+            
+                row_to_change_values[3] = MyCalendar.format_date_to_show(date)
+                
+            except Exception as e:
+                mb.showerror("Datos No Válidos" , f"\n\nDatos incompletos o erróneos.\n\n")
+                oll_ok = False   
+            
+        elif log_type == 'log':
+            try:
+                new_comment = Contact(str(datetime.now())[:16] , calendar_date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
+            
+            except Exception as e:
+                mb.showerror("Datos No Válidos" , f"\n\nDatos incompletos o erróneos.\n\n")
+                oll_ok = False     
+                           
         else:
-            MyCalendar.calendar_toggle_frame(self , 'pop')
+            date = f'{calendar_date} {hour}'
             
-            new_comment = Contact(str(datetime.now())[:16] , date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , True)
+            try:
+            
+                MyCalendar.calendar_toggle_frame(self , 'pop')
+            
+                new_comment = Contact(str(datetime.now())[:16] , date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , True , row_id)
              
-            row_to_change_values[3] = f'{MyCalendar.format_date_to_show(date)} {dot}'
-                  
-        db.session.add(new_comment)
-        db.session.commit()
-        db.session.close()
-
-        self.info.item(row_id , text = row_to_change_text , values = row_to_change_values)
-        
-        GetInfo.load_comments(self , self.entry_nif.get())
-        
+                row_to_change_values[3] = f'{MyCalendar.format_date_to_show(date)} {dot}'
             
+            except Exception as e:
+                mb.showerror("Datos No Válidos" , f"\n\nDatos incompletos o erróneos.\n\n")
+                oll_ok = False        
+                
+                
+        if oll_ok:          
+            db.session.add(new_comment)
+            db.session.commit()
+            db.session.close()
+
+            self.info.item(row_id , text = row_to_change_text , values = row_to_change_values)
+            
+            GetInfo.load_comments(self , self.entry_nif.get())
+        
+        
+    def check_hour(hour):
+
+        test = hour.split(":")
+        
+        try:
+            if (test[0].isdigit() and len(test[0]) == 2) and (test[1].isdigit() and len(test[1])): 
+                if int(test[0]) <=24 and int(test[1]) < 60:
+                    ok = hour
+                print( 'ok: ', ok)
+                return ok , True
+            
+            else:
+                raise Exception
+        
+        except Exception as e:
+            mb.showerror('Hora' , f'\n\nEl formato de la hora no es correcto: {hour}\n\nFormato Correcto: 08:30 (HH:MM)')
+                    
+            
+alerts = []
 
 class Alerts():
     
-    def check_pop_ups(self = "", employee_id = 1  , date = datetime.now()):
-        
-        old_alerts = alerts       
-        
-        search = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee_id , Contact.next_contact <= date , Contact.pop_up == True)).all()
+    def check_pop_ups(self , employee_id ):
+        date = str(datetime.now())
+
+        old_alerts = alerts[:]     
+
+        search = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee_id , Contact.pop_up == True)).all()
 
         for alert in search:
-            #print(alert)
             
-            if alert.id_contact not in alerts:
+            if str(alert.next_contact) <= str(date)  and alert.id_contact not in alerts:
                 alerts.append(alert.id_contact)
                 
         new_alerts = alerts
         
         if new_alerts != old_alerts:
-            Alerts.pop_up_alert(self, employee_id , date , new_alerts)
-            
-            old_alerts = new_alerts
-            
-        time.sleep(300)
-        
-        Alerts.check_pop_ups(self , employee_id)    
-    
-    
-    def pop_up_alert(self, employee_id , date , now_alerts):
-        window = Toplevel()
-        window.title(f"Pop Ups [{len(alerts)}]")
-        #CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray") 
-        main_frame = CTkFrame(window)
-        main_frame.pack(fill = 'both' , expand = True)
-        
-        for alerts in now_alerts:
-            show_alert = CtkFrame(main_frame)
-            show_alert.pack(fill = 'x' , expand = True)
-        
+            Alerts.pop_up_alert(self , new_alerts)
 
-    def alert_info(id_contact):
-        pass
+
+    def pop_up_alert(self , now_alerts = alerts , focus_id = 0):
         
+        window = Toplevel()
+        window.configure(bg = "#f4f4f4")
+        window.title(f"Pop Ups [{len(alerts)}]")
+
+        main_frame = CTkScrollableFrame(window , width = 600 , fg_color = "transparent")
+        main_frame.grid(row = 0 , column = 0 , sticky = 'nswe')
+        main_frame.grid_columnconfigure(0 , weight = 1)
+        
+        for i, id_contact in enumerate(now_alerts):
+            show_alert_frame = CTkFrame(main_frame , fg_color = 'lightgray' , corner_radius = 3)
+            show_alert_frame.grid(row = i , column = 0 , sticky = 'we' , padx = 10 , pady = 5)
+            show_alert_frame.grid_columnconfigure(0 , weight = 1)
+            
+            alert_content = Alerts.alert_info(self , id_contact)
+            
+            label_alert_name = ttk.Label(show_alert_frame , text = alert_content[0])
+            label_alert_name.configure(background = "lightgray")
+            label_alert_name.grid(row = 0 , column = 0 , sticky = 'we' , padx = 10 , pady = 5)
+            
+            label_alert_date = ttk.Label(show_alert_frame , text = alert_content[1])
+            label_alert_date.configure(background = "lightgray")
+            label_alert_date.grid(row = 0 , column = 1 , sticky = 'we' , padx = 10 , pady = 5)
+            
+            show_client_button = CTkButton(show_alert_frame , text = 'Ver' , corner_radius = 2 , fg_color = '#f4f4f4' , text_color = 'snow3' , hover_color = 'LightBlue4' , width = 60)
+            show_client_button.grid(row = 0 , column = 2 , padx = 10 , pady = 5)          
+            
+            Pops.center_window(self , window)
+            window.lift()
+
+
+    def alert_info(self , id_contact):
+        
+        contact_info = db.session.get(Contact , id_contact)
+        client = db.session.get(Client , contact_info.client_id)
+        text_to_label_alert = [client.name , MyCalendar.format_date_to_show(contact_info.next_contact)]
+        
+        return text_to_label_alert
+    
+    
+    def refresh_alerts(self , employee_id):
+        try:
+            Alerts.check_pop_ups(self, employee_id)
+            threading.Timer(60, Alerts.refresh_alerts, args=[self , employee_id]).start()
+            
+        except Exception as e:
+            exit()
+
+        
+    

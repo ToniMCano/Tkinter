@@ -231,91 +231,6 @@ def muestra():
 #contacts()
 
 
-
-
-def load_contacts(): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
-    
-    bell = '◉'  # ASCII
-    dot = '🔔'
-    alert = ""
-    dataframe = {"estado" : [] , "días" : [] , "nombre" : [] , "último" : [] , "próximo" : [] , "cp" : []}
-    
-    '''if str(employee_id_sended).isdigit():
-        pass
-    
-    else:
-        employee_id_sended = db.session.query(Employee).filter(Employee.employee_alias == employee_id_sended).first()
-        employee_id_sended = employee_id_sended.id_employee
-
-    if not date:
-        date = str(datetime.now()) + " 23:59"    
-
-    try:
-        clean = self.info.get_children()
-        
-        for x in clean: 
-            self.info.delete(x)
-                    
-    except Exception as e:
-        print(e)
-    
-    contacts = 0
-    bgcolor = 0
-    clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == int(employee_id_sended))).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
-    self.info.tag_configure("odd", background="lightgray" )
-    self.info.tag_configure("even", background="white")
-    self.info.tag_configure("font_red", foreground="red")
-    scrollbar = ttk.Scrollbar(self.frame_tree, orient="vertical", command=self.info.yview)
-    scrollbar.grid(row = 0, column = 1 , sticky = "ns")
-    self.info.configure(yscroll=scrollbar.set)
-    '''
-    clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == 1)).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
-    
-    #self.treeview.insert("", "end", text="Fila 3", tags=("odd",))
-    for i , client in enumerate(clients):
-        
-        contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.next_contact.desc()).first()
-        
-        dataframe["estado"].append(client.state)
-        dataframe["días"].append(LoadInfo.get_days(client))
-        dataframe["nombre"].append(client.name)
-        dataframe["último"].append(contact.last_contact_date)
-        dataframe["próximo"].append(f'{contact.next_contact}')
-        dataframe["cp"].append(client.postal_code)
-        
-        insert = pd.DataFrame(dataframe)
-        
-    ''' 
-    for i , client in enumerate(clients):
-
-        
-        if contact.next_contact[:10] <= str(date)[:10]:               
-            
-            if int(LoadInfo.get_days(client)) > 110:
-                font = "font_red"
-                
-            else:
-                font = ""
-            
-            if bgcolor % 2 == 0:
-                color= "odd"
-            
-            else:
-                color= "even"
-                
-                
-            self.info.insert("" , 0 , text = client.state , values = (LoadInfo.get_days(client) , client.name, contact.last_contact_date   , f'{contact.next_contact}', client.postal_code) , tags=(color, font) )
-            contacts += 1
-            bgcolor += 1
-            
-    self.contacts.set(f"Contactos: {contacts}")'''
-    ordenado = insert.sort_values(by = ["cp"])
-    print(ordenado)
-    print(ordenado.iat[0,-1])
-    print(len(ordenado))
-
-
-    
 def optimizar():
     replace_date = db.session.query(Contact).all()
 
@@ -332,30 +247,5 @@ def optimizar():
     db.session.commit()
     db.session.close()
     
-def dates(date = "2024-05-25 19:00"):
-    
-    date = datetime.strptime(date,'%Y-%m-%d %H:%M').strftime("%d %B %Y %H:%M")
-    
-    return date
 
-def check_pop_ups(self = "", employee_id = 1  , date = "2024-05-31 08:00"):
-        
-    search = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee_id , Contact.next_contact <= date , Contact.pop_up == True)).all()
-
-    for alert in search:
-        print(f'\n\n{alert.id_contact}\n\n')
-        
-
-        
-            
-def listas():
-    lista1 = ["2024-05-31 08:00" , "2024-05-21 08:00"]
-    lista2 = [1, 2, 3, 4, 5]
-    
-    print()
-    print(lista1)
-    lista1 = sorted(lista1)
-    lista1.remove("2024-05-31 08:00")
-    print(lista1)
-    
-listas()
+optimizar()
