@@ -959,8 +959,11 @@ class AddInfo():
         company_info = db.session.get(Client , client)
         employee = self.active_employee_id.get() 
         row_id = self.info.focus()
-        dot = '◉' 
-        hour , oll_ok = AddInfo.check_hour(hour.get())   
+        dot = '◉'
+         
+        if log_type != 'log':
+                    
+            hour , oll_ok = AddInfo.check_hour(hour.get())   
 
         self.text_log.delete(1.0 , 'end')
         
