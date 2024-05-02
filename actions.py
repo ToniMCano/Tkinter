@@ -650,7 +650,7 @@ class LoadInfo():
     
     
     def get_client_name(tree , event):
-
+        
         try:
             row = tree.info.focus()
             item = tree.info.item(row)
@@ -742,50 +742,57 @@ class GetInfo():
         client = db.session.query(Client).filter(Client.name == client_name).first()
         contact_person = db.session.get(ContactPerson , client.contact_person)
         
-        tree.entry_company_name.delete(0 , END)
-        tree.entry_company_name.insert(0 , client.name) # Es lo mismo que placeholder
+        try:
+            tree.entry_company_name.delete(0 , END)
+            
+            tree.entry_nif.delete(0 , END)
+            
+            tree.entry_adress.delete(0 , END)
+            
+            tree.entry_web.delete(0 , END)
+            
+            tree.entry_mail_empresa.delete(0 , END)
+            
+            tree.entry_company_phone.delete(0 , END)
+            
+            tree.entry_company_phone2.delete(0 , END)
+            
+            tree.entry_contact_name.delete(0 , END)
+            
+            tree.entry_contact_surname.delete(0 , END)
+            
+            tree.entry_job_title.delete(0 , END)
+            
+            tree.entry_contact_mail.delete(0 , END)
+            
+            tree.entry_contact_phone.delete(0 , END)
+            
+            tree.entry_mobile.delete(0 , END)
+            
+            GetInfo.load_comments(tree , client.nif)
         
-        tree.entry_nif.delete(0 , END)
-        tree.entry_nif.insert(0, client.nif)
-        
-        tree.entry_adress.delete(0 , END)
-        tree.entry_adress.insert(0 , client.adress + str(client.postal_code))
-        
-        tree.entry_activity.current(newindex = Pops.current_combo(client.activity , LoadInfo.nace_list()))
-        
-        tree.entry_employees.current(newindex = Pops.current_combo(client.number_of_employees , "employees"))
-        
-        tree.entry_web.delete(0 , END)
-        tree.entry_web.insert(0, client.web)
-        
-        tree.entry_mail_empresa.delete(0 , END)
-        tree.entry_mail_empresa.insert(0 , client.mail)
-        
-        tree.entry_company_phone.delete(0 , END)
-        tree.entry_company_phone.insert(0, client.phone)
-        
-        tree.entry_company_phone2.delete(0 , END)
-        tree.entry_company_phone2.insert(0, str(client.phone2))
-        
-        tree.entry_contact_name.delete(0 , END)
-        tree.entry_contact_name.insert(0, contact_person.contact_name)
-        
-        tree.entry_contact_surname.delete(0 , END)
-        tree.entry_contact_surname.insert(0,contact_person.contact_surname)
-        
-        tree.entry_job_title.delete(0 , END)
-        tree.entry_job_title.insert(0, contact_person.contact_job_title)
-        
-        tree.entry_contact_mail.delete(0 , END)
-        tree.entry_contact_mail.insert(0,contact_person.contact_mail)
-        
-        tree.entry_contact_phone.delete(0 , END)
-        tree.entry_contact_phone.insert(0, contact_person.contact_phone)
-        
-        tree.entry_mobile.delete(0 , END)
-        tree.entry_mobile.insert(0 , contact_person.contact_mobile)
-        
-        GetInfo.load_comments(tree , client.nif)
+        except Exception as e:
+            print(f'Error al borrar los datos: {e}')
+            
+        try:
+            tree.entry_company_name.insert(0 , client.name) # Es lo mismo que placeholder
+            tree.entry_nif.insert(0, client.nif)
+            tree.entry_adress.insert(0 , client.adress + str(client.postal_code))
+            tree.entry_activity.current(newindex = Pops.current_combo(client.activity , LoadInfo.nace_list()))
+            tree.entry_employees.current(newindex = Pops.current_combo(client.number_of_employees , "employees"))
+            tree.entry_web.insert(0, client.web)
+            tree.entry_mail_empresa.insert(0 , client.mail)
+            tree.entry_company_phone.insert(0, client.phone)
+            tree.entry_company_phone2.insert(0, str(client.phone2))
+            tree.entry_contact_name.insert(0, contact_person.contact_name)
+            tree.entry_contact_surname.insert(0,contact_person.contact_surname)
+            tree.entry_job_title.insert(0, contact_person.contact_job_title)
+            tree.entry_contact_mail.insert(0,contact_person.contact_mail)
+            tree.entry_contact_phone.insert(0, contact_person.contact_phone)
+            tree.entry_mobile.insert(0 , contact_person.contact_mobile)
+            
+        except Exception as e:
+            print(f'Error al cargar los datos: {e}')
         
         #tree.notes.delete(0 , END)
         #tree.notes.insert(0 , "686289365")
@@ -1078,8 +1085,6 @@ class Alerts():
         main_frame.grid(row = 0 , column = 0 , sticky = 'nswe')
         main_frame.grid_columnconfigure(0 , weight = 1)
         
-        names = []
-        dates = []
             
         for i, id_contact in enumerate(now_alerts):
             
@@ -1088,19 +1093,16 @@ class Alerts():
             show_alert_frame.grid_columnconfigure(0 , weight = 1)
             
             alert_content = Alerts.alert_info(self , id_contact)
-            names.append(alert_content[0])
-            dates.append(alert_content[1])
-            print("hecho" , i)
             
-            label_alert_name = ttk.Label(show_alert_frame , text = names[i])
+            label_alert_name = ttk.Label(show_alert_frame , text = alert_content[0])
             label_alert_name.configure(background = "lightgray")
             label_alert_name.grid(row = 0 , column = 0 , sticky = 'we' , padx = 10 , pady = 5)
             
-            label_alert_date = ttk.Label(show_alert_frame , text = dates[i])
+            label_alert_date = ttk.Label(show_alert_frame , text = alert_content[1])
             label_alert_date.configure(background = "lightgray")
             label_alert_date.grid(row = 0 , column = 1 , sticky = 'we' , padx = 10 , pady = 5)
             
-            show_client_button = CTkButton(show_alert_frame , text = 'Ver' , corner_radius = 2 , fg_color = '#f4f4f4' , text_color = 'snow3' , hover_color = 'LightBlue4' , width = 60 , command = lambda name = names[i]: Alerts.view_alert(self , name , window))
+            show_client_button = CTkButton(show_alert_frame , text = 'Ver' , corner_radius = 2 , fg_color = '#f4f4f4' , text_color = 'snow3' , hover_color = 'LightBlue4' , width = 60 , command = lambda name = alert_content[0]: Alerts.view_alert(self , name , window))
             show_client_button.grid(row = 0 , column = 2 , padx = 10 , pady = 5)          
             
             Pops.center_window(self , window)
@@ -1126,16 +1128,16 @@ class Alerts():
 
         
     def view_alert(self , name , window):
-        print(name)
+        
         tree = self.info.get_children()
         
         for item in tree:
             if self.info.item(item , 'values')[1]== name:
+                                
+                item = self.info.selection_set(item)
                 
-                print("ROWid" , item ,self.info.item(item , 'values')[1] )
-                
-                self.info.focus(item)
-                
+                GetInfo.load_client_info(self , name)
+
                 window.destroy()
                 
         
@@ -1145,19 +1147,4 @@ class Alerts():
                 #row = tree.info.focus(focus)  item = tree.info.item(row)  client_name = item['values'][1]  load_client_info(tree , client_name)
         
     
-''' def get_client_name(tree , event):
-
-        try:
-            row = tree.info.focus()
-            item = tree.info.item(row)
-            client_name = item['values'][1]
-            
-            GetInfo.load_client_info(tree , client_name)
-        
-        except IndexError:
-            pass
-        
-        except Exception as e:
-            print(e , type(e))
-            mb.showerror("Error en Get Client Name" ,  e)
-        '''
+Siguiente paso implementar el borrado del popup, cuando se vuelva a introducir un log o un nexcontact.
