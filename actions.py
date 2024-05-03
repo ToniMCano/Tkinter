@@ -12,7 +12,7 @@ from datetime import datetime , timedelta
 #import locale
 from tkinter import messagebox as mb
 import os
-from sqlalchemy.exc import IntegrityError , SQLAlchemyError
+from sqlalchemy.exc import IntegrityError , SQLAlchemyError 
 from customtkinter import *
 import pandas as pd
 import time
@@ -297,7 +297,7 @@ class Pops:
         entry_mobile = ttk.Entry(frame_contact_person)
         entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
         
-        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: AddInfo.test_add_company(self , add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}, {company_street_number.get() } {company_street_floor.get()} {company_city_entry.get()}, ({company_province_entry.get()})" , "Código Postal": company_postal_code_entry.get() , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
+        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: AddInfo.test_add_company(self , add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}, {company_street_number.get() } {company_street_floor.get()} {company_city_entry.get()}, ({company_province_entry.get()})" , "Código Postal: ": company_postal_code_entry.get() , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
         save_company_button.grid(row = 5 , column = 0 , pady = 10)
         
         Pops.center_window(Pops , add_company_frame)
@@ -422,7 +422,6 @@ class MyCalendar():
 
     def general_calendar_date(self , place , date , event):
         
-        frame = MyCalendar.place_to_frame(self , place)
         
         try:
             fecha_seleccionada = frame.calendar.get_date() ## Para poder ordenarlo en la DB "YYYY-MM-DD" 
@@ -435,7 +434,6 @@ class MyCalendar():
             else:
                 day = int(fecha_seleccionada[-2:])
             
-            print(self.employee.get() , fecha_seleccionada , "enviado")    
             LoadInfo.load_contacts(self , self.employee.get() , fecha_seleccionada)
             
             date.set(datetime(year,month,day).strftime("%d %B")) 
@@ -505,7 +503,7 @@ class LoadInfo():
                 LoadInfo.load_contacts(root , employee.id_employee , date = datetime.now())
                 print(f" Empleado {employee.id_employee}")
                 
-                alias = GetInfo.employees_list().index(alias)
+                alias = LoadInfo.employees_list().index(alias)
                     
                 root.employee.current(newindex = alias)
                 root.combo_state.current(newindex=2)
@@ -541,7 +539,7 @@ class LoadInfo():
         
 
 
-    def load_contacts(self , employee_id_sended , date , query = 'último'): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
+    def load_contacts(self , employee_id_sended , date , query = 'último' , state_sended = "Contact"): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
         
         dot = '◉'  # ASCII
         bell = '🔔'
@@ -549,6 +547,7 @@ class LoadInfo():
         dataframe = {"estado" : [] , "días" : [] , "nombre" : [] , "último" : [] , "próximo" : [] , "cp" : [] , "pop" : []}
         pd_filter = query
         ascending_value = False
+        state_view = state_sended
         
         if query == "días":
             ascending_value = True
@@ -574,32 +573,49 @@ class LoadInfo():
         
         contacts = 0
         bgcolor = 0
-        clients = db.session.query(Client).filter(and_(Client.state == "Contact" , Client.employee_id == int(employee_id_sended))).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
-        self.info.tag_configure("odd", background="snow2" )
+        
+        clients = db.session.query(Client).filter(and_(Client.state == state_view , Client.employee_id == int(employee_id_sended))).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
+        
         self.info.tag_configure("odd", background="snow2" )
         self.info.tag_configure("even", background="white")
         self.info.tag_configure("font_red", foreground="red")
+        
         scrollbar = ttk.Scrollbar(self.frame_tree, orient="vertical", command=self.info.yview)
         scrollbar.grid(row = 0, column = 1 , sticky = "ns")
         self.info.configure(yscroll=scrollbar.set)
         
-        for i , client in enumerate(clients):
+        for i , client in enumerate(clients):  # De aquí se deber cargar el útlimo contacto con el "dot" si fuera necesario
             
             contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first()
             
-            dataframe["estado"].append(client.state)
-            dataframe["días"].append(LoadInfo.get_days(client))
-            dataframe["nombre"].append(client.name)
-            dataframe["último"].append(contact.last_contact_date)
-            dataframe["próximo"].append(f'{contact.next_contact}')
-            dataframe["cp"].append(client.postal_code)  
-            dataframe["pop"].append(contact.pop_up)
+            try:
+                dataframe["estado"].append(client.state)
+                dataframe["días"].append(LoadInfo.get_days(client))
+                dataframe["nombre"].append(client.name)
+                
+                if contact.last_contact_date:
+                    dataframe["último"].append(contact.last_contact_date)
+                    
+                else:
+                    dataframe["último"].append("d")
+                    
+                if contact.next_contact:
+                    dataframe["próximo"].append(f'{contact.next_contact}')
+                    
+                else:
+                    dataframe["próximo"].append(f'{"d"}')
+                print(dataframe["próximo"] ,dataframe["último"] ) 
+                dataframe["cp"].append(client.postal_code)  
+                dataframe["pop"].append(contact.pop_up)
+
+            except Exception as e:
+                print(e)
             
-            oredenado = pd.DataFrame(dataframe)
-            ordenado = oredenado.sort_values(by = pd_filter , ascending = ascending_value)
-            ordenado = ordenado.reset_index(drop = True)
-            #pop_up = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first()
-                       
+            print(dataframe)
+        ordenado = pd.DataFrame(dataframe)
+        ordenado = ordenado.sort_values(by = pd_filter , ascending = ascending_value)
+        ordenado = ordenado.reset_index(drop = True)
+        
         for i , client in enumerate(clients):
             #print(f'[2]ID Cliente: {client.id_client} - ID CLiente Contacto: {contact.client_id}')
             if ordenado.at[i, 'próximo'] <= str(date)[:10] + "23:59":               
@@ -618,18 +634,17 @@ class LoadInfo():
                 
                 if ordenado.at[i, 'pop'] == True:
                     next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'próximo'])} {dot}"
-                    print(f"{ordenado.at[i, 'pop']} - {next_contact} - {client.id_client}")
                 
                 else:
                     next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'próximo'])}"
-                    #print('NO Pop Up' , contact.pop_up , type(contact.pop_up) ,"[" ,  pop_up.pop_up , "]")
-                    #print(f"{pop_up.pop_up} - True")
-                self.info.insert("" , 0 , text = ordenado.at[i, 'estado'] , values = (ordenado.at[i, 'días'] , ordenado.at[i, 'nombre'] , MyCalendar.format_date_to_show(ordenado.at[i, 'último'])  , next_contact , ordenado.at[i, 'cp']) , tags=(color, font) )
+                    
+                self.info.insert("" , 0 , text = ordenado.at[i, 'estado'] , values = (ordenado.at[i, 'días'].lstrip("0") , ordenado.at[i, 'nombre'] , MyCalendar.format_date_to_show(ordenado.at[i, 'último'])  , next_contact , ordenado.at[i, 'cp']) , tags=(color, font) )
+               
                 contacts += 1
                 bgcolor += 1
                 
         self.contacts.set(f"Contactos: {contacts}")
-        #print(ordenado)
+        
         Alerts.refresh_alerts(self , employee_id_sended )
     
     
@@ -641,6 +656,9 @@ class LoadInfo():
             date = client.start_contact_date
             
             days = str(today - datetime.strptime(date, "%Y-%m-%d %H:%M:%S")).split(" ")[0] 
+            
+            if len(days) == 1:
+                days = f'0{days}'
         
         except Exception as e:
             print(e) 
@@ -687,6 +705,40 @@ class LoadInfo():
         return lista_nace
         
         
+    def employees_list():
+        
+        employees_list = []
+        employees = db.session.query(Employee).all()
+        
+        for alias in employees:
+            employees_list.append(alias.employee_alias)
+        
+        return employees_list
+        
+        
+    def companies_state(self, event):  # Recibir valor del Combobox
+        
+        item = self.combo_state.get()
+        #frame = MyCalendar.place_to_frame(self , place)
+        fecha_seleccionada = self.frame_calendar.calendar.get_date()
+        print(item, fecha_seleccionada)
+        
+        if item == "Lead":
+            state_sended = "Lead"
+        
+        if item == "Candidate":
+            state_sended = "Candidate"
+        
+        if item == "Contact":
+            state_sended = "Contact"
+        
+        if item == "Pool":
+            state_sended = "Pool"
+        
+        if item == "All":
+            state_sended = "All"
+            
+        LoadInfo.load_contacts(self , self.active_employee_id.get() , fecha_seleccionada , 'último' , state_sended) 
     
 class GetInfo():
     
@@ -797,15 +849,7 @@ class GetInfo():
         #tree.notes.delete(0 , END)
         #tree.notes.insert(0 , "686289365")
         
-    def employees_list():
-        
-        employees_list = []
-        employees = db.session.query(Employee).all()
-        
-        for alias in employees:
-            employees_list.append(alias.employee_alias)
-        
-        return employees_list
+   
         
         
         
@@ -815,7 +859,7 @@ class AddInfo():
         
         nif_check = ['a','b','c','e','f','g','h','j','p','q','r','s','u','v' , 'w' , 'n']
 
-        if data["Nombre Contacto: "] != "" and data['Apellidos Contacto: '] != "" and data['Teléfono Contacto: '] != "" and data['Mail Contacto: '] and data['Nombre Empresa: '] != ""  and data['N.I.F.: '] != ""  and data['Mail Empresa: '] != ""  and data['Teléfono Empresa: '] != "":
+        if data["Nombre Contacto: "] != "" and data['Apellidos Contacto: '] != "" and data['Teléfono Contacto: '] != "" and data['Mail Contacto: '] and data['Nombre Empresa: '] != ""  and data['N.I.F.: '] != ""  and data['Mail Empresa: '] != ""  and data['Teléfono Empresa: '] != "" and len(data["Código Postal: "] != 5):
             
             if data['N.I.F.: '][0].lower() in nif_check and len(data['N.I.F.: ']) == 9:
                 
@@ -875,7 +919,7 @@ class AddInfo():
             
             vcontact_person = AddInfo.add_contact(data , employee_adder)
             
-            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , self.active_employee_id.get()  , "Pool", data["Empleados: "])
+            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Código Postal: "], data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , self.active_employee_id.get()  , "Pool", data["Empleados: "] , datetime.now(),)
             vcontact_person.client_id = vcontact_person.id_person
             
             db.session.add(company)
@@ -892,7 +936,7 @@ class AddInfo():
 
         except Exception as e:
             
-            if isinstance(e, IntegrityError):
+            if isinstance(e, IntegrityError) or isinstance(e, SQLAlchemyError) :
                 print(e)
                 mb.showerror("Error de Integridad" , f"La empresa ya existe, el Nombre o el N.I.F. ya existen en la Base de Datos.")
                 
@@ -960,7 +1004,7 @@ class AddInfo():
             
     
     def add_log(self , hour , calendar_date , log_type):
-        print(hour , 'antes')
+        
         log = self.text_log.get(1.0, "end")
         client = self.company_id.get()
         company_info = db.session.get(Client , client)
@@ -981,21 +1025,18 @@ class AddInfo():
         
         if log_type == 'next':
             date = f'{calendar_date} {hour}'
+            Alerts.clean_old_pop_ups(self ,  client)
             
-            try:
-                MyCalendar.calendar_toggle_frame(self , 'next')
-            
-            except Exception as e:
-                mb.showerror("Datos No Válidos" , f"\n\nDatos incompletos o erróneos.\n\n")
-                oll_ok = False   
-            
+            MyCalendar.calendar_toggle_frame(self , 'next')
+
             try:
                 new_comment = Contact(str(datetime.now())[:16] , date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
             
                 row_to_change_values[3] = MyCalendar.format_date_to_show(date)
                 
             except Exception as e:
-                mb.showerror("Datos No Válidos" , f"\n\nDatos incompletos o erróneos.\n\n")
+                print(e)
+                mb.showerror("Datos No Válidos (Next Contact)" , f"\n\nDatos incompletos o erróneos.\n\n")
                 oll_ok = False   
             
         elif log_type == 'log':
@@ -1004,12 +1045,19 @@ class AddInfo():
             
                 new_comment = Contact(str(datetime.now())[:16] , calendar_date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
             
+            
             except Exception as e:
-                mb.showerror("Datos No Válidos" , f"\n\nDatos incompletos o erróneos.\n\n")
+                print(e)
+                
+                if isinstance(e , IntegrityError):
+                    pass
+                else:
+                    mb.showerror("Datos No Válidos (Log)" , f"\n\nDatos incompletos o erróneos.\n\n")
                 oll_ok = False     
                            
         else:
             date = f'{calendar_date} {hour}'
+            Alerts.clean_old_pop_ups(self ,  client)
             
             try:
             
@@ -1027,11 +1075,12 @@ class AddInfo():
         if oll_ok:          
             db.session.add(new_comment)
             db.session.commit()
-            db.session.close()
 
             self.info.item(row_id , text = row_to_change_text , values = row_to_change_values)
             
             GetInfo.load_comments(self , self.entry_nif.get())
+            
+        db.session.close()
         
         
     def check_hour(hour):
@@ -1042,7 +1091,7 @@ class AddInfo():
             if (test[0].isdigit() and len(test[0]) == 2) and (test[1].isdigit() and len(test[1])): 
                 if int(test[0]) <=24 and int(test[1]) < 60:
                     ok = hour
-                print( 'ok: ', ok)
+
                 return ok , True
             
             else:
@@ -1127,7 +1176,7 @@ class Alerts():
             exit()
 
         
-    def view_alert(self , name , window):
+    def view_alert(self , name , window , clean = False):
         
         tree = self.info.get_children()
         
@@ -1140,11 +1189,29 @@ class Alerts():
 
                 window.destroy()
                 
+                
+    def clean_old_pop_ups(self, company):
+        last = db.session.query(Contact).filter(and_(Contact.client_id == company , Contact.pop_up == True)).first()  
+        print(last)
         
-                #row_id = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.next_contact.desc()).first()
-       
+        try:
+            if last.pop_up:
+                last.pop_up = False 
+            
+                db.session.commit()
+                #db.session.close()
         
-                #row = tree.info.focus(focus)  item = tree.info.item(row)  client_name = item['values'][1]  load_client_info(tree , client_name)
+                dot = '◉'
+                tree = self.info.get_children() 
+                row_id = self.info.focus()
+                print(row_id)
+                row_to_change_values = list(self.info.item(row_id, 'values'))
+                row_to_change_text = self.info.item(row_id, 'text')
+                print(row_to_change_values)
+                row_to_change_values[3] = row_to_change_values[3].replace(dot , "")
+                print(row_to_change_values)
+                self.info.item(row_id , text = row_to_change_text , values = row_to_change_values)
         
-    
-Siguiente paso implementar el borrado del popup, cuando se vuelva a introducir un log o un nexcontact.
+        except Exception as e:
+            print(e)
+            

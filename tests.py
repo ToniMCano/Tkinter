@@ -158,7 +158,7 @@ def date():
     for x in range(25):
         
         day = str(random.randint(1 , 15))
-        month = str(random.randint(1 , 4))
+        month = str(random.randint(2, 4))
         
         if len(day) < 2:
             day =f"0{day}"
@@ -246,6 +246,35 @@ def optimizar():
             print(new.last_contact_date)
     db.session.commit()
     db.session.close()
+   
     
+def optimizar2():
+    clients = db.session.query(Client).all()
+    for dates in clients:
+        
+        dates.start_contact_date = date()
+    db.session.commit()
+    db.session.close()
+        
+        
 
-optimizar()
+def date():
+    
+    last = []
+    next = []
+    
+    for x in range(25):
+        
+        day = str(random.randint(1 , 15))
+        month = str(random.randint(2, 4))
+        
+        if len(day) < 2:
+            day =f"0{day}"
+            
+        month =f"0{month}"
+        day = str(random.randint(15 , 30))
+        
+        return f"2024-{month}-{day} 0{random.randint(6,9)}:00:00"
+        
+        
+optimizar2()

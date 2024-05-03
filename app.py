@@ -29,7 +29,7 @@ class Main:
         self.ventana_principal.configure(bg="#f4f4f4") 
         #self.ventana_principal.protocol("WM_DELETE_WINDOW", lambda: als.refresh_alerts(self , self.active_employee_id)) #Sirve para vincular un evento al cierre de una ventana.
         pw.center_window(self, self.ventana_principal)
-        print("estoy")
+        
         
         
         # INFO LISTA
@@ -113,16 +113,16 @@ class Main:
      
         # LEAD, CANDIDATE , CONTACT
         
-        self.employee = ttk.Combobox(self.header ,state = "readonly", values =  gi.employees_list() , width= 10)
+        self.employee = ttk.Combobox(self.header ,state = "readonly", values =  li.employees_list() , width= 10)
         self.employee.configure(background='lightblue')
                
         self.employee.grid(row = 0 , column = 3 , padx = 5)
-        self.employee.bind("<<ComboboxSelected>>" , self.test)
+        self.employee.bind("<<ComboboxSelected>>")
 
-        self.combo_state = ttk.Combobox(self.header ,state = "readonly",values=["Lead", "Candidate", "Contact" , 'All'] , width= 10)
+        self.combo_state = ttk.Combobox(self.header ,state = "readonly",values=["Lead", "Candidate", "Contact" , "Pool" , 'All'] , width= 10)
         self.combo_state.configure(background='lightblue')
         self.combo_state.grid(row = 0 , column = 4 , padx = 5)
-        self.combo_state.bind("<<ComboboxSelected>>" , self.companies_state)
+        self.combo_state.bind("<<ComboboxSelected>>" , lambda e: li.companies_state(self , e))
 
         # CALENDAR
         
@@ -158,12 +158,7 @@ class Main:
         self.new_company = ttk.Button(self.header , text = 'Add Company' , command = lambda: pw.new_company(self)) 
         #self.new_company.config(height = 47, width = 47)
         self.new_company.grid(row = 0 , column = 0 , padx = 5) 
-        
-        self.pool = ttk.Button(self.header, text = "Pool")
-        self.pool.config(cursor = 'arrow')
-        #self.pool.config(height=2 ,width=5)
-        self.pool.grid(row = 0 , column = 1 , padx = 5)
-        
+                
         login_button = ttk.Button(self.header , text = "Login" , command = lambda: pw.login(self))
         login_button.grid(row = 0 , column = 10 , sticky = E)
         
@@ -361,7 +356,7 @@ class Main:
         self.entry_mobile = ttk.Entry(self.margin_frame_contact)
         self.entry_mobile.grid(row = 6 , column = 1 , pady = 2 , padx = 2 , sticky = W+E)
         
-        self.mobile_button = ttk.Button(self.entry_mobile , image = self.mobile_icon , width = 2 , command = self.capturar )
+        self.mobile_button = ttk.Button(self.entry_mobile , image = self.mobile_icon , width = 2)
         self.mobile_button.config(cursor = 'arrow')
         self.mobile_button.pack(side = "right")
                                                                        # Centrar texto------------------------
@@ -394,32 +389,11 @@ class Main:
 
 
         
-    def capturar(self):
-        
-        print(self.entry_mobile.get())
-
-        
-    def test(self, event):
-        
-        item = self.employee.get()
-        print(item)
-        
         
     def abrir_enlace(self):
         
          webbrowser.open_new('https://chat.openai.com/c/2220aa72-de48-497a-b191-203933de98d3')
            
-            
-    def companies_state(self, event):  # Recibir valor del Combobox
-        
-            item = self.combo_state.get()
-            print(item)
-
-
-    def stop_all(self):
-        self.ventana_principal.quit()
-         
-    
            
 
 if __name__ == "__main__":
