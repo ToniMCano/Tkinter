@@ -584,37 +584,7 @@ class LoadInfo():
         scrollbar.grid(row = 0, column = 1 , sticky = "ns")
         self.info.configure(yscroll=scrollbar.set)
         
-        for i , client in enumerate(clients):  # De aquí se deber cargar el útlimo contacto con el "dot" si fuera necesario
-            
-            contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first()
-            
-            try:
-                dataframe["estado"].append(client.state)
-                dataframe["días"].append(LoadInfo.get_days(client))
-                dataframe["nombre"].append(client.name)
-                
-                if contact.last_contact_date:
-                    dataframe["último"].append(contact.last_contact_date)
-                    
-                else:
-                    dataframe["último"].append("d")
-                    
-                if contact.next_contact:
-                    dataframe["próximo"].append(f'{contact.next_contact}')
-                    
-                else:
-                    dataframe["próximo"].append(f'{"d"}')
-                print(dataframe["próximo"] ,dataframe["último"] ) 
-                dataframe["cp"].append(client.postal_code)  
-                dataframe["pop"].append(contact.pop_up)
-
-            except Exception as e:
-                print(e)
-            
-            print(dataframe)
-        ordenado = pd.DataFrame(dataframe)
-        ordenado = ordenado.sort_values(by = pd_filter , ascending = ascending_value)
-        ordenado = ordenado.reset_index(drop = True)
+        ordenado = LoadInfo.contact_list(clients, dataframe)
         
         for i , client in enumerate(clients):
             #print(f'[2]ID Cliente: {client.id_client} - ID CLiente Contacto: {contact.client_id}')
@@ -648,6 +618,51 @@ class LoadInfo():
         Alerts.refresh_alerts(self , employee_id_sended )
     
     
+    def contact_list(clients, dataframe):
+        
+        for i , client in enumerate(clients):  # De aquí se deber cargar el útlimo contacto con el "dot" si fuera necesario
+                
+                contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first()
+                
+                try:
+                    dataframe["estado"].append(client.state)
+                    dataframe["días"].append(LoadInfo.get_days(client))
+                    dataframe["nombre"].append(client.name)
+                    
+                    if contact.last_contact_date:
+                        dataframe["último"].append(contact.last_contact_date)
+                        
+                    else:
+                        dataframe["último"].append("último")
+                        
+                    if contact.next_contact:
+                        dataframe["próximo"].append(f'{contact.next_contact}')
+                        
+                    else:
+                        dataframe["próximo"].append(f'{"próximo"}')
+                    
+                    dataframe["cp"].append(client.postal_code)  
+                    
+                    if contact.pop_up:
+                        dataframe["pop"].append(f'{contact.pop_up}')
+                        
+                    else:
+                        dataframe["pop"].append(f'{"pop"}')
+                    "algo"
+
+                except Exception as e:
+                    print(e)
+
+        ordenado = pd.DataFrame(dataframe)
+        
+        return ordenado
+
+
+    def pool_list(clients, dataframe):
+        pass
+        
+        
+            
     def get_days(client):
         
         today = datetime.now()
