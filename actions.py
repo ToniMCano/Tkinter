@@ -400,7 +400,7 @@ class MyCalendar():
         
         if place == "general":
             
-            frame = frame.calendar.bind("<<CalendarSelected>>", lambda e: MyCalendar.general_calendar_date(self , place , date , e))
+            general_date = frame.calendar.bind("<<CalendarSelected>>", lambda e: MyCalendar.general_calendar_date(self , place , frame.calendar.get_date() , e))
        
         elif place != "general":
             
@@ -422,9 +422,8 @@ class MyCalendar():
 
     def general_calendar_date(self , place , date , event):
         
-        
         try:
-            fecha_seleccionada = frame.calendar.get_date() ## Para poder ordenarlo en la DB "YYYY-MM-DD" 
+            fecha_seleccionada = date ## Para poder ordenarlo en la DB "YYYY-MM-DD" 
             month = int(fecha_seleccionada[5:7])
             year = int(fecha_seleccionada[0:4])
             
@@ -436,7 +435,7 @@ class MyCalendar():
             
             LoadInfo.load_contacts(self , self.employee.get() , fecha_seleccionada)
             
-            date.set(datetime(year,month,day).strftime("%d %B")) 
+            self.fecha.set(datetime(year,month,day).strftime("%d %B")) 
             
             MyCalendar.calendar_toggle_frame(self , place)
         
@@ -604,14 +603,14 @@ class LoadInfo():
                     
                 else:
                     dataframe["próximo"].append(f'{"d"}')
-                print(dataframe["próximo"] ,dataframe["último"] ) 
+
                 dataframe["cp"].append(client.postal_code)  
                 dataframe["pop"].append(contact.pop_up)
 
             except Exception as e:
                 print(e)
             
-            print(dataframe)
+            #print(dataframe)
         ordenado = pd.DataFrame(dataframe)
         ordenado = ordenado.sort_values(by = pd_filter , ascending = ascending_value)
         ordenado = ordenado.reset_index(drop = True)
