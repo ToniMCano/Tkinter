@@ -17,7 +17,6 @@ from customtkinter import *
 import pandas as pd
 import time
 import threading
-import threading
 #locale.setlocale(locale.LC_ALL, '')   Si uso Locale customtkinter da problemas.  ----- "TO-DO"
  
 
@@ -592,7 +591,7 @@ class LoadInfo():
         Alerts.refresh_alerts(self , employee_id_sended )
     
     
-    def contacts_dataframe(self, clients, dataframe, pd_filter , ascending_value):
+    def contacts_dataframe(self, clients, dataframe, pd_filter , ascending_value): 
         
         for i , client in enumerate(clients):  # De aquí se deber cargar el útlimo contacto con el "dot" si fuera necesario
             
@@ -607,13 +606,13 @@ class LoadInfo():
                     dataframe["último"].append(contact.last_contact_date)
                     
                 else:
-                    dataframe["último"].append("d")
+                    dataframe["último"].append(".")
                     
                 if contact.next_contact:
                     dataframe["próximo"].append(f'{contact.next_contact}')
                     
                 else:
-                    dataframe["próximo"].append(f'{"d"}')
+                    dataframe["próximo"].append(f'{"."}')
 
                 dataframe["cp"].append(client.postal_code)  
                 dataframe["pop"].append(contact.pop_up)
@@ -658,54 +657,7 @@ class LoadInfo():
                 bgcolor += 1
                 
         return contacts
-                
-                
-                
-                
-    def contact_list(clients, dataframe):
-        
-        for i , client in enumerate(clients):  # De aquí se deber cargar el útlimo contacto con el "dot" si fuera necesario
-                
-                contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first()
-                
-                try:
-                    dataframe["estado"].append(client.state)
-                    dataframe["días"].append(LoadInfo.get_days(client))
-                    dataframe["nombre"].append(client.name)
-                    
-                    if contact.last_contact_date:
-                        dataframe["último"].append(contact.last_contact_date)
-                        
-                    else:
-                        dataframe["último"].append("último")
-                        
-                    if contact.next_contact:
-                        dataframe["próximo"].append(f'{contact.next_contact}')
-                        
-                    else:
-                        dataframe["próximo"].append(f'{"próximo"}')
-                    
-                    dataframe["cp"].append(client.postal_code)  
-                    
-                    if contact.pop_up:
-                        dataframe["pop"].append(f'{contact.pop_up}')
-                        
-                    else:
-                        dataframe["pop"].append(f'{"pop"}')
-                    
 
-                except Exception as e:
-                    print("contact_list" , e)
-
-        ordenado = pd.DataFrame(dataframe)
-        
-        return ordenado
-
-
-    def pool_list(clients, dataframe):
-        pass
-        
-        
             
     def get_days(client):
         
@@ -1078,13 +1030,13 @@ class AddInfo():
          
         if log_type != 'log':
                     
-            hour , all_ok = AddInfo.check_hour(hour.get())   
+            hour = AddInfo.check_hour(hour.get())   
 
         self.text_log.delete(1.0 , 'end')
         
         if log_type == 'next':
             
-            try:                                                     #log_type_next(self , calendar_date , hour  , log , employee , company_info , row_to_change_values , dot)
+            try:                                                     
                 all_ok , new_comment , row_to_change_values = AddInfo.log_type_next(self , calendar_date , hour , log , employee , company_info , row_to_change_values , dot)
             
             except Exception as e:
@@ -1093,7 +1045,7 @@ class AddInfo():
                 
         elif log_type == 'log':
             try:
-                 all_ok , new_comment = AddInfo.log_type_log(self , calendar_date , hour , log , employee , company_info)
+                 all_ok , new_comment = AddInfo.log_type_log(self , calendar_date , log , employee , company_info)
                  
             except Exception as e:
                 print(f"add_log (log_type_log): {e}")
@@ -1110,11 +1062,11 @@ class AddInfo():
         if all_ok:          
             db.session.add(new_comment)
             db.session.commit()
-            print("Hemos Guardado")
+            print("* Hemos Guardado")
             self.info.item(row_id , text = row_to_change_text , values = row_to_change_values)
             
             GetInfo.load_comments(self , self.entry_nif.get())
-            print("Hemos refrescado\n\n\n\n")
+            print("* Hemos refrescado\n\n\n\n")
         db.session.close()
     
     
@@ -1135,10 +1087,10 @@ class AddInfo():
         
         #return row_to_change_values , row_to_change_text
     
-        
-    def log_type_log(self , calendar_date , hour , client , log , employee , company_info):
+
+    def log_type_log(self , calendar_date , log , employee , company_info):
             try:
-                new_comment = Contact(str(datetime.now())[:16] , calendar_date , log , client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
+                new_comment = Contact(str(datetime.now())[:16] , calendar_date , log , company_info.id_client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
                
                 all_ok = True
                 
@@ -1154,24 +1106,21 @@ class AddInfo():
                 
         
     def log_type_next(self , calendar_date , hour , log , employee , company_info , row_to_change_values , dot):
-        print('company info',f'-----{company_info.id_client}-----')
-        print('company info',f'-----{company_info}-----')
-        
+        print('* company info',f'-----{company_info.id_client}-----')       
         
         date = f'{calendar_date} {hour}'
-        Alerts.clean_old_pop_ups(self ,  company_info.id_client)
-        print(company_info.id_client , "desde Next Save")
+        Alerts.clean_old_pop_ups(self ,  company_info)
         
         MyCalendar.calendar_toggle_frame(self , 'next')
 
         try:
-            print("Falla Aquí" , str(datetime.now())[:16] , date , log , company_info.id_client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
+            print("* Falla Aquí" , str(datetime.now())[:16] , date , log , company_info.id_client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
             print(row_to_change_values)
             new_comment = Contact(str(datetime.now())[:16] , date , log , company_info.id_client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
             print(new_comment)
-            print('row_to_change_values',row_to_change_values)  
+            print('* row_to_change_values',row_to_change_values)  
             row_to_change_values[3] = MyCalendar.format_date_to_show(date) 
-            print(f" row_to_change_values[3]: {row_to_change_values[3]}")
+            print(f"* row_to_change_values[3]: {row_to_change_values[3]}")
             all_ok = True
             
             return all_ok , new_comment , row_to_change_values 
@@ -1187,14 +1136,14 @@ class AddInfo():
         Alerts.clean_old_pop_ups(self ,  company_info)
             
         try:
-            print(f"log_type_pop en try")
+            print(f"**log_type_pop en try")
             MyCalendar.calendar_toggle_frame(self , 'pop')
-            print(f"log_type_pop antes new_comment")
+            print(f"**log_type_pop antes new_comment")
             print(str(datetime.now())[:16] , date , log , company_info.id_client , employee , company_info.contact_person , company_info.state , company_info.counter , True)
             new_comment = Contact(str(datetime.now())[:16] , date , log , company_info.id_client , employee , company_info.contact_person , company_info.state , company_info.counter , True)
-            print(f"log_type_pop después new_comment" , row_to_change_values)
+            print(f"**log_type_pop después new_comment" , row_to_change_values)
             row_to_change_values[3] = f'{MyCalendar.format_date_to_show(date)} {dot}' # EL PROBLEMA VIENED DE AQUÍ
-            print("Hemos pasado")
+            print("**Hemos pasado")
             all_ok = True
             
             return all_ok , new_comment , row_to_change_values
@@ -1212,7 +1161,7 @@ class AddInfo():
                 if int(test[0]) <=24 and int(test[1]) < 60:
                     ok = hour
 
-                return ok , True
+                return ok 
             
             else:
                 raise Exception
@@ -1233,12 +1182,13 @@ class Alerts():
         search = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee_id , Contact.pop_up == True)).all()
 
         for alert in search:
-            
+
             if str(alert.next_contact) <= str(date)  and alert.id_contact not in alerts:
+
                 alerts.append(alert.id_contact)
-                print(f"Alerts: {alerts}")
+  
         new_alerts = alerts
-        
+
         if new_alerts != old_alerts:
             Alerts.pop_up_alert(self , employee_id , date , new_alerts)
 
@@ -1292,6 +1242,7 @@ class Alerts():
     
     
     def refresh_alerts(self , employee_id):
+        print("Refresh Alerts")
         try:
             Alerts.check_pop_ups(self, employee_id)
             threading.Timer(60, Alerts.refresh_alerts, args=[self , employee_id]).start()
@@ -1319,27 +1270,32 @@ class Alerts():
     def clean_old_pop_ups(self, client):
         last = db.session.query(Contact).filter(and_(Contact.client_id == client.id_client , Contact.pop_up == True)).first()  
         values = AddInfo.row_to_change(self , client.name)
-        print("clean old pops",last)
-        
+        print("* clean old pops",last)
+        print(values)
         try:
             if last.pop_up:
-                print("Dentro de last" , last.pop_up )
+                print("* Dentro de last" , last.pop_up )
                 last.pop_up = False 
-                print("Dentro de last cambiado" , last.pop_up )
+                print("* Dentro de last cambiado" , last.pop_up )
                 db.session.commit()
                 #db.session.close()
         
                 dot = '◉'
                 row_to_change_text = values[0]
+                print("* 0 SI" , values[0])
                 row_to_change_values = values[1]
-                row_id = values[3]
-
+                print("* 1 SI" , values[1])
+                row_id = values[2]
+                print("* 2 SI" , values[2])
+                print("Dentro Antes" , row_to_change_values[3])
                 row_to_change_values[3] = row_to_change_values[3].replace(dot , "")
-                
+                print("Dentro de Despuùes" , row_to_change_values[3])
                 self.info.item(row_id , text = row_to_change_text , values = row_to_change_values)
-                
+                last.pop_up = False
+                print("* Alerts Antes de remover" ,alerts)
                 alerts.remove(last.id_contact)
+                print("* Alerts Despúes de remover" ,alerts)
                 
         except Exception as e:
             print("clean_old_pop_ups -" , e)
-            
+
