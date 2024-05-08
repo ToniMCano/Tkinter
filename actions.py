@@ -20,9 +20,9 @@ import threading
 #locale.setlocale(locale.LC_ALL, '')   Si uso Locale customtkinter da problemas.  ----- "TO-DO"
  
 
-
 alerts = []
- 
+active_timer = [False]
+
 class Pops:
     
     def center_window(self, window):
@@ -507,7 +507,8 @@ class LoadInfo():
                 root.combo_state.current(newindex=2)
                 
                 root.active_employee_id.set(employee.id_employee)
-                
+                               
+                Alerts.refresh_alerts(root , employee.id_employee)
                
         if not exists:
             mb.showwarning("Login Error" , "El usuario o la contraseña no son correctos")
@@ -518,15 +519,15 @@ class LoadInfo():
     def on_heading_click(self , query):
         
         if query == 'state':
-            query = "estado"
+            query = "state"
         elif query == 'days':
-            query = "días"
+            query = "days"
         elif query == 'client':
-            query = "nombre"
-        elif query == 'last_contact':
-            query = "último"
-        elif query == 'next_contact':
-            query = "próximo"
+            query = "name"
+        elif query == 'last':
+            query = "last"
+        elif query == 'next':
+            query = "next"
         elif query == 'postal_code':
             query = 'cp'
         
@@ -537,19 +538,14 @@ class LoadInfo():
         
 
 
-    def load_contacts(self , employee_id_sended , date , query = 'último' , state_sended = "Contact"): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
+    def load_contacts(self , employee_id_sended , date , query = 'last' , state_sended = "Contact"): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
         
         dot = '◉'  # ASCII
-        bell = '🔔'
-        alert = ""
-        dataframe = {"estado" : [] , "días" : [] , "nombre" : [] , "último" : [] , "próximo" : [] , "cp" : [] , "pop" : []}
+        dataframe = {"state" : [] , "days" : [] , "name" : [] , "last" : [] , "next" : [] , "cp" : [] , "pop" : []}
         pd_filter = query
         ascending_value = False
         state_view = state_sended
-        
-        if query == "días":
-            ascending_value = True
-            
+
         if str(employee_id_sended).isdigit():
             pass
         
@@ -558,7 +554,7 @@ class LoadInfo():
             employee_id_sended = employee_id_sended.id_employee
 
         if not date:
-            date = str(datetime.now()) + " 23:59"    
+            date = str(datetime.now())[:11]    
 
         try:
             clean = self.info.get_children()
@@ -587,32 +583,32 @@ class LoadInfo():
         contacts = LoadInfo.row_colors(self, clients , ordenado , date , bgcolor , contacts , dot)
                 
         self.contacts.set(f"Contactos: {contacts}")
-
-        Alerts.refresh_alerts(self , employee_id_sended )
+        print("*** Llamada desde load_contacts")
+        Alerts.check_pop_ups(self , employee_id_sended )
     
     
     def contacts_dataframe(self, clients, dataframe, pd_filter , ascending_value): 
         
-        for i , client in enumerate(clients):  # De aquí se deber cargar el útlimo contacto con el "dot" si fuera necesario
-            
-            contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date.desc()).first()
+        for i , client in enumerate(clients):  
+            # De aquí se deber cargar el útlimo contacto con el "dot" si fuera necesario
+            contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.id_contact.desc()).first()
             
             try:
-                dataframe["estado"].append(client.state)
-                dataframe["días"].append(LoadInfo.get_days(client))
-                dataframe["nombre"].append(client.name)
+                dataframe["state"].append(client.state)
+                dataframe["days"].append(LoadInfo.get_days(client))
+                dataframe["name"].append(client.name)
                 
                 if contact.last_contact_date:
-                    dataframe["último"].append(contact.last_contact_date)
+                    dataframe["last"].append(contact.last_contact_date)
                     
                 else:
-                    dataframe["último"].append(".")
+                    dataframe["last"].append(".")
                     
                 if contact.next_contact:
-                    dataframe["próximo"].append(f'{contact.next_contact}')
+                    dataframe["next"].append(f'{contact.next_contact}')
                     
                 else:
-                    dataframe["próximo"].append(f'{"."}')
+                    dataframe["next"].append(f'{"."}')
 
                 dataframe["cp"].append(client.postal_code)  
                 dataframe["pop"].append(contact.pop_up)
@@ -631,9 +627,9 @@ class LoadInfo():
     def row_colors(self, clients , ordenado , date , bgcolor , contacts , dot):
         for i , client in enumerate(clients):
             #print(f'[2]ID Cliente: {client.id_client} - ID CLiente Contacto: {contact.client_id}')
-            if ordenado.at[i, 'próximo'] <= str(date)[:10] + "23:59":               
+            if ordenado.at[i, "next"] <= str(date)[:11] + "23:59":               
               
-                if int(ordenado.at[i, 'días']) > 110:
+                if int(ordenado.at[i, "days"]) >= 80:
                     font = "font_red"
                     
                 else:
@@ -646,12 +642,12 @@ class LoadInfo():
                     color= "even"
                 
                 if ordenado.at[i, 'pop'] == True:
-                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'próximo'])} {dot}"
+                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, "next"])} {dot}"
                 
                 else:
-                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'próximo'])}"
+                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, "next"])}"
                     
-                self.info.insert("" , 0 , text = ordenado.at[i, 'estado'] , values = (ordenado.at[i, 'días'].lstrip("0") , ordenado.at[i, 'nombre'] , MyCalendar.format_date_to_show(ordenado.at[i, 'último'])  , next_contact , ordenado.at[i, 'cp']) , tags=(color, font) )
+                self.info.insert("" , 0 , text = ordenado.at[i, 'state'] , values = (ordenado.at[i, 'days'].lstrip("0") , ordenado.at[i, 'name'] , MyCalendar.format_date_to_show(ordenado.at[i, 'last'])  , next_contact , ordenado.at[i, 'cp']) , tags=(color, font) )
                
                 contacts += 1
                 bgcolor += 1
@@ -749,7 +745,7 @@ class LoadInfo():
         if item == "All":
             state_sended = "All"
             
-        LoadInfo.load_contacts(self , self.active_employee_id.get() , fecha_seleccionada , 'último' , state_sended) 
+        LoadInfo.load_contacts(self , self.active_employee_id.get() , fecha_seleccionada , 'last' , state_sended) 
     
 class GetInfo():
     
@@ -1015,7 +1011,7 @@ class AddInfo():
         except Exception as e:
             mb.showerror("Error al añadir Persona de Contacto" , f"{e}")
             
-    
+                
     def add_log(self , hour , calendar_date , log_type):
         
         log = self.text_log.get(1.0, "end")
@@ -1025,7 +1021,8 @@ class AddInfo():
         row_id = self.info.focus()   
         values =  AddInfo.row_to_change(self, company_info.name)  
         row_to_change_text = values[0]
-        row_to_change_values  =  values[1]         
+        row_to_change_values  =  values[1]
+        print(f"Focus add_log: {row_id}")         
         dot = '◉'
          
         if log_type != 'log':
@@ -1170,27 +1167,34 @@ class AddInfo():
             mb.showerror('Hora' , f'\n\nEl formato de la hora no es correcto: {hour}\n\nFormato Correcto: 08:30 (HH:MM)')
                     
             
-alerts = []
+
 
 class Alerts():
     
     def check_pop_ups(self , employee_id ):
+        
         date = str(datetime.now())
-
+        print("Cheking pop Ups..." , date)
         old_alerts = alerts[:]     
 
-        search = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee_id , Contact.pop_up == True)).all()
+        try:
+            search = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee_id , Contact.pop_up == True)).all()
 
-        for alert in search:
+            for alert in search:
 
-            if str(alert.next_contact) <= str(date)  and alert.id_contact not in alerts:
+                if str(alert.next_contact) <= str(date)  and alert.id_contact not in alerts:
 
-                alerts.append(alert.id_contact)
-  
-        new_alerts = alerts
+                    alerts.append(alert.id_contact)
+    
+            new_alerts = alerts
+            
+            if new_alerts != old_alerts:
+                Alerts.pop_up_alert(self , employee_id , date , new_alerts)
+            
+        except Exception as e:
+            print(e)
 
-        if new_alerts != old_alerts:
-            Alerts.pop_up_alert(self , employee_id , date , new_alerts)
+        
 
 
     def pop_up_alert(self , employee_id , date , now_alerts = alerts):
@@ -1242,18 +1246,23 @@ class Alerts():
     
     
     def refresh_alerts(self , employee_id):
-        print("Refresh Alerts")
+        
+        threading.Timer(60 , Alerts.refresh_alerts, args=[self , employee_id]).start()
+ 
+        print("*** Refresh Alerts" , datetime.now() , "***")
+
         try:
             Alerts.check_pop_ups(self, employee_id)
-            threading.Timer(60, Alerts.refresh_alerts, args=[self , employee_id]).start()
             
         except Exception as e:
+            print(e)
             exit()
 
+    
         
     def view_alert(self , name , window , employee_id_sended , date , clean = False):
         print( "Empleado y fecha" ,employee_id_sended , date )
-        LoadInfo.load_contacts(self , employee_id_sended , date , query = 'último' , state_sended = "Contact")
+        LoadInfo.load_contacts(self , employee_id_sended , date , query = 'last' , state_sended = "Contact")
         
         tree = self.info.get_children()
         

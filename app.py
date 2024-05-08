@@ -27,10 +27,7 @@ class Main:
         self.ventana_principal.resizable(1,1)
         self.ventana_principal.geometry('1200x800')
         self.ventana_principal.configure(bg="#f4f4f4") 
-        #self.ventana_principal.protocol("WM_DELETE_WINDOW", lambda: als.refresh_alerts(self , self.active_employee_id)) #Sirve para vincular un evento al cierre de una ventana.
         pw.center_window(self, self.ventana_principal)
-        
-        
         
         # INFO LISTA
         
@@ -53,8 +50,8 @@ class Main:
         self.info.heading("#0" , text = "Estado" , command = lambda: li.on_heading_click(self , "state"))
         self.info.heading("#1" , text = "Días" , command = lambda: li.on_heading_click(self , "days"))
         self.info.heading("#2" , text  ="Cliente" , command = lambda: li.on_heading_click(self , "client"))
-        self.info.heading("#3" , text = "Último Contacto" , command = lambda: li.on_heading_click(self , "last_contact"))
-        self.info.heading("#4" , text = "Próximo Contacto" , command = lambda: li.on_heading_click(self , "next_contact"))
+        self.info.heading("#3" , text = "Último Contacto" , command = lambda: li.on_heading_click(self , "last"))
+        self.info.heading("#4" , text = "Próximo Contacto" , command = lambda: li.on_heading_click(self , "next"))
         self.info.heading("#5" , text = "C. Postal" , command = lambda: li.on_heading_click(self , "postal_code"))
         
         self.info.column("#0" , width = 25 , anchor="center")
@@ -186,7 +183,7 @@ class Main:
         self.boton_pop_up.config(cursor = 'arrow')
         self.boton_pop_up.grid(row = 2 , column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
-        self.boton_log = ttk.Button(self.frame_log , text = "Log" , command = lambda: ai.add_log(self , 'hour' , str(datetime.now() + timedelta(days = 1))[:16] , "log"))
+        self.boton_log = ttk.Button(self.frame_log , text = "Log" , command = lambda: ai.add_log(self , 'hour' , str(datetime.now())[:16] , "log"))
         self.boton_log.config(cursor = 'arrow')
         self.boton_log.grid(row = 1 , column = 7, padx = 2 , pady= 2 , sticky = "nswe" , rowspan = 2)
 

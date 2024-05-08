@@ -12,6 +12,8 @@ from tkinter import *
 import customtkinter
 from actions import GetInfo,LoadInfo
 import pandas as pd
+import threading
+import time
 
 
 
@@ -276,5 +278,16 @@ def date():
         
         return f"2024-{month}-{day} 0{random.randint(6,9)}:00:00"
         
+
+def exect():
+    print('Se ejecuta' , datetime.now())
+
+   
+
+   
         
-optimizar2()
+        
+refresh_alerts()
+
+
+
