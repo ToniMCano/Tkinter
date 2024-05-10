@@ -286,8 +286,9 @@ def exect():
 
    
         
-        
-refresh_alerts()
+listar = ['a' , 'b' ]
+listar.remove('a')
+print(listar)
 
 
 
