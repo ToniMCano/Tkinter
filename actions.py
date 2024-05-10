@@ -368,7 +368,7 @@ class MyCalendar():
             frame.place_forget()
                 
     
-    def calendar(self , place , date = "" ):  
+    def calendar(self , place):  
         
         frame = MyCalendar.place_to_frame(self , place)
         
@@ -399,7 +399,7 @@ class MyCalendar():
         
         if place == "general":
             
-            general_date = frame.calendar.bind("<<CalendarSelected>>", lambda e: MyCalendar.general_calendar_date(self , place , frame.calendar.get_date() , e))
+            frame.calendar.bind("<<CalendarSelected>>", lambda e: MyCalendar.general_calendar_date(self , place , frame.calendar.get_date() , e))
        
         elif place != "general":
             
@@ -415,7 +415,7 @@ class MyCalendar():
             hour.current(newindex = 0)
             hour.config(justify=CENTER)
             hour.pack(fill = "x" , expand = True , anchor = "center")
-            send = ttk.Button(frame , text = "Save" , command = lambda: AddInfo.add_log(self , hour , frame.calendar.get_date() , log_type))#lambda: MyCalendar.format_date(self , place , hour = hour.get()) )
+            send = ttk.Button(frame , text = "Save" , command = lambda: AddInfo.add_log(self , frame.calendar.get_date() , log_type , hour))#lambda: MyCalendar.format_date(self , place , hour = hour.get()) )
             send.pack(pady = 5)
             
 
@@ -612,7 +612,7 @@ class LoadInfo():
 
                 dataframe["cp"].append(client.postal_code)  
                 dataframe["pop"].append(contact.pop_up)
-
+                #print(f"{client.name} - {contact.pop_up}")
             except Exception as e:
                 print("load_contacts" , e)
             
@@ -626,7 +626,7 @@ class LoadInfo():
     
     def row_colors(self, clients , ordenado , date , bgcolor , contacts , dot):
         for i , client in enumerate(clients):
-            #print(f'[2]ID Cliente: {client.id_client} - ID CLiente Contacto: {contact.client_id}')
+
             if ordenado.at[i, 'next'] <= str(date)[:11] + "23:59":               
               
                 if int(ordenado.at[i, "days"]) >= 80:
@@ -640,7 +640,7 @@ class LoadInfo():
                 
                 else:
                     color= "even"
-                
+                #print(ordenado.at[i, 'pop'])
                 if ordenado.at[i, 'pop'] == True:
                     next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])} {dot}"
                 
@@ -678,6 +678,7 @@ class LoadInfo():
         
         try:
             row = tree.info.focus()
+            print(row)
             item = tree.info.item(row)
             client_name = item['values'][1]
             
@@ -926,7 +927,7 @@ class AddInfo():
         
         try:
             
-            vcontact_person = AddInfo.add_contact(data , employee_adder)
+            vcontact_person = AddInfo.add_contact_person(data , employee_adder)
             
             company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Código Postal: "], data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , self.active_employee_id.get()  , "Pool", data["Empleados: "] , datetime.now(),)
             vcontact_person.client_id = vcontact_person.id_person
@@ -996,7 +997,7 @@ class AddInfo():
             mb.showwarning("Errores en la inserción de Empresas" , f"Empresas que no han podido ser insertadas: {errores}")    
             
      
-    def add_contact(data , employee_adder):
+    def add_contact_person(data , employee_adder):
         
         try:                                                                                                                                                                                                # TO-DO sustituir por la empresa adminstradora
             contact_person = ContactPerson(data["Nombre Contacto: "] , data["Apellidos Contacto: "] , data["Cargo: "] , data["Teléfono Contacto: "] , data["Móvil Contacto: "] , data["Mail Contacto: "] , "Id de la Empresa" , employee_adder)
@@ -1012,65 +1013,67 @@ class AddInfo():
             mb.showerror("Error al añadir Persona de Contacto" , f"{e}")
             
                 
-    def add_log(self , hour , calendar_date , log_type):
+    def add_log(self , calendar_date , log_type , hour):
         
-        log = self.text_log.get(1.0, "end")
-        client = self.company_id.get()
-        company_info = db.session.get(Client , client)
-        employee = self.active_employee_id.get() 
-        row_id = self.info.focus()   
-        values =  AddInfo.row_to_change(self, company_info.name)  
-        row_to_change_text = values[0]
-        row_to_change_values  =  values[1]
-        all_ok = "Hola"
-        print(f"Focus add_log: {row_id}")         
-        dot = '◉'
+        client = self.company_id.get()#
+        company_info = db.session.get(Client , client)#
+        employee = self.active_employee_id.get()# 
+        dot = '◉'#
          
-        if log_type != 'log':
-                    
-            hour = AddInfo.check_hour(hour.get())   
 
-        self.text_log.delete(1.0 , 'end')
-        
         if log_type == 'next':
             
             try:                                                     
-                all_ok , new_comment , row_to_change_values = AddInfo.log_type_next(self , calendar_date , hour , log , employee , company_info , row_to_change_values , dot)
+                AddInfo.log_type_next(self , calendar_date , employee , company_info , hour)
             
             except Exception as e:
                 print(f"add_log (log_type_next): {e}")
-                all_ok = False
                 
         elif log_type == 'log':
             try:
-                 all_ok , new_comment = AddInfo.log_type_log(self , log , employee , company_info)
+                AddInfo.log_type_log(self , employee , company_info)
                  
             except Exception as e:
-                print(f"add_log (log_type_log): {e}")
-                all_ok = False           
+                print(f"add_log (log_type_log): {e}")           
                            
         else:
             try:
-                all_ok , new_comment , row_to_change_values = AddInfo.log_type_pop(self , calendar_date , hour , log , employee , company_info , row_to_change_values , dot)
+                AddInfo.log_type_pop(self , calendar_date , employee , company_info , dot , hour)
               
             except Exception as e:
-                print(f"add_log (log_type_pop): {e}") #add_log (log_type_pop): cannot unpack non-iterable bool object
-                all_ok = False       
-            
+                print(f"add_log (log_type_pop): {e}") #add_log (log_type_pop): cannot unpack non-iterable bool object 
+                     
+        self.text_log.delete(1.0 , 'end')
+        #AddInfo.save_log(self , all_ok , new_comment , row_to_change_text , row_to_change_values , employee , calendar_date)
+        
+    
+    
+    def save_log(self , all_ok , new_comment , row_text_values_item):
+        
+        AddInfo.confirm_unique_pop(new_comment)
+
+        row = row_text_values_item
+        
         if all_ok:  
-            print("*** All OK" , all_ok)        
+       
             db.session.add(new_comment)
             db.session.commit()
-            print("* Hemos Guardado")
-            self.info.item(row_id , text = row_to_change_text , values = row_to_change_values)
-            
+
+            self.info.item( row[2] , text = row[0] , values = row[1])
+
             GetInfo.load_comments(self , self.entry_nif.get())
-            LoadInfo.load_contacts(self , employee , calendar_date)
-            print("* Hemos refrescado\n\n\n\n")
+
         db.session.close()
     
     
-    def row_to_change(self , client):
+    def confirm_unique_pop(new_comment):
+       contacts =  db.session.query(Contact).filter(Contact.client_id == new_comment.client_id).all()   
+       
+       for contact in contacts:
+           contact.pop_up = False 
+        
+        
+    def row_to_change(self , client_name):
         
         text = ""
         values = ""
@@ -1078,58 +1081,65 @@ class AddInfo():
         
         for item in tree: #self.info.item(item , 'values')[1]
             
-            if self.info.item(item , 'values')[1] == client:
-                print(f"** Client Name: {client}")
+            if self.info.item(item , 'values')[1] == client_name:
+                print(f"** Client Name: {client_name}")
                 values = list(self.info.item(item , 'values'))
                 text = self.info.item(item , 'text')
                 print(text , values[1])
-        return [text , values , item]
+                return [text , values , item]
     
 
-    def log_type_log(self , log , employee , company_info):
-            try:
-                last_comment = db.session.query(Contact).filter(Contact.contact_employee_id == employee).order_by(Contact.last_contact_date.desc()).first()
-                new_comment = Contact(str(datetime.now())[:16] , last_comment.last_contact_date , log , company_info.id_client , employee , company_info.contact_person , company_info.state , company_info.counter , last_comment.pop_up)
-                last_comment.pop_up = False
-                db.session.commit()
-                Alerts.clean_old_pop_ups(self , last_comment.id_contact)
-               
-                all_ok = True
-                
-                return all_ok , new_comment
-            
-            except Exception as e:
-                print("add_log" , e)
-                
-                if isinstance(e , IntegrityError):
-                    pass
-                else:
-                    mb.showerror("Datos No Válidos (Log)" , f"\n\nDatos incompletos o erróneos.\n\n")
-                
+    def log_type_log(self , employee , company_info):
         
-    def log_type_next(self , calendar_date , hour , log , employee , company_info , row_to_change_values , dot):
-    
-        last_comment = db.session.query(Contact).filter(Contact.contact_employee_id == employee).order_by(Contact.last_contact_date.desc()).first() 
-        last_comment.pop_up = False
-        db.session.commit()
+        row_text_values_item = AddInfo.row_to_change(self , company_info.name)
         
-        date = f'{calendar_date} {hour}'
-        
-        Alerts.clean_old_pop_ups(self ,  last_comment.id_contact)
-        
-        MyCalendar.calendar_toggle_frame(self , 'next')
-
         try:
-            #print("* Falla Aquí" , str(datetime.now())[:16] , date , log , company_info.id_client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
-            #print(row_to_change_values)
-            new_comment = Contact(str(datetime.now())[:16] , date , log , company_info.id_client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
-           # print(new_comment)
-            #print('* row_to_change_values',row_to_change_values)  
-            row_to_change_values[3] = MyCalendar.format_date_to_show(date) 
-            #print(f"* row_to_change_values[3]: {row_to_change_values[3]}")
+            print(f"***ENTRA")
+            last_comment = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee , Contact.client_id == company_info.id_client)).order_by(Contact.last_contact_date.desc()).first()
+            new_comment = Contact(str(datetime.now())[:16] , last_comment.next_contact , self.text_log.get(1.0, "end") , company_info.id_client , employee , company_info.contact_person , company_info.state , company_info.counter , False)
+            
+            Alerts.clean_old_pop_ups(self , last_comment.id_contact)
+            
             all_ok = True
             
-            return all_ok , new_comment , row_to_change_values 
+            row_text_values_item[1][2] = str(datetime.now())[:16] 
+            
+            AddInfo.save_log(self , all_ok , new_comment , row_text_values_item)
+        
+        except Exception as e:
+            print("add_log" , e)
+            
+            if isinstance(e , IntegrityError):
+                pass
+            else:
+                mb.showerror("Datos No Válidos (Log)" , f"\n\nDatos incompletos o erróneos.\n\n")
+                
+                     
+    def log_type_next(self , calendar_date , employee , company_info , hour): 
+
+        row_text_values_item = AddInfo.row_to_change(self , company_info.name)
+        
+        date = AddInfo.clean_last_contact(self , employee , company_info , calendar_date , AddInfo.check_hour(hour.get())   , 'next')
+        
+        '''
+       --- reemplazar clean_last_contact para incluir estas funcions desde pop y next,  ---
+         date = f'{calendar_date} {hour}'
+                
+        MyCalendar.calendar_toggle_frame(self , calendar)   
+                
+        Alerts.clean_old_pop_ups(self , last_comment.id_contact)
+        '''
+
+        try:
+
+            new_comment = Contact(str(datetime.now())[:16] , date , self.text_log.get(1.0, "end") , company_info.id_client , self.active_employee_id.get() , company_info.contact_person , company_info.state , company_info.counter , False)
+ 
+            row_text_values_item[1][3] = MyCalendar.format_date_to_show(date) 
+
+            all_ok = True
+            
+            AddInfo.save_log(self , all_ok , new_comment , row_text_values_item)
+            
             
         except Exception as e:
             print("add_log" , e)
@@ -1137,28 +1147,26 @@ class AddInfo():
             mb.showerror("Datos No Válidos (Next Contact)" , f"\n\nDatos incompletos o erróneos.\n\n")
 
     
-    def log_type_pop(self , calendar_date , hour , log , employee , company_info , row_to_change_values , dot):
-        date = f'{calendar_date} {hour}'  #and_(Contact.client_id == company_info.id_client , Contact.pop_up == True)
-        contact = db.session.query(Contact).filter(Contact.client_id == company_info.id_client).order_by(Contact.last_contact_date.desc()).first()
-        contact.pop_up = False
-        Alerts.clean_old_pop_ups(self ,  contact.id_contact)
-            
+    def log_type_pop(self , calendar_date , employee , company_info , dot , hour):
+        
+        row_text_values_item = AddInfo.row_to_change(self , company_info.name)
+        
+        date = AddInfo.clean_last_contact(self , employee , company_info , calendar_date , AddInfo.check_hour(hour.get())  , 'pop')
+                
         try:
-            print(f"**log_type_pop en try")
-            MyCalendar.calendar_toggle_frame(self , 'pop')
-            print(f"**log_type_pop antes new_comment")
-            print(str(datetime.now())[:16] , date , log , company_info.id_client , employee , company_info.contact_person , company_info.state , company_info.counter , True)
-            new_comment = Contact(str(datetime.now())[:16] , date , log , company_info.id_client , employee , company_info.contact_person , company_info.state , company_info.counter , True)
-            print(f"**log_type_pop después new_comment" , row_to_change_values)
-            row_to_change_values[3] = f'{MyCalendar.format_date_to_show(date)} {dot}' # EL PROBLEMA VIENED DE AQUÍ
-            print("**Hemos pasado")
+            new_comment = Contact(str(datetime.now())[:16] , date , self.text_log.get(1.0, "end") , company_info.id_client , self.active_employee_id.get() , company_info.contact_person , company_info.state , company_info.counter , True)
+            
+            row_text_values_item[1][3] = f'{MyCalendar.format_date_to_show(date)} {dot}'
+           
             all_ok = True
             
-            return all_ok , new_comment , row_to_change_values
-        
+            AddInfo.save_log(self , all_ok , new_comment , row_text_values_item)
+            
+            Alerts.check_pop_ups(self , employee)
+            
         except Exception as e:
             mb.showerror("Datos No Válidos" , f"\n\nDatos incompletos o erróneos.\n\n")                          
-            
+                 
             
     def check_hour(hour):
 
@@ -1232,15 +1240,15 @@ class Alerts():
             label_alert_name.configure(background = "lightgray")
             label_alert_name.grid(row = 0 , column = 0 , sticky = 'we' , padx = 10 , pady = 5)
             
-            label_alert_log = ttk.Label(show_alert_frame , text = alert_content[1] , wraplength = 250)
+            label_alert_log = ttk.Label(show_alert_frame , text = alert_content[2] , wraplength = 250)
             label_alert_log.configure(background = "lightgray")
             label_alert_log.grid(row = 0 , column = 1 , sticky = 'we' , padx = 10 , pady = 5)
             
-            label_alert_date = ttk.Label(show_alert_frame , text = alert_content[2])
+            label_alert_date = ttk.Label(show_alert_frame , text = alert_content[3])
             label_alert_date.configure(background = "lightgray")
             label_alert_date.grid(row = 0 , column = 2 , sticky = 'we' , padx = 10 , pady = 5)
             
-            show_client_button = CTkButton(show_alert_frame , text = 'Ver' , corner_radius = 2 , fg_color = '#f4f4f4' , text_color = 'snow3' , hover_color = 'LightBlue4' , width = 60 , command = lambda name = alert_content[0]: Alerts.view_alert(self , name , window ,  employee_id , date))
+            show_client_button = CTkButton(show_alert_frame , text = 'Ver' , corner_radius = 2 , fg_color = '#f4f4f4' , text_color = 'snow3' , hover_color = 'LightBlue4' , width = 60 , command = lambda name = alert_content[1]: Alerts.view_alert(self , name , window ,  employee_id , date))
             show_client_button.grid(row = 0 , column = 3 , padx = 10 , pady = 5)          
             
             Pops.center_window(self , window)
@@ -1251,7 +1259,7 @@ class Alerts():
         
         contact_info = db.session.get(Contact , id_contact)
         client = db.session.get(Client , contact_info.client_id)
-        text_to_label_alert = [client.name , contact_info.log ,MyCalendar.format_date_to_show(contact_info.next_contact)]
+        text_to_label_alert = [f"[{contact_info.id_contact}] {client.name}" , client.name , contact_info.log ,MyCalendar.format_date_to_show(contact_info.next_contact)]
         
         return text_to_label_alert
     
@@ -1271,8 +1279,8 @@ class Alerts():
 
     
         
-    def view_alert(self , name , window , employee_id_sended , date , clean = False):
-        print( "Empleado y fecha" ,employee_id_sended , date )
+    def view_alert(self , name , window , employee_id_sended , date):
+        
         LoadInfo.load_contacts(self , employee_id_sended , date , query = 'last' , state_sended = "Contact")
         
         tree = self.info.get_children()
@@ -1287,37 +1295,18 @@ class Alerts():
                 window.destroy()
                 
                 
-    def clean_old_pop_ups(self, contact_id):
-        print(f"*** Cleanning Old PopUps... {alerts} ")
-        contact = db.session.get(Contact , contact_id)
-        last = db.session.query(Contact).filter(and_(Contact.client_id == contact.client_id , Contact.pop_up == True)).first()  
-        client = db.session.get(Client , contact.client_id)
-        values = AddInfo.row_to_change(self , client.name)
-        print("* clean old pops",last)
-        print(values)
+    def clean_old_pop_ups(self, contact_id_to_remove):
+        print(f"\n\n\n********* Cleanning Old PopUps... {alerts}************")
+
         try:
-            last.pop_up = False 
-            print("* Dentro de last cambiado" , last.pop_up )
-            db.session.commit()
-            #db.session.close()
-    
-            dot = '◉'
-            row_to_change_text = values[0]
-            print("* 0 SI" , values[0])
-            row_to_change_values = values[1]
-            print("* 1 SI" , values[1])
-            row_id = values[2]
-            print("* 2 SI" , values[2])
-            print("Dentro Antes" , row_to_change_values[3])
-            row_to_change_values[3] = row_to_change_values[3].replace(dot , "")
-            print("Dentro de Despuùes" , row_to_change_values[3])
-            self.info.item(row_id , text = row_to_change_text , values = row_to_change_values)
-            last.pop_up = False
-            print("* Alerts Antes de remover" ,alerts)
-            alerts.remove(contact_id)
-            Alerts.check_pop_ups(self, last.contact_employee_id)
+            print(f"* [{contact_id_to_remove}] Alerts Antes de remover : {alerts}")
+            if contact_id_to_remove in alerts:
+                alerts.remove(contact_id_to_remove)
+            
             print("* Alerts Despúes de remover" ,alerts)
-                
+            print(f"********* Cleanning Old PopUps... {alerts}************\n\n\n")
         except Exception as e:
-            print("clean_old_pop_ups -" , e)
+            print(e)
+        
+
 

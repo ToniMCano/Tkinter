@@ -125,7 +125,7 @@ class Main:
         
         # Crear un Frame que se mostrará/ocultará self.frame_button
         self.frame_calendar = tk.Frame(self.ventana_principal , highlightbackground = 'LightBlue4' , highlightthickness = 1)
-        mc.calendar(self , "general" , self.fecha)
+        mc.calendar(self , "general")
         self.frame_calendar_next = tk.Frame(self.ventana_principal , highlightbackground = 'LightBlue4' , highlightthickness = 1)
         mc.calendar(self  , "next")
         self.frame_calendar_pop = tk.Frame(self.ventana_principal , highlightbackground = 'LightBlue4' , highlightthickness = 1)
@@ -183,7 +183,7 @@ class Main:
         self.boton_pop_up.config(cursor = 'arrow')
         self.boton_pop_up.grid(row = 2 , column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
-        self.boton_log = ttk.Button(self.frame_log , text = "Log" , command = lambda: ai.add_log(self , 'hour' , str(datetime.now())[:16] , "log"))
+        self.boton_log = ttk.Button(self.frame_log , text = "Log" , command = lambda: ai.add_log(self , str(datetime.now())[:16] , "log" , 'hour'))
         self.boton_log.config(cursor = 'arrow')
         self.boton_log.grid(row = 1 , column = 7, padx = 2 , pady= 2 , sticky = "nswe" , rowspan = 2)
 

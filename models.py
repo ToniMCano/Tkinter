@@ -149,4 +149,4 @@ class Contact(Base):
         
 
     def __str__(self):
-        return F"Last Contact: {self.last_contact_date} - Log: {self.log} - ID Employee: {self.contact_employee_id} - Next Contact: {self.next_contact} - Client ID: {self.client_id}"
+        return f"[{self.id_contact}-{self.pop_up}] Last Contact: {self.last_contact_date} - Log: {self.log} - ID Employee: {self.contact_employee_id} - Next Contact: {self.next_contact} - Client ID: {self.client_id}"
