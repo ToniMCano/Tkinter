@@ -129,19 +129,19 @@ class Contact(Base):
     next_contact = Column(String)
     log = Column(String , nullable = False)
     client_id = Column(Integer , ForeignKey("client.id_client"))
-    company_state = Column(String , nullable = False)
+    contact_type = Column(String , nullable = False)
     contact_counter = Column(Integer , nullable = False)
     contact_employee_id = Column(Integer , ForeignKey('employee.id_employee'))
     contact_person_id = Column(Integer , ForeignKey('contact_person.id_person'))
     pop_up = Column(Boolean)
 
 
-    def __init__(self , last_contact_date , next_contact , log , client_id , contact_employee_id , contact_person_id , company_state = 'pool' ,  contact_counter = 0 , pop_up = False):
+    def __init__(self , last_contact_date , next_contact , log , client_id , contact_employee_id , contact_person_id , contact_type = 'log' ,  contact_counter = 0 , pop_up = False):
         self.last_contact_date = last_contact_date
         self.next_contact = next_contact
         self.log = log
         self.client_id = client_id
-        self.company_state = company_state # La dejo creada por si en un futuro incluyo otra función (Localizado, No Localizado, Aclarado, Venta...)
+        self.contact_type = contact_type # La dejo creada por si en un futuro incluyo otra función (Localizado, No Localizado, Aclarado, Venta...)
         self.contact_counter = contact_counter
         self.contact_employee_id = contact_employee_id
         self.contact_person_id = contact_person_id

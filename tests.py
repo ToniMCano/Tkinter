@@ -144,7 +144,7 @@ def contact():
             print(company.state , company.id_client)
             for i, contact in enumerate(range(25)):
                 print(contact)
-                contact_random = Contact(company_state = company.state, last_contact_date = f"{last[i]} {str(random.randint(8,19))}:00" , next_contact = f"{next[i]} {str(random.randint(8,19))}:00"  , log =  "No localizado, estará a parir de las 16:00" ,client_id =  company.id_client , contact_counter = 1 , contact_employee_id = company.employee_id , contact_person_id =  company.contact_person)
+                contact_random = Contact(contact_type = company.state, last_contact_date = f"{last[i]} {str(random.randint(8,19))}:00" , next_contact = f"{next[i]} {str(random.randint(8,19))}:00"  , log =  "No localizado, estará a parir de las 16:00" ,client_id =  company.id_client , contact_counter = 1 , contact_employee_id = company.employee_id , contact_person_id =  company.contact_person)
             
                 db.session.add(contact_random)
                 db.session.commit()
@@ -227,10 +227,8 @@ def muestra():
             nace.append(x[0].value)
     print(nace[0])
 
-#datos_muestra()
-#empleados()
-#contact()
-#contacts()
+
+
 
 
 def optimizar():
@@ -285,10 +283,17 @@ def exect():
    
 
    
-        
-listar = ['a' , 'b' ]
-listar.remove('a')
-print(listar)
+#datos_muestra()
+#empleados()
+#contact()
+#contacts()
+#optimizar()
+
+comment = db.session.query(Contact).all()
 
 
+if 'on' in comment[0].contact_type:
+    print(f"Funciona {comment[0].contact_type}")
+else:
+    print(f"NO Funciona ")
 
