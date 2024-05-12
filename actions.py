@@ -296,7 +296,7 @@ class Pops:
         entry_mobile = ttk.Entry(frame_contact_person)
         entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
         
-        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: AddInfo.test_add_company(self , add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}, {company_street_number.get() } {company_street_floor.get()} {company_city_entry.get()}, ({company_province_entry.get()})" , "Código Postal: ": company_postal_code_entry.get() , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
+        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: CheckInfo.test_add_company(self , add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}, {company_street_number.get() } {company_street_floor.get()} {company_city_entry.get()}, ({company_province_entry.get()})" , "Código Postal: ": company_postal_code_entry.get() , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
         save_company_button.grid(row = 5 , column = 0 , pady = 10)
         
         Pops.center_window(Pops , add_company_frame)
@@ -867,10 +867,90 @@ class GetInfo():
         #tree.notes.insert(0 , "686289365")
         
    
+class CheckInfo:
+    
         
+    def check_name(self , name , wich_name):
         
+        try:
+            if name != "":
+                return name
+            
+            else:
+                raise Exception
         
-class AddInfo():
+        except Exception as e:
+            mb.showwarning(f"{wich_name}" , f"El formato del {wich_name} no es correcto, comprueba el {wich_name}.")
+       
+       
+    def check_contact_surname(self , surname):
+        
+        try:
+            if surname != "":
+                return surname
+            
+            else:
+                raise Exception
+        
+        except Exception as e:
+            mb.showwarning("Persona de Contacto (Apellido)" , f"El formato del Apellido no es correcto, comprueba el Apellido.")
+
+        
+    def check_phones(self , phone , which_phone):
+             
+        try: 
+            if len(phone) == 9 and str(phone).isdigit():
+                return phone
+            
+            else:
+                raise Exception
+        
+        except Exception as e:
+            mb.showwarning("Teléfonos" , f"El formato del {which_phone} no es correcto, comprueba el {which_phone}.")
+
+    
+    def check_contact_mail(self , complete_mail , wich_mail):
+          
+        try: 
+            mail = complete_mail.split(".")
+            
+            if mail[0] != "www" and "@" in complete_mail and len(mail[-1] < 2):
+                return complete_mail
+            
+            else:
+                raise Exception
+        
+        except Exception as e:
+            mb.showwarning("Teléfonos" , f"El formato del {wich_mail} no es correcto, comprueba el {wich_mail}.")
+ 
+
+    def check_nif(self , nif):
+        
+        nif_check = ['a','b','c','e','f','g','h','j','p','q','r','s','u','v' , 'w' , 'n']
+        try:             
+            if nif[0] in nif_check or len(nif) == 9:
+                return nif
+            
+            else:
+                raise Exception
+        
+        except Exception as e:
+            mb.showwarning("N.I.F." , f"El formato del N.I.F. no es correcto, comprueba el N.I.F.")
+ 
+
+    
+    def check_postal_code(self , code):
+        
+        try:
+            if len(code) == 5 and str(code).isdigit():
+                return code
+
+            else:
+                raise Exception
+        
+        except Exception as e:
+            mb.showwarning("Código Postal" , f"El formato del Código Postal no es correcto, comprueba el Código Postal")
+ 
     
     def test_add_company(self , add_company_frame , data):
         
@@ -928,6 +1008,10 @@ class AddInfo():
             add_company_frame.destroy()
             Pops.new_company(data)
       
+        
+        
+class AddInfo():
+    
     
     def add_company(self, data , add_company_frame , employee_adder = 0 , company_to_add = 0):
         
@@ -1317,84 +1401,43 @@ class Logs:
             mb.showerror('Hora' , f'\n\nEl formato de la hora no es correcto: {hour}\n\nFormato Correcto: 08:30 (HH:MM)')
                     
             
-
 class Update:
     
-    def update_info(self, data , event):
-        print(f"\n\n\n***{data}***\n\n\n")
+    def update_info_entries(self, data , event):
         
-        values = {"company_name" : Update.test("algo") , "nif" : '' ,  "adress" : '' ,  "web" : '' ,  "company_mail" : '' ,
-                  "phone" : '' ,  "phone2" : '' ,  "contact_name" : '' ,  "contact_surname" : '' ,  "job_title" : '' ,
-                  "contact_phone" : '' ,  "mobile" : ''}
         
-        if data == "8":         
-            try:
-                self.entry_company_name.delete(0 , END)
-                
-                self.entry_nif.delete(0 , END)
-                
-                self.entry_adress.delete(0 , END)
-                
-                self.entry_web.delete(0 , END)
-                
-                self.entry_company_mail.delete(0 , END)
-                
-                self.entry_company_phone.delete(0 , END)
-                
-                self.entry_company_phone2.delete(0 , END)
-                
-                self.entry_contact_name.delete(0 , END)
-                
-                self.entry_contact_surname.delete(0 , END)
-                
-                self.entry_job_title.delete(0 , END)
-                
-                self.entry_contact_mail.delete(0 , END)
-                
-                self.entry_contact_phone.delete(0 , END)
-                
-                self.entry_mobile.delete(0 , END)
-                
-                #GetInfo.load_comments(self , client.nif)
+        try:
+            identificator = self.entry_nif.get()
+            company = db.session.query(Client).filter(and_(Client.nif == identificator , Client.state == 'Contact')).first()
+            new_data = data.get()
             
-            except Exception as e:
-                print(f'Error al borrar los datos: {e}')
-                
-                
-            try:
-                self.entry_company_name.get()
-                
-                self.entry_nif.get()
-                
-                self.entry_adress.get()
-                
-                self.entry_web.get()
-                
-                self.entry_company_mail.get()
-                
-                self.entry_company_phone.get()
-                
-                self.entry_company_phone2.get()
-                
-                self.entry_contact_name.get()
-                
-                self.entry_contact_surname.get()
-                
-                self.entry_job_title.get()
-                
-                self.entry_contact_mail.get()
-                
-                self.entry_contact_phone.get()
-                
-                self.entry_mobile.get()
-                
-                #GetInfo.load_comments(tree , client.nif)
+        except Exception as e:
+            print(f'[] {e}')
             
+        if data not in [self.entry_adress , self.entry_employees , self.entry_activity]:
+            try:
+            
+                ""
+        
             except Exception as e:
-                print(f'Error al borrar los datos: {e}')
-                
+                print(f'[] {e}')
+        
+        elif data == self.entry_adress :
+            try:
+                print("ADRESS:" , data.get())
+        
+            except Exception as e:
+                print(f'[] {e}')
+        
         else:
-            values[data]
-            
-    def test(data):  
-        print(data)
+            try:
+                print("COMBO:" , data.get())
+                
+            except Exception as e:
+                print(f'[] {e}')
+                
+    def test(self , data):
+        variable = self.entry_nif
+        data = str(variable).split("_")[0]
+        comment = db.session.query(Client).filter(data == variable.get()).first()
+        print(comment)

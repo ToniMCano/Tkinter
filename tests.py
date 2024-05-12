@@ -289,7 +289,6 @@ def exect():
 #contacts()
 #optimizar()
 
-comment = db.session.query(Contact).all()
 
 
 if 'on' in comment[0].contact_type:
