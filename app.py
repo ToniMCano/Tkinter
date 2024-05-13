@@ -230,7 +230,7 @@ class Main:
         
         self.entry_company_name = ttk.Entry(self.margin_frame_company)
         self.entry_company_name.grid(row = 2, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_company_name.bind("<Return>" , lambda e: upd.test(self , ['company_name' , self.entry_company_name] , e))
+        self.entry_company_name.bind("<Return>" , lambda e: upd.test(self , 'name' , e))
         
         
         self.label_nif = ttk.Label(self.margin_frame_company  , text = "N.I.F.", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')

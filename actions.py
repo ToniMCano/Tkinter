@@ -296,7 +296,7 @@ class Pops:
         entry_mobile = ttk.Entry(frame_contact_person)
         entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
         
-        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: CheckInfo.test_add_company(self , add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}, {company_street_number.get() } {company_street_floor.get()} {company_city_entry.get()}, ({company_province_entry.get()})" , "Código Postal: ": company_postal_code_entry.get() , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
+        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: CheckInfo.test_add_company(self , add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}-{company_street_number.get()}-{company_street_floor.get()}-{company_city_entry.get()}-{company_province_entry.get()}" , "Código Postal: ": company_postal_code_entry.get() , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
         save_company_button.grid(row = 5 , column = 0 , pady = 10)
         
         Pops.center_window(Pops , add_company_frame)
@@ -844,9 +844,10 @@ class GetInfo():
             print(f'Error al borrar los datos: {e}')
             
         try:
+            adress = GetInfo.format_adress_to_Show(client.adress , client.postal_code)
             tree.entry_company_name.insert(0 , client.name) # Es lo mismo que placeholder
             tree.entry_nif.insert(0, client.nif)
-            tree.entry_adress.insert(0 , client.adress + str(client.postal_code))
+            tree.entry_adress.insert(0 , adress)
             tree.entry_activity.current(newindex = Pops.current_combo(client.activity , LoadInfo.nace_list()))
             tree.entry_employees.current(newindex = Pops.current_combo(client.number_of_employees , "employees"))
             tree.entry_web.insert(0, client.web)
@@ -865,51 +866,63 @@ class GetInfo():
         
         #tree.notes.delete(0 , END)
         #tree.notes.insert(0 , "686289365")
+    
+    def format_adress_to_Show(adress , cp):
         
+        street , number , floor , city , province = adress.split("-")
+        
+        adress_to_show = f'{street}, {number}  {floor} {city} ({str(cp)})'
+        
+        return adress_to_show
+        
+            
    
 class CheckInfo:
     
         
-    def check_name(self , name , wich_name):
+    def check_name(self , name , wich_name , data , update = False):
         
         try:
             if name != "":
                 return name
             
             else:
+                data['Nombre Empresa: '] == False
                 raise Exception
         
         except Exception as e:
             mb.showwarning(f"{wich_name}" , f"El formato del {wich_name} no es correcto, comprueba el {wich_name}.")
        
        
-    def check_contact_surname(self , surname):
+    def check_surname(self , surname , data , update = False):
         
         try:
             if surname != "":
                 return surname
             
             else:
+                data['Nombre Empresa: '] = False
                 raise Exception
         
         except Exception as e:
             mb.showwarning("Persona de Contacto (Apellido)" , f"El formato del Apellido no es correcto, comprueba el Apellido.")
 
         
-    def check_phones(self , phone , which_phone):
+    def check_phones(self , phone , which_phone , data , update = False):
              
         try: 
             if len(phone) == 9 and str(phone).isdigit():
                 return phone
             
             else:
+                data['Nombre Empresa: '] = False
                 raise Exception
         
         except Exception as e:
             mb.showwarning("Teléfonos" , f"El formato del {which_phone} no es correcto, comprueba el {which_phone}.")
 
     
-    def check_contact_mail(self , complete_mail , wich_mail):
+    def check_mail(self , complete_mail , wich_mail , data , update = False):
           
         try: 
             mail = complete_mail.split(".")
@@ -918,13 +931,14 @@ class CheckInfo:
                 return complete_mail
             
             else:
+                data['Nombre Empresa: '] = False
                 raise Exception
         
         except Exception as e:
             mb.showwarning("Teléfonos" , f"El formato del {wich_mail} no es correcto, comprueba el {wich_mail}.")
  
 
-    def check_nif(self , nif):
+    def check_nif(self , nif , data , update = False):
         
         nif_check = ['a','b','c','e','f','g','h','j','p','q','r','s','u','v' , 'w' , 'n']
         try:             
@@ -932,6 +946,7 @@ class CheckInfo:
                 return nif
             
             else:
+                data['Nombre Empresa: '] = False
                 raise Exception
         
         except Exception as e:
@@ -939,88 +954,106 @@ class CheckInfo:
  
 
     
-    def check_postal_code(self , code):
+    def check_postal_code(self , code , data , update = False):
         
         try:
             if len(code) == 5 and str(code).isdigit():
-                return code
+                
+                if update is not False:
+                    print('OK')
+                    
+                else:
+                    print(code)
+                    return code
 
             else:
+                data['Nombre Empresa: '] = False
                 raise Exception
         
         except Exception as e:
             mb.showwarning("Código Postal" , f"El formato del Código Postal no es correcto, comprueba el Código Postal")
  
+ 
+    def check_web(self , web , data , update = False):
+        
+        try:
+            web_test = web.split(".")
+            
+            if web_test[0] == "www":
+                if len(web_test[-1]) >= 2:
+                    return True
+            else:
+                data['Nombre Empresa: '] = False
+                raise Exception
+            
+        except Exception as e:
+            print(e)
+            mb.showerror("Error en Web" , "\n\nEl formato de la web no correcto.\n\n")
+            
     
     def test_add_company(self , add_company_frame , data):
         
-        nif_check = ['a','b','c','e','f','g','h','j','p','q','r','s','u','v' , 'w' , 'n']
+        try:
+            company_name = CheckInfo.check_name(self , data["Nombre Empresa: "] , data , 'Nombre Empresa' ,  'remplazar')
+            nif = CheckInfo.check_nif(self , data["N.I.F.: "] ,  'remplazar')              
+            postal_code = CheckInfo.check_postal_code(self , data["Código Postal: "] , data , 'remplazar') 
+            web = CheckInfo.check_web(self , data["Web: "] , 'remplazar')  ####
+            company_mail = CheckInfo.check_mail(self , data["Mail Empresa: "] , "Mail Empresa" , data ,  'remplazar') 
+            company_phone = CheckInfo.check_phones(self , data["Teléfono Empresa: "] , 'Teléfono de Empresa' , data , 'remplazar')
+            company_phone2 = CheckInfo.check_phones(self , data["Teléfono2 Empresa: "] , 'Teléfono de Empresa2' , data , 'remplazar')
+            
+            contact_name = CheckInfo.check_name(self , data["Nombre Contacto: "] , 'Nombre Contacto' , data ,  'remplazar')
+            contact_surname = CheckInfo.check_surname(self , data["Apellidos Contacto: "] ,  data , 'remplazar')
+            contact_phone = CheckInfo.check_phones(self , data["Teléfono Contacto: "] , 'Teléfono de Contacto' , data , 'remplazar')
+            contact_mobile = CheckInfo.check_phones(self , data["Móvil Contacto: "] , 'Teléfono de Contacto' , data , 'remplazar')
+            contact_mail = CheckInfo.check_mail(self , data["Mail Contacto: "] , "Mail Contacto" , data ,  'remplazar') 
+            values_info = [company_name , nif , postal_code , web , company_mail , company_phone , company_phone2 , contact_name , contact_surname , contact_phone , contact_mobile , contact_mail]
 
-        if data["Nombre Contacto: "] != "" and data['Apellidos Contacto: '] != "" and data['Teléfono Contacto: '] != "" and data['Mail Contacto: '] and data['Nombre Empresa: '] != ""  and data['N.I.F.: '] != ""  and data['Mail Empresa: '] != ""  and data['Teléfono Empresa: '] != "" and len(data["Código Postal: "] != 5):
-            
-            if data['N.I.F.: '][0].lower() in nif_check and len(data['N.I.F.: ']) == 9:
+            if data["Nombre Empresa: "]:
                 
-                if data["Web: "].split(".")[0] == "www" and len(data["Web: "].split(".")[-1]) >= 2:
-                       
-                    if ("@" in data['Mail Empresa: '] and data['Mail Empresa: '].split("@")[0] != "" and len(data['Mail Empresa: '].split(".")[-1])) >= 2 and ("@" in data['Mail Contacto: '] and data['Mail Contacto: '].split("@")[0] != "" and len(data['Mail Contacto: '].split(".")[-1]) >= 2):
-                        
-                        if (str(data['Teléfono Contacto: ']).isdigit() and len(data['Teléfono Contacto: ']) == 9)  and (str(data["Teléfono Empresa: "]).isdigit() and len(data["Teléfono Empresa: "]) == 9):
-                
-                        
-                            AddInfo.add_company(self , data , add_company_frame)
-                        
-                        else:
-                            mb.showwarning("Teléfono" , f"El formato del Teléfono no es correcto, comprueba Teléfono Empras y Teléfono Contacto.")
-                            add_company_frame.lift()
-                    
-                    else:
-                        mb.showwarning("Mail" , f"El formato del Mail no es correcto, comprueba los Mails.")
-                        add_company_frame.lift()
-                
-                else:
-                    mb.showwarning("Web" , f'El formato de la Web no es correcto [{data["Web: "]}]')
-                    add_company_frame.lift()
-                    
+                AddInfo.add_company(self , data , add_company_frame)
+                            
             else:
-                mb.showwarning("N.I.F." , f"El formato del N.I.F. no es correcto [{data['N.I.F.: ']}]")
-                add_company_frame.lift()                    
-               
-        else:
-            print("else")
-            mb.showwarning( "Faltan Datos:" , 
-            f"""Faltan Datos o son incorrectos, compruebalos.
-            
-                Empresa:                               
-            
-                Nombre:   {data['Nombre Empresa: ']}   
-                N.I.F:    {data['N.I.F.: ']}       
-                Teléfono: {data['Teléfono Empresa: ']} 
-                Mail:     {data['Mail Empresa: '] }    
+                mb.showwarning( "Faltan Datos:" , 
+                f"""Faltan Datos o son incorrectos, compruebalos.
                 
-                Persona de Contacto: 
+                    Empresa:                               
+                
+                    Nombre:   {data['Nombre Empresa: ']}   
+                    N.I.F:    {data['N.I.F.: ']}       
+                    Teléfono: {data['Teléfono Empresa: ']} 
+                    Mail:     {data['Mail Empresa: '] }    
+                    
+                    Persona de Contacto: 
+                
+                    Nombre:    {data['Nombre Contacto: ']}
+                    Apellidos: {data['Apellidos Contacto: ']}
+                    Teléfono:  {data['Teléfono Contacto: ']}
+                    Mail: {data["Mail Contacto: "]}
+                """ 
+                )
+                
+                add_company_frame.destroy()
+                
+                Pops.new_company(data)
             
-                Nombre:    {data['Nombre Contacto: ']}
-                Apellidos: {data['Apellidos Contacto: ']}
-                Teléfono:  {data['Teléfono Contacto: ']}
-                Mail: {data["Mail Contacto: "]}
-            """ 
-            )
-            add_company_frame.destroy()
-            Pops.new_company(data)
-      
+        except Exception as e:
+            print(e)
+                
+
         
         
 class AddInfo():
     
     
-    def add_company(self, data , add_company_frame , employee_adder = 0 , company_to_add = 0):
+    def add_company(self, data , add_company_frame):
         
         
         try:
-            
+            employee_adder = self.active_employee_id.get()
             vcontact_person = AddInfo.add_contact_person(data , employee_adder)
             
-            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Código Postal: "], data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , self.active_employee_id.get()  , "Pool", data["Empleados: "] , datetime.now(),)
+            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Código Postal: "], data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee_adder , "Pool", data["Empleados: "] , datetime.now(),)
             vcontact_person.client_id = vcontact_person.id_person
             
             db.session.add(company)
@@ -1436,8 +1469,18 @@ class Update:
             except Exception as e:
                 print(f'[] {e}')
                 
-    def test(self , data):
-        variable = self.entry_nif
-        data = str(variable).split("_")[0]
-        comment = db.session.query(Client).filter(data == variable.get()).first()
-        print(comment)
+    def test(self , data , event):
+        
+        fields =  {'name' : Update.pnt(data) }
+        
+        fields[data]
+        #variable = self.entry_nif.get()
+        #data = str(variable).split("_")[0]
+        #client = db.session.query(Client).filter(Client.nif == variable).first()  
+        
+          
+        #print(f"--------{data}----------")
+        #print(client)
+        
+    def pnt(algo):
+        print('*********algo*********')

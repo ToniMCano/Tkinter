@@ -46,10 +46,9 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
             
     for employee_id in range(3):
         for data_row in range(50):
-            start = start_date()
             row.append("Company".lower() + str(alias))
             row.append(random.choice(nif_check).capitalize() + "".join(random.choices(nif , k=8)))
-            row.append(f"adress{str(alias)},{str(alias)} {str(random.randint(1,20))} - {random.choice(nif_check).capitalize()}  City{str(alias)}, (Province{str(alias)})")
+            row.append(f"Street{str(alias)}-{str(alias)}-{str(random.randint(1,20))} {random.choice(nif_check).capitalize()}-City{str(alias)}-Province{str(alias)}")
             row.append(''.join(random.choices(nif , k = 5)))
             row.append(f"www.web{str(alias)}.com")  
             row.append(f"{row[0]}@{row[4][4:]}")
@@ -78,13 +77,13 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
     for x in data: 
         active_sheet.append(x) # Añadimos las filas
         
-    wb.save("data2.xlsx")    
+    wb.save("data.xlsx")    
     
     
 def start_date():
     
-    day =1 
-    month = 1
+    day =random.randint(1,25) 
+    month = random.randint(3,4)
     new_date = datetime(2024,month,day,8,0,0)
     dated = []
 
@@ -216,19 +215,6 @@ def index():
                         
     print (index , alias)
     
-    
-def muestra(): 
-
-    excel = openpyxl.load_workbook("recursos/NACE.xlsx")
-    nace = []
-
-    for x in excel["Hoja 1"]:
-        if len(x[0].value.split("-")[0].strip(" ")) > 1:
-            nace.append(x[0].value)
-    print(nace[0])
-
-
-
 
 
 def optimizar():
@@ -258,7 +244,7 @@ def optimizar2():
         
         
 
-def date():
+'''def date():
     
     last = []
     next = []
@@ -274,11 +260,18 @@ def date():
         month =f"0{month}"
         day = str(random.randint(15 , 30))
         
-        return f"2024-{month}-{day} 0{random.randint(6,9)}:00:00"
+        return f"2024-{month}-{day} 0{random.randint(6,9)}:00:00"'''
         
 
-def exect():
+
+    
+values ={ 'uno' : False , 'dos': True}
+
+if values['dos']:
     print('Se ejecuta' , datetime.now())
+else: 
+    print('no cuela')
+print("fin")
 
    
 
@@ -290,9 +283,4 @@ def exect():
 #optimizar()
 
 
-
-if 'on' in comment[0].contact_type:
-    print(f"Funciona {comment[0].contact_type}")
-else:
-    print(f"NO Funciona ")
 
