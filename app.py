@@ -107,6 +107,12 @@ class Main:
         self.header = ttk.Frame(self.ventana_principal)
         self.header.grid(row = 0 , column = 0 , columnspan = 6, pady = 5 , padx = 5 , sticky = W+E)
         self.header.columnconfigure(10, weight = 1)
+        self.header.columnconfigure(6, weight = 1)
+        
+                # AÑADIR CONTACTOS DESDE POOL
+        
+        self.new_company = ttk.Button(self.header , text = 'Add Company' , command = lambda: pw.new_company(self)) 
+        self.new_company.grid(row = 0 , column = 0 , padx = 5) 
      
         # LEAD, CANDIDATE , CONTACT
         
@@ -149,15 +155,21 @@ class Main:
         self.boton_fecha = ttk.Button(self.frame_calendar_button, image = self.icon_calendar, command = lambda: mc.calendar_toggle_frame(self , "general"))
         self.boton_fecha.config(cursor = 'arrow')
         self.boton_fecha.grid(row=0, column=1, sticky="ew")
-
-        # AÑADIR CONTACTOS DESDE POOL
         
-        self.new_company = ttk.Button(self.header , text = 'Add Company' , command = lambda: pw.new_company(self)) 
-        #self.new_company.config(height = 47, width = 47)
-        self.new_company.grid(row = 0 , column = 0 , padx = 5) 
-                
-        login_button = ttk.Button(self.header , text = "Login" , command = lambda: pw.login(self))
-        login_button.grid(row = 0 , column = 10 , sticky = E)
+        self.frame_views = ttk.Frame(self.header , height = 10)
+        self.frame_views.grid(row = 0 , column = 6 , sticky = 'nswe' , padx = 5 , columnspan = 4) 
+        
+        self.crm_view = CTkButton(self.frame_views , text = "CRM" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: pw.login(self))
+        self.crm_view.place(relx=0.2, rely=0.5  , anchor=tk.CENTER)
+        
+        self.sales_view = CTkButton(self.frame_views , text = "Pedido" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: pw.login(self))
+        self.sales_view.place(relx=0.5, rely=0.5 , anchor=tk.CENTER)
+        
+        self.bi_view = CTkButton(self.frame_views , text = "Estadísticas" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: pw.login(self))
+        self.bi_view.place(relx=0.8, rely=0.5 , anchor=tk.CENTER)
+        
+        self.login_button = ttk.Button(self.header , text = "Login" , command = lambda: pw.login(self))
+        self.login_button.grid(row = 0 , column = 10 , sticky = E)
         
         self.pop_up = ttk.Button(self.header, text = "PopUp" , command = lambda: als.pop_up_alert(self, self.active_employee_id.get() , str(datetime.now())))
         self.pop_up.config(cursor = 'arrow')
@@ -200,7 +212,7 @@ class Main:
         # FRAME EMPRESA
         
         self.frame_company = CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray") 
-        self.frame_company.grid(row = 1 , column = 5 , sticky = "nswe" , columnspan = 4, rowspan = 2 , padx = 5) 
+        self.frame_company.grid(row = 1 , column = 5 , sticky = "nswe" , columnspan = 4, padx = 5) 
         
         self.frame_company.grid_columnconfigure(1, weight=1)
         self.frame_company.grid_columnconfigure(0, weight=1)
@@ -296,7 +308,7 @@ class Main:
         #FRAME CONTACTO
         
         self.contact_frame = CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray" ) 
-        self.contact_frame.grid(row = 3 , column = 5 , columnspan=2 , rowspan = 2 , pady = 5 ,  padx = 5 , sticky='nsew')
+        self.contact_frame.grid(row = 3 , column = 5 , columnspan=2 , rowspan = 2 ,  padx = 5 , sticky='nsew')
         
         self.contact_frame.grid_columnconfigure(1, weight=1)
         self.contact_frame.grid_columnconfigure(0, weight=1)
@@ -373,9 +385,22 @@ class Main:
         self.mobile_button.config(cursor = 'arrow')
         self.mobile_button.pack(side = "right")
                                                                        # Centrar texto------------------------
-        self.free_space = ttk.Label(self.margin_frame_contact , text="algo" , anchor = 'center' , justify =  'center')
-        self.free_space.grid(row = 7 , column = 0 , columnspan = 2 ,sticky = 'nswe', pady = 5 )
+        self.company_contact_buttons = CTkFrame(self.ventana_principal , fg_color = 'transparent')
+        self.company_contact_buttons.grid(row = 2 , column = 5 , columnspan = 2 ,sticky = 'nswe' , padx   = 5 )
         self.contact_frame.grid_rowconfigure(7,weight=1)
+        
+        self.company_contact_buttons.grid_columnconfigure(0, weight = 1)
+        self.company_contact_buttons.grid_columnconfigure(1, weight = 1)
+        self.company_contact_buttons.grid_columnconfigure(2, weight = 1)
+        
+        self.button_a = CTkButton(self.company_contact_buttons , text = "Terminate" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4')
+        self.button_a.grid(row = 0 , column = 0 , sticky = "we" , pady = 5 , padx = 5)
+        
+        self.button_b = CTkButton(self.company_contact_buttons , text = "Mail" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4')
+        self.button_b.grid(row = 0 , column = 1 , sticky = "we" , pady = 5 , padx = 5)
+        
+        self.button_c = CTkButton(self.company_contact_buttons , text = "Save" , height = 2 , fg_color = "#f4f4f4" , text_color = 'LightBlue4' , border_color = "LightBlue4" , border_width = 2 , hover_color = 'LightBlue4')
+        self.button_c.grid(row = 0 , column = 2 , sticky = "we" , pady = 5 , padx = 5)
         
         self.notes = Text(self.contact_frame)
         self.notes.config(height = 3)
