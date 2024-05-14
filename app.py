@@ -230,7 +230,7 @@ class Main:
         
         self.entry_company_name = ttk.Entry(self.margin_frame_company)
         self.entry_company_name.grid(row = 2, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_company_name.bind("<Return>" , lambda e: upd.test(self , 'name' , e))
+        self.entry_company_name.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_company_name , 'company_name', e))
         
         
         self.label_nif = ttk.Label(self.margin_frame_company  , text = "N.I.F.", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
@@ -238,35 +238,35 @@ class Main:
         
         self.entry_nif = ttk.Entry(self.margin_frame_company )
         self.entry_nif.grid(row = 2 , column = 1 , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_nif.bind("<Return>" , lambda e: upd.update_info_entries(self , 'nif', e))
+        self.entry_nif.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_nif , 'nif', e))
         
         self.label_adress = ttk.Label(self.margin_frame_company  , text = "Dirección" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_adress.grid(row = 3 , column = 0 , columnspan = 2 , sticky = "we" , padx = 2 , pady = 2) 
 
         self.entry_adress = ttk.Entry(self.margin_frame_company )
         self.entry_adress.grid(row = 4 , column =0 , columnspan = 2 , sticky = "we" , padx = 2 , pady = 2)
-        self.entry_adress.bind("<Return>" , lambda e: upd.update_info_entries(self , 'adress' , e))
+        self.entry_adress.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_adress , 'adress' , e))
                 
         self.label_activity = ttk.Label(self.margin_frame_company  , text = "Actividad", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_activity.grid(row = 5 , column = 0, sticky=W+E , padx = 2 , pady = 2)
         
         self.entry_activity = ttk.Combobox(self.margin_frame_company , values = li.nace_list())
         self.entry_activity.grid(row = 6 , column = 0 , sticky = W+E , padx = 2  , pady = 2)
-        self.entry_activity.bind("<Return>" , lambda e: upd.update_info_entries(self , 'activity' , e)) 
+        self.entry_activity.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_activity , 'activity' , e)) 
         
         self.label_employees = ttk.Label(self.margin_frame_company , text = "Empleados", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_employees.grid(row = 5 , column = 1, sticky=W+E , padx = 2 , pady = 2)
         
         self.entry_employees = ttk.Combobox(self.margin_frame_company , values = [" < 10" , "10 - 50" , "50 - 250" , " > 250"], font = ("" , 9 , 'bold'))
         self.entry_employees.grid(row = 6 , column = 1 , sticky = W+E , padx = 2  , pady = 2)
-        self.entry_employees.bind("<Return>" , lambda e: upd.update_info_entries(self , 'employees' , e)) 
+        self.entry_employees.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_employees , 'employees' , e)) 
         
         self.label_web = ttk.Label(self.margin_frame_company , text = "Web", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_web.grid(row = 7 , column = 0,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
         
         self.entry_web = ttk.Entry(self.margin_frame_company)
         self.entry_web.grid(row = 8 , column= 0 , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_web.bind("<Return>" , lambda e: upd.update_info_entries(self , 'web' , e))
+        self.entry_web.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_web , 'web' , e))
         
         self.web_button = ttk.Button(self.entry_web ,  image = self.web_icon , command = self.abrir_enlace)
         self.web_button.config(cursor = 'arrow')
@@ -277,7 +277,7 @@ class Main:
         
         self.entry_company_mail = ttk.Entry(self.margin_frame_company)
         self.entry_company_mail.grid(row = 8 , column = 1,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_company_mail.bind("<Return>" , lambda e: upd.update_info_entries(self , 'company_mail' , e))
+        self.entry_company_mail.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_company_mail , 'company_mail' , e))
         
         self.mail_button = ttk.Button(self.entry_company_mail, image = self.mail_icon)
         self.mail_button.config(cursor = 'arrow')
@@ -288,7 +288,7 @@ class Main:
         
         self.entry_company_phone = ttk.Entry(self.margin_frame_company)
         self.entry_company_phone.grid(row = 10, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_company_phone.bind("<Return>" , lambda e: upd.update_info_entries(self , 'phone' , e))
+        self.entry_company_phone.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_company_phone , 'phone' , e))
         
         self.phone_button = ttk.Button(self.entry_company_phone , image = self.phone_icon)
         self.phone_button.config(cursor = 'arrow')
@@ -299,7 +299,7 @@ class Main:
         
         self.entry_company_phone2 = ttk.Entry(self.margin_frame_company)
         self.entry_company_phone2.grid(row = 10, column= 1  , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_company_phone2.bind("<Return>" , lambda e: upd.update_info_entries(self , 'phone2' , e))
+        self.entry_company_phone2.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_company_phone2 , 'phone2' , e))
         
         self.phone2_button = ttk.Button(self.entry_company_phone2 , image = self.mobile_icon)
         self.phone2_button.config(cursor = 'arrow')
@@ -336,28 +336,28 @@ class Main:
         
         self.entry_contact_name = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_name.grid(row = 2 , column = 0 ,  padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_contact_name.bind("<Return>" , lambda e: upd.update_info_entries(self , 'contact_name' , e))
+        self.entry_contact_name.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_contact_name , 'contact_name' , e))
         
         self.label_contact_surname = ttk.Label(self.margin_frame_contact , text = "Apellidos" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_contact_surname.grid(row = 1 , column = 1 , sticky = W+E, padx = 2 , pady = 2) 
         
         self.entry_contact_surname = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_surname.grid(row = 2 , column = 1 , padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_contact_surname.bind("<Return>" , lambda e: upd.update_info_entries(self , 'contact_surname' , e))
+        self.entry_contact_surname.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_contact_surname , 'contact_surname' , e))
         
         self.label_job_title = ttk.Label(self.margin_frame_contact, text = "Cargo" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_job_title.grid(row = 3 , column = 0, padx = 2 , pady = 2 , sticky = W+E)
         
         self.entry_job_title = ttk.Entry(self.margin_frame_contact)
         self.entry_job_title.grid(row = 4 , column = 0 , padx = 2, pady = 2 , sticky = W+E)
-        self.entry_job_title.bind("<Return>" , lambda e: upd.update_info_entries(self , 'job_title' , e))
+        self.entry_job_title.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_job_title , 'job_title' , e))
         
         self.label_contact_mail = ttk.Label(self.margin_frame_contact , text = "Mail" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_contact_mail.grid(row = 3 , column = 1 , padx = 2 , pady = 2  , sticky = W+E)
         
         self.entry_contact_mail = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_mail.grid(row = 4, column = 1 , padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_contact_mail.bind("<Return>" , lambda e: upd.update_info_entries(self , 'contact_mail' , e))
+        self.entry_contact_mail.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_contact_mail , 'contact_mail' , e))
         
         self.contact_mail_button = ttk.Button(self.entry_contact_mail , image = self.mail_icon) 
         self.mail_button.config(cursor = 'arrow')
@@ -368,7 +368,7 @@ class Main:
         
         self.entry_contact_phone = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_phone.grid(row = 6 , column = 0 , padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_contact_phone.bind("<Return>" , lambda e: upd.update_info_entries(self , 'contact_phone' , e))
+        self.entry_contact_phone.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_contact_phone , 'contact_phone' , e))
         
         self.contact_phone_button = ttk.Button(self.entry_contact_phone , image = self.phone_icon)
         self.contact_phone_button.config(cursor = 'arrow')
@@ -379,7 +379,7 @@ class Main:
         
         self.entry_mobile = ttk.Entry(self.margin_frame_contact)
         self.entry_mobile.grid(row = 6 , column = 1 , pady = 2 , padx = 2 , sticky = W+E)
-        self.entry_mobile.bind("<Return>" , lambda e: upd.update_info_entries(self , 'mobile' , e))
+        self.entry_mobile.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_mobile , 'mobile' , e))
         
         self.mobile_button = ttk.Button(self.entry_mobile , image = self.mobile_icon , width = 2)
         self.mobile_button.config(cursor = 'arrow')
@@ -405,7 +405,7 @@ class Main:
         self.notes = Text(self.contact_frame)
         self.notes.config(height = 3)
         self.notes.grid(row = 8, column = 0  , columnspan = 2 , sticky = 'we' , padx = 5 , pady = 2)
-        self.notes.bind("<Return>" , lambda e: upd.update_info_entries(self , 'notes' , e))
+        self.notes.bind("<Return>" , lambda e: upd.update_info_entries(self.notes , 'notes' , e))
         
         self.ids_frame = ttk.Frame(self.contact_frame)
         self.ids_frame.grid(row = 9 , column = 0 , columnspan = 2 , sticky = W+E)
