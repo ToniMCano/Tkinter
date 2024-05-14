@@ -1,6 +1,6 @@
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk 
 from tkinter import *
 from PIL import Image, ImageTk
 from tkcalendar import Calendar
@@ -9,12 +9,13 @@ from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
 from sqlalchemy import and_ , or_  
-from actions import LoadInfo as li , GetInfo as gi , MyCalendar as mc , Pops as pw , Alerts as als , AddInfo as ai , Logs , Update as upd
+from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs
 from datetime import datetime , timedelta
 #import locale
 from tkinter import messagebox as mb
 from ttkthemes import ThemedTk
 from customtkinter import *
+from sales_tab import SalesTab
 #locale.setlocale(locale.LC_ALL, '')
 
 
@@ -27,7 +28,9 @@ class Main:
         self.ventana_principal.resizable(1,1)
         self.ventana_principal.geometry('1200x800')
         self.ventana_principal.configure(bg="#f4f4f4") 
-        pw.center_window(self, self.ventana_principal)
+        Pops.center_window(self, self.ventana_principal)
+        
+        
         
         # INFO LISTA
         
@@ -37,22 +40,27 @@ class Main:
         #style.configure("mystyle.Treeview.Heading" , font = ("" , 11 , ) , foreground = 'white')   # Modificar la fuente de las cabeceras
         style.configure("Treeview.Heading", background='LightBlue4')  # Cambia "blue" al color deseado
         style.layout("mystyle.Treeview" , [("mystyle.Treeview.treearea", {'sticky' : 'nswe'})]) # Eliminar los bordes??
+       
         self.frame_tree = ttk.Frame(self.ventana_principal)
-        self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan=3)
         self.frame_tree.grid_columnconfigure(0, weight=1)
         self.frame_tree.grid_rowconfigure(3, weight=1)
+        
+        self.sales_frame = ttk.Frame(self.ventana_principal)
+        
+        
+        
         
         
         self.info = ttk.Treeview(self.frame_tree,height = 20 , style="mystyle.Treeview")
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
         
         self.info["columns"] = ( "#0" , "#1" , "#2" , "#3" ,  "#4")
-        self.info.heading("#0" , text = "Estado" , command = lambda: li.on_heading_click(self , "state"))
-        self.info.heading("#1" , text = "Días" , command = lambda: li.on_heading_click(self , "days"))
-        self.info.heading("#2" , text  ="Cliente" , command = lambda: li.on_heading_click(self , "client"))
-        self.info.heading("#3" , text = "Último Contacto" , command = lambda: li.on_heading_click(self , "last"))
-        self.info.heading("#4" , text = "Próximo Contacto" , command = lambda: li.on_heading_click(self , "next"))
-        self.info.heading("#5" , text = "C. Postal" , command = lambda: li.on_heading_click(self , "postal_code"))
+        self.info.heading("#0" , text = "Estado" , command = lambda: LoadInfo.on_heading_click(self , "state"))
+        self.info.heading("#1" , text = "Días" , command = lambda: LoadInfo.on_heading_click(self , "days"))
+        self.info.heading("#2" , text  ="Cliente" , command = lambda: LoadInfo.on_heading_click(self , "client"))
+        self.info.heading("#3" , text = "Último Contacto" , command = lambda: LoadInfo.on_heading_click(self , "last"))
+        self.info.heading("#4" , text = "Próximo Contacto" , command = lambda: LoadInfo.on_heading_click(self , "next"))
+        self.info.heading("#5" , text = "C. Postal" , command = lambda: LoadInfo.on_heading_click(self , "postal_code"))
         
         self.info.column("#0" , width = 25 , anchor="center")
         self.info.column("#1" , width = 10 , anchor="center")
@@ -65,11 +73,11 @@ class Main:
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
-        self.info.bind("<ButtonRelease-1>" , lambda event: li.get_client_name(self , event))
+        self.info.bind("<ButtonRelease-1>" , lambda event: LoadInfo.get_client_name(self , event))
         self.active_employee_id = StringVar()
         self.fecha = StringVar()
         self.company_id = StringVar()
-        pw.login(self)
+        Pops.login(self)
         
         
         
@@ -111,12 +119,12 @@ class Main:
         
                 # AÑADIR CONTACTOS DESDE POOL
         
-        self.new_company = ttk.Button(self.header , text = 'Add Company' , command = lambda: pw.new_company(self)) 
+        self.new_company = ttk.Button(self.header , text = 'Add Company' , command = lambda: Pops.new_company(self)) 
         self.new_company.grid(row = 0 , column = 0 , padx = 5) 
      
         # LEAD, CANDIDATE , CONTACT
         
-        self.employee = ttk.Combobox(self.header ,state = "readonly", values =  li.employees_list() , width= 10)
+        self.employee = ttk.Combobox(self.header ,state = "readonly", values =  LoadInfo.employees_list() , width= 10)
         self.employee.configure(background='lightblue')
                
         self.employee.grid(row = 0 , column = 3 , padx = 5)
@@ -125,17 +133,17 @@ class Main:
         self.combo_state = ttk.Combobox(self.header ,state = "readonly",values=["Lead", "Candidate", "Contact" , "Pool" , 'All'] , width= 10)
         self.combo_state.configure(background='lightblue')
         self.combo_state.grid(row = 0 , column = 4 , padx = 5)
-        self.combo_state.bind("<<ComboboxSelected>>" , lambda e: li.companies_state(self , e))
+        self.combo_state.bind("<<ComboboxSelected>>" , lambda e: LoadInfo.companies_state(self , e))
 
         # CALENDAR
         
         # Crear un Frame que se mostrará/ocultará self.frame_button
         self.frame_calendar = tk.Frame(self.ventana_principal , highlightbackground = 'LightBlue4' , highlightthickness = 1)
-        mc.calendar(self , "general")
+        MyCalendar.calendar(self , "general")
         self.frame_calendar_next = tk.Frame(self.ventana_principal , highlightbackground = 'LightBlue4' , highlightthickness = 1)
-        mc.calendar(self  , "next")
+        MyCalendar.calendar(self  , "next")
         self.frame_calendar_pop = tk.Frame(self.ventana_principal , highlightbackground = 'LightBlue4' , highlightthickness = 1)
-        mc.calendar(self  , "pop")
+        MyCalendar.calendar(self  , "pop")
         
                   
 
@@ -152,26 +160,26 @@ class Main:
         #self.label_calendar_button.config(width = 15 , height = 1)
         self.label_calendar_button.grid(row = 0, column = 6)
         
-        self.boton_fecha = ttk.Button(self.frame_calendar_button, image = self.icon_calendar, command = lambda: mc.calendar_toggle_frame(self , "general"))
+        self.boton_fecha = ttk.Button(self.frame_calendar_button, image = self.icon_calendar, command = lambda: MyCalendar.calendar_toggle_frame(self , "general"))
         self.boton_fecha.config(cursor = 'arrow')
         self.boton_fecha.grid(row=0, column=1, sticky="ew")
         
         self.frame_views = ttk.Frame(self.header , height = 10)
         self.frame_views.grid(row = 0 , column = 6 , sticky = 'nswe' , padx = 5 , columnspan = 4) 
         
-        self.crm_view = CTkButton(self.frame_views , text = "CRM" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: pw.login(self))
+        self.crm_view = CTkButton(self.frame_views , text = "CRM" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Tabs.toggle_view(self , 'CRM'))
         self.crm_view.place(relx=0.2, rely=0.5  , anchor=tk.CENTER)
         
-        self.sales_view = CTkButton(self.frame_views , text = "Pedido" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: pw.login(self))
+        self.sales_view = CTkButton(self.frame_views , text = "Pedido" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: SalesTab.sales_root(self))
         self.sales_view.place(relx=0.5, rely=0.5 , anchor=tk.CENTER)
         
-        self.bi_view = CTkButton(self.frame_views , text = "Estadísticas" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: pw.login(self))
+        self.bi_view = CTkButton(self.frame_views , text = "Estadísticas" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Pops.login(self))
         self.bi_view.place(relx=0.8, rely=0.5 , anchor=tk.CENTER)
         
-        self.login_button = ttk.Button(self.header , text = "Login" , command = lambda: pw.login(self))
+        self.login_button = ttk.Button(self.header , text = "Login" , command = lambda: Pops.login(self))
         self.login_button.grid(row = 0 , column = 10 , sticky = E)
         
-        self.pop_up = ttk.Button(self.header, text = "PopUp" , command = lambda: als.pop_up_alert(self, self.active_employee_id.get() , str(datetime.now())))
+        self.pop_up = ttk.Button(self.header, text = "PopUp" , command = lambda: Alerts.pop_up_alert(self, self.active_employee_id.get() , str(datetime.now())))
         self.pop_up.config(cursor = 'arrow')
         #self.pop_up.config(height = 2, width = 5)
         self.pop_up.grid(row = 0 , column = 11 , padx = 5 , sticky = E)
@@ -187,11 +195,11 @@ class Main:
         self.text_log.config(height = 3 , width = 80)
         self.text_log.grid(row = 1 , column = 1, rowspan = 2 , sticky = 'nswe', padx = 5 , pady = 2)
         
-        self.next_contact = ttk.Button(self.frame_log , text = "Next Contact" , command = lambda: mc.calendar_toggle_frame(self , "next"))
+        self.next_contact = ttk.Button(self.frame_log , text = "Next Contact" , command = lambda: MyCalendar.calendar_toggle_frame(self , "next"))
         self.next_contact.config(cursor = 'arrow')
         self.next_contact.grid(row = 1, column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
-        self.boton_pop_up = ttk.Button(self.frame_log , text = "Pop Up", command = lambda: mc.calendar_toggle_frame(self , "pop"))
+        self.boton_pop_up = ttk.Button(self.frame_log , text = "Pop Up", command = lambda: MyCalendar.calendar_toggle_frame(self , "pop"))
         self.boton_pop_up.config(cursor = 'arrow')
         self.boton_pop_up.grid(row = 2 , column = 0 , sticky = 'nswe' , padx = 2 , pady = 2)
         
@@ -212,7 +220,7 @@ class Main:
         # FRAME EMPRESA
         
         self.frame_company = CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray") 
-        self.frame_company.grid(row = 1 , column = 5 , sticky = "nswe" , columnspan = 4, padx = 5) 
+        
         
         self.frame_company.grid_columnconfigure(1, weight=1)
         self.frame_company.grid_columnconfigure(0, weight=1)
@@ -230,7 +238,7 @@ class Main:
         
         self.entry_company_name = ttk.Entry(self.margin_frame_company)
         self.entry_company_name.grid(row = 2, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_company_name.bind("<Return>" , lambda e: upd.test(self , 'name' , e))
+        self.entry_company_name.bind("<Return>" , lambda e: Update.test(self , 'name' , e))
         
         
         self.label_nif = ttk.Label(self.margin_frame_company  , text = "N.I.F.", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
@@ -238,35 +246,35 @@ class Main:
         
         self.entry_nif = ttk.Entry(self.margin_frame_company )
         self.entry_nif.grid(row = 2 , column = 1 , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_nif.bind("<Return>" , lambda e: upd.update_info_entries(self , 'nif', e))
+        self.entry_nif.bind("<Return>" , lambda e: Update.update_info_entries(self , 'nif', e))
         
         self.label_adress = ttk.Label(self.margin_frame_company  , text = "Dirección" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_adress.grid(row = 3 , column = 0 , columnspan = 2 , sticky = "we" , padx = 2 , pady = 2) 
 
         self.entry_adress = ttk.Entry(self.margin_frame_company )
         self.entry_adress.grid(row = 4 , column =0 , columnspan = 2 , sticky = "we" , padx = 2 , pady = 2)
-        self.entry_adress.bind("<Return>" , lambda e: upd.update_info_entries(self , 'adress' , e))
+        self.entry_adress.bind("<Return>" , lambda e: Update.update_info_entries(self , 'adress' , e))
                 
         self.label_activity = ttk.Label(self.margin_frame_company  , text = "Actividad", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_activity.grid(row = 5 , column = 0, sticky=W+E , padx = 2 , pady = 2)
         
-        self.entry_activity = ttk.Combobox(self.margin_frame_company , values = li.nace_list())
+        self.entry_activity = ttk.Combobox(self.margin_frame_company , values = LoadInfo.nace_list())
         self.entry_activity.grid(row = 6 , column = 0 , sticky = W+E , padx = 2  , pady = 2)
-        self.entry_activity.bind("<Return>" , lambda e: upd.update_info_entries(self , 'activity' , e)) 
+        self.entry_activity.bind("<Return>" , lambda e: Update.update_info_entries(self , 'activity' , e)) 
         
         self.label_employees = ttk.Label(self.margin_frame_company , text = "Empleados", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_employees.grid(row = 5 , column = 1, sticky=W+E , padx = 2 , pady = 2)
         
         self.entry_employees = ttk.Combobox(self.margin_frame_company , values = [" < 10" , "10 - 50" , "50 - 250" , " > 250"], font = ("" , 9 , 'bold'))
         self.entry_employees.grid(row = 6 , column = 1 , sticky = W+E , padx = 2  , pady = 2)
-        self.entry_employees.bind("<Return>" , lambda e: upd.update_info_entries(self , 'employees' , e)) 
+        self.entry_employees.bind("<Return>" , lambda e: Update.update_info_entries(self , 'employees' , e)) 
         
         self.label_web = ttk.Label(self.margin_frame_company , text = "Web", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_web.grid(row = 7 , column = 0,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
         
         self.entry_web = ttk.Entry(self.margin_frame_company)
         self.entry_web.grid(row = 8 , column= 0 , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_web.bind("<Return>" , lambda e: upd.update_info_entries(self , 'web' , e))
+        self.entry_web.bind("<Return>" , lambda e: Update.update_info_entries(self , 'web' , e))
         
         self.web_button = ttk.Button(self.entry_web ,  image = self.web_icon , command = self.abrir_enlace)
         self.web_button.config(cursor = 'arrow')
@@ -277,7 +285,7 @@ class Main:
         
         self.entry_company_mail = ttk.Entry(self.margin_frame_company)
         self.entry_company_mail.grid(row = 8 , column = 1,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_company_mail.bind("<Return>" , lambda e: upd.update_info_entries(self , 'company_mail' , e))
+        self.entry_company_mail.bind("<Return>" , lambda e: Update.update_info_entries(self , 'company_mail' , e))
         
         self.mail_button = ttk.Button(self.entry_company_mail, image = self.mail_icon)
         self.mail_button.config(cursor = 'arrow')
@@ -288,7 +296,7 @@ class Main:
         
         self.entry_company_phone = ttk.Entry(self.margin_frame_company)
         self.entry_company_phone.grid(row = 10, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_company_phone.bind("<Return>" , lambda e: upd.update_info_entries(self , 'phone' , e))
+        self.entry_company_phone.bind("<Return>" , lambda e: Update.update_info_entries(self , 'phone' , e))
         
         self.phone_button = ttk.Button(self.entry_company_phone , image = self.phone_icon)
         self.phone_button.config(cursor = 'arrow')
@@ -299,7 +307,7 @@ class Main:
         
         self.entry_company_phone2 = ttk.Entry(self.margin_frame_company)
         self.entry_company_phone2.grid(row = 10, column= 1  , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_company_phone2.bind("<Return>" , lambda e: upd.update_info_entries(self , 'phone2' , e))
+        self.entry_company_phone2.bind("<Return>" , lambda e: Update.update_info_entries(self , 'phone2' , e))
         
         self.phone2_button = ttk.Button(self.entry_company_phone2 , image = self.mobile_icon)
         self.phone2_button.config(cursor = 'arrow')
@@ -308,7 +316,6 @@ class Main:
         #FRAME CONTACTO
         
         self.contact_frame = CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray" ) 
-        self.contact_frame.grid(row = 3 , column = 5 , columnspan=2 , rowspan = 2 ,  padx = 5 , sticky='nsew')
         
         self.contact_frame.grid_columnconfigure(1, weight=1)
         self.contact_frame.grid_columnconfigure(0, weight=1)
@@ -317,8 +324,7 @@ class Main:
         self.contact_header = Label(self.contact_frame , text = "Contacto" ,bg = 'LightBlue4' , fg = 'white')
         self.contact_header.grid(row = 0 , column = 0 , columnspan = 2  ,sticky=W+E)
         
-        self.new_contact = ttk.Button(self.contact_header , text = "+"  ,  command = lambda: pw.create_contact(self))
-        self.new_contact.config(cursor = 'arrow')
+        self.new_contact = CTkButton(self.contact_header , text = "+"  ,  command = lambda: Pops.create_contact(self) , width = 30 , corner_radius = 3 , fg_color = "#f4f4f4" , text_color = "gray")
         self.new_contact.pack(side = "right")
         
         self.other_contact = ttk.Button(self.contact_header , image = self.triangle_icon)
@@ -336,28 +342,28 @@ class Main:
         
         self.entry_contact_name = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_name.grid(row = 2 , column = 0 ,  padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_contact_name.bind("<Return>" , lambda e: upd.update_info_entries(self , 'contact_name' , e))
+        self.entry_contact_name.bind("<Return>" , lambda e: Update.update_info_entries(self , 'contact_name' , e))
         
         self.label_contact_surname = ttk.Label(self.margin_frame_contact , text = "Apellidos" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_contact_surname.grid(row = 1 , column = 1 , sticky = W+E, padx = 2 , pady = 2) 
         
         self.entry_contact_surname = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_surname.grid(row = 2 , column = 1 , padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_contact_surname.bind("<Return>" , lambda e: upd.update_info_entries(self , 'contact_surname' , e))
+        self.entry_contact_surname.bind("<Return>" , lambda e: Update.update_info_entries(self , 'contact_surname' , e))
         
         self.label_job_title = ttk.Label(self.margin_frame_contact, text = "Cargo" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_job_title.grid(row = 3 , column = 0, padx = 2 , pady = 2 , sticky = W+E)
         
         self.entry_job_title = ttk.Entry(self.margin_frame_contact)
         self.entry_job_title.grid(row = 4 , column = 0 , padx = 2, pady = 2 , sticky = W+E)
-        self.entry_job_title.bind("<Return>" , lambda e: upd.update_info_entries(self , 'job_title' , e))
+        self.entry_job_title.bind("<Return>" , lambda e: Update.update_info_entries(self , 'job_title' , e))
         
         self.label_contact_mail = ttk.Label(self.margin_frame_contact , text = "Mail" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_contact_mail.grid(row = 3 , column = 1 , padx = 2 , pady = 2  , sticky = W+E)
         
         self.entry_contact_mail = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_mail.grid(row = 4, column = 1 , padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_contact_mail.bind("<Return>" , lambda e: upd.update_info_entries(self , 'contact_mail' , e))
+        self.entry_contact_mail.bind("<Return>" , lambda e: Update.update_info_entries(self , 'contact_mail' , e))
         
         self.contact_mail_button = ttk.Button(self.entry_contact_mail , image = self.mail_icon) 
         self.mail_button.config(cursor = 'arrow')
@@ -368,7 +374,7 @@ class Main:
         
         self.entry_contact_phone = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_phone.grid(row = 6 , column = 0 , padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_contact_phone.bind("<Return>" , lambda e: upd.update_info_entries(self , 'contact_phone' , e))
+        self.entry_contact_phone.bind("<Return>" , lambda e: Update.update_info_entries(self , 'contact_phone' , e))
         
         self.contact_phone_button = ttk.Button(self.entry_contact_phone , image = self.phone_icon)
         self.contact_phone_button.config(cursor = 'arrow')
@@ -379,24 +385,23 @@ class Main:
         
         self.entry_mobile = ttk.Entry(self.margin_frame_contact)
         self.entry_mobile.grid(row = 6 , column = 1 , pady = 2 , padx = 2 , sticky = W+E)
-        self.entry_mobile.bind("<Return>" , lambda e: upd.update_info_entries(self , 'mobile' , e))
+        self.entry_mobile.bind("<Return>" , lambda e: Update.update_info_entries(self , 'mobile' , e))
         
         self.mobile_button = ttk.Button(self.entry_mobile , image = self.mobile_icon , width = 2)
         self.mobile_button.config(cursor = 'arrow')
         self.mobile_button.pack(side = "right")
                                                                        # Centrar texto------------------------
         self.company_contact_buttons = CTkFrame(self.ventana_principal , fg_color = 'transparent')
-        self.company_contact_buttons.grid(row = 2 , column = 5 , columnspan = 2 ,sticky = 'nswe' , padx   = 5 )
         self.contact_frame.grid_rowconfigure(7,weight=1)
         
         self.company_contact_buttons.grid_columnconfigure(0, weight = 1)
         self.company_contact_buttons.grid_columnconfigure(1, weight = 1)
         self.company_contact_buttons.grid_columnconfigure(2, weight = 1)
         
-        self.button_a = CTkButton(self.company_contact_buttons , text = "Terminate" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4')
+        self.button_a = CTkButton(self.company_contact_buttons , text = "Terminate" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Tabs.toggle_view(self , 'view'))
         self.button_a.grid(row = 0 , column = 0 , sticky = "we" , pady = 5 , padx = 5)
         
-        self.button_b = CTkButton(self.company_contact_buttons , text = "Mail" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4')
+        self.button_b = CTkButton(self.company_contact_buttons , text = "Mail" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Tabs.toggle_view(self , 'view'))
         self.button_b.grid(row = 0 , column = 1 , sticky = "we" , pady = 5 , padx = 5)
         
         self.button_c = CTkButton(self.company_contact_buttons , text = "Save" , height = 2 , fg_color = "#f4f4f4" , text_color = 'LightBlue4' , border_color = "LightBlue4" , border_width = 2 , hover_color = 'LightBlue4')
@@ -405,7 +410,7 @@ class Main:
         self.notes = Text(self.contact_frame)
         self.notes.config(height = 3)
         self.notes.grid(row = 8, column = 0  , columnspan = 2 , sticky = 'we' , padx = 5 , pady = 2)
-        self.notes.bind("<Return>" , lambda e: upd.update_info_entries(self , 'notes' , e))
+        self.notes.bind("<Return>" , lambda e: Update.update_info_entries(self , 'notes' , e))
         
         self.ids_frame = ttk.Frame(self.contact_frame)
         self.ids_frame.grid(row = 9 , column = 0 , columnspan = 2 , sticky = W+E)
@@ -426,15 +431,16 @@ class Main:
         self.rcontact_label_responsable_id = Label(self.ids_frame , textvariable = self.active_employee_id , bg = 'LightBlue4' , fg = 'white' , anchor = "w")
         self.rcontact_label_responsable_id.grid(row = 0 , column = 3 , sticky = W+E)
 
-
+        Tabs.toggle_view(self , 'CRM')
+        #LoadInfo.sales_root(self)
+        #SalesTab.sales_root(self)
         
-        
+    
     def abrir_enlace(self):
         
          webbrowser.open_new('https://chat.openai.com/c/2220aa72-de48-497a-b191-203933de98d3')
-           
-           
-
+      
+        
 if __name__ == "__main__":
     
     

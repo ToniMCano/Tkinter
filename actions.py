@@ -486,6 +486,9 @@ class MyCalendar():
 
 class LoadInfo():
 
+    def sales_root(self):
+        
+        print(f"-----------------------------LOAD INFO{self.active_employee_id.get()}")
     
     def check_employee(root , employee_password , alias , window):
                 
@@ -1484,3 +1487,21 @@ class Update:
         
     def pnt(algo):
         print('*********algo*********')
+        
+class Tabs:
+    
+    def toggle_view(self , view):
+        
+        if view == 'CRM':
+            self.sales_frame.grid_forget()
+            self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan=3)
+            self.frame_company.grid(row = 1 , column = 5 , sticky = "nswe" , columnspan = 4, padx = 5) 
+            self.contact_frame.grid(row = 3 , column = 5 , columnspan=2 , rowspan = 2 ,  padx = 5 , sticky='nsew')
+            self.company_contact_buttons.grid(row = 2 , column = 5 , columnspan = 2 ,sticky = 'nswe' , padx   = 5 )
+        
+        else:
+            self.frame_tree.grid_forget()
+            self.frame_company.grid_forget() 
+            self.contact_frame.grid_forget()
+            self.company_contact_buttons.grid_forget()
+        
