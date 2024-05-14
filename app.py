@@ -170,7 +170,7 @@ class Main:
         self.crm_view = CTkButton(self.frame_views , text = "CRM" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Tabs.toggle_view(self , 'CRM'))
         self.crm_view.place(relx=0.2, rely=0.5  , anchor=tk.CENTER)
         
-        self.sales_view = CTkButton(self.frame_views , text = "Pedido" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: SalesTab.sales_root(self))
+        self.sales_view = CTkButton(self.frame_views , text = "Venta" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: SalesTab.sales_root(self))
         self.sales_view.place(relx=0.5, rely=0.5 , anchor=tk.CENTER)
         
         self.bi_view = CTkButton(self.frame_views , text = "Estadísticas" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Pops.login(self))
