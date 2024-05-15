@@ -120,16 +120,16 @@ class Main:
      
         # LEAD, CANDIDATE , CONTACT
         
-        self.employee = ttk.Combobox(self.header ,state = "readonly", values =  LoadInfo.employees_list() , width= 10)
-        self.employee.configure(background='lightblue')
+        self.employee_and_categories = ttk.Combobox(self.header ,state = "readonly", values =  LoadInfo.employees_list() , width= 10)
+        self.employee_and_categories.configure(background='lightblue')
                
-        self.employee.grid(row = 0 , column = 3 , padx = 5)
-        self.employee.bind("<<ComboboxSelected>>")
+        self.employee_and_categories.grid(row = 0 , column = 3 , padx = 5)
+        self.employee_and_categories.bind("<<ComboboxSelected>>")
 
-        self.combo_state = ttk.Combobox(self.header ,state = "readonly",values = ["Lead", "Candidate", "Contact" , "Pool" , 'All'], width= 10)
-        self.combo_state.configure(background='lightblue')
-        self.combo_state.grid(row = 0 , column = 4 , padx = 5)
-        self.combo_state.bind("<<ComboboxSelected>>" , lambda e: LoadInfo.companies_state(self , e))
+        self.combo_state_and_subcategories = ttk.Combobox(self.header ,state = "readonly",values = ["Lead", "Candidate", "Contact" , "Pool" , 'All'], width= 10)
+        self.combo_state_and_subcategories.configure(background='lightblue')
+        self.combo_state_and_subcategories.grid(row = 0 , column = 4 , padx = 5)
+        self.combo_state_and_subcategories.bind("<<ComboboxSelected>>" , lambda e: LoadInfo.companies_state(self , e))
 
         # CALENDAR
         

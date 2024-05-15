@@ -19,12 +19,8 @@ class SalesTab:
     
     def sales_root(self):
         
-        self.frame_tree.grid_forget()
-        self.frame_company.grid_forget() 
-        self.contact_frame.grid_forget()
-        self.company_contact_buttons.grid_forget()
-        self.new_company.grid_forget() #self.header
         LoadInfo.combo_state_values(self , 'sales')
+        
         self.ventana_principal.update()
         
         self.sales_frame.grid(row = 2, column = 0, columnspan = 6 , rowspan = 2 , sticky = 'nswe')
@@ -33,7 +29,7 @@ class SalesTab:
         self.sales_frame.grid_rowconfigure(1 , weight = 1)
         
         self.description = StringVar() 
-        self.description.set('Descripción Producto')
+        self.description.set('Descripción Producto') # Será el nombre del producto seleccionado
         
                        
         self.sales_header = CTkFrame(self.sales_frame , fg_color = 'transparent' , height = 50 , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')
@@ -62,6 +58,7 @@ class SalesTab:
         self.product_description_frame = CTkScrollableFrame(self.sales_frame , corner_radius = 3 , border_width = 1 , border_color = 'lightgray' , fg_color = 'transparent' )
         self.product_description_frame.grid(row = 3 , column =  0, sticky = 'nswe', padx = 3 , pady = 3)
         self.product_description_frame.grid_columnconfigure(0 , weight = 1)
+        
         
         
         

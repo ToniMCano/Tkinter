@@ -34,7 +34,8 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
     nace = []
     
     employees =  [" < 10" , "10 - 50" , "50 - 250" , " > 250"]
-    alias = 1
+    alias = 151
+    alias2 = 1
     employee = 1
     starts = start_date()
 
@@ -59,25 +60,28 @@ def datos_muestra(): # EXCEL CON MUESTRA DE DATOS PARA PRUEBAS
             row.append(employee)
             row.append("Contact")
             row.append(random.choice(employees))
-            row.append(starts[alias - 1])
+            row.append(starts[alias2 - 1])
             row.append(random.randint(0,1))
             row.append(0) # created_by
             
             if row[-2] == 0:
-                row[-5] = "Pool"
+                row[-5] = "Lead"
+            else:
+                row[-5] = "Candidate"
 
             data.append(row)
             
             row = []
             
             alias += 1
+            alias += 2
             
         employee += 1
             
     for x in data: 
         active_sheet.append(x) # Añadimos las filas
         
-    wb.save("data.xlsx")    
+    wb.save("data2.xlsx")    
     
     
 def start_date():
@@ -275,7 +279,7 @@ province = data["Dirección: "].split("-")[4] if "-" in data["Dirección: "] els
 
 
    
-#datos_muestra()
+datos_muestra()
 #empleados()
 #contact()
 #contacts()
@@ -283,43 +287,3 @@ province = data["Dirección: "].split("-")[4] if "-" in data["Dirección: "] els
 
 
 
-data = {"Nombre Empresa: " "N.I.F.: "  "Web: "  "Mail Empresa: " "Teléfono Empresa: "  "Teléfono2 Empresa: " :    "Mail Contacto: "  "Teléfono Contacto: " }
-       
-def check_phones(phone , which_phone , data , update = False):
-    
-    warning =  mb.showwarning("Teléfonos" , f"""El formato del {which_phone} no es correcto, comprueba el {which_phone}.
-                        {phone} [{len(phone)}] Teléfono: {phone} (isdigit: {str(phone).isdigit()} - Longitud: {len(phone) == 9})
-                        """)   
-    try: 
-        if len(phone) == 9 and str(phone).isdigit():
-            return phone
-        
-        else:
-            if which_phone == "Móvil Contacto: "  or which_phone == "Teléfono2 Empresa: " and phone == "":
-                pass
-            
-            elif which_phone == 'Teléfono de Contacto' or which_phone == "Teléfono Empresa: ":
-                data['save'] = False
-                data[which_phone] = ""
-                
-                raise Exception
-            
-            else:
-                answer = mb.askyesno("Teléfono Opcional" , "¿Deseas modificarlo o continuar?\n\n Y : modificarlo\nN: Continuar el registro.")
-                
-                if answer == 'yes':   
-                    data[which_phone] = ""
-                    data['save'] = False
-                    
-                else:
-                    pass
-    
-    except Exception as e:
-        print(f"[check_phones]: {e}")
-        data['save'] = False
-        warning
-        
-        
-check_phones()
-
-print(data)

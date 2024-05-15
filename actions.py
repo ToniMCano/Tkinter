@@ -458,7 +458,7 @@ class MyCalendar():
             else:
                 day = int(fecha_seleccionada[-2:])
             
-            LoadInfo.load_contacts(self , self.employee.get() , fecha_seleccionada)
+            LoadInfo.load_contacts(self , self.employee_and_categories.get() , fecha_seleccionada)
             
             self.fecha.set(datetime(year,month,day).strftime("%d %B")) 
             
@@ -499,15 +499,20 @@ class MyCalendar():
             
             
     def format_date_to_show(date):
-        try:
-            date = datetime.strptime(date,'%Y-%m-%d %H:%M').strftime("%d %B %Y %H:%M")
-            
-            return date
-
-        except Exception as e:
-            mb.showwarning("Error al Introducir la Hora" , f'\nFecha introducida: {date[-5:]}\n\nFormato Válid: 08:25 (HH:MM)')
         
+        if date != '0':
+            
+            try:
+                date = datetime.strptime(date,'%Y-%m-%d %H:%M').strftime("%d %B %Y %H:%M")
+                
+                return date
 
+            except Exception as e:
+                print(e)
+                mb.showwarning("Error al Introducir la Hora" , f'\nFecha introducida: {date[-5:]}\n\nFormato Válid: 08:25 (HH:MM)')
+    
+        else:
+            pass
 
 
 class LoadInfo():
@@ -532,8 +537,8 @@ class LoadInfo():
                 
                 alias = LoadInfo.employees_list().index(alias)
                     
-                root.employee.current(newindex = alias)
-                root.combo_state.current(newindex=2)
+                root.employee_and_categories.current(newindex = alias)
+                root.combo_state_and_subcategories.current(newindex=2)
                 
                 root.active_employee_id.set(employee.id_employee)
                                
@@ -546,6 +551,8 @@ class LoadInfo():
     
     
     def on_heading_click(self , query):
+        
+        state_sended = self.combo_state_and_subcategories.get()
         
         if query == 'state':
             query = "state"
@@ -563,7 +570,7 @@ class LoadInfo():
         employee_id = self.active_employee_id.get()
         date = datetime.strptime(self.fecha.get() + f' {datetime.now().year}' , '%d %B %Y')
         
-        LoadInfo.load_contacts(self , employee_id , date , query)
+        LoadInfo.load_contacts(self , employee_id , date , query , state_sended)
         
 
 
@@ -592,12 +599,19 @@ class LoadInfo():
                 self.info.delete(x)
                         
         except Exception as e:
-            print("load_contacts" , e)
+            print("[load_contacts] (Clean): " , e)
         
         contacts = 0
         bgcolor = 0
         
-        clients = db.session.query(Client).filter(and_(Client.state == state_view , Client.employee_id == int(employee_id_sended))).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
+        if state_sended == 'Pool':
+            clients = db.session.query(Client).filter(Client.state == state_view).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
+        
+        elif state_sended == 'All':
+            clients = db.session.query(Client).filter(Client.employee_id == int(employee_id_sended)).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
+        
+        else:
+            clients = db.session.query(Client).filter(and_(Client.state == state_view , Client.employee_id == int(employee_id_sended))).all() # Cada objeto en la lista será el primer contacto dentro de su respectivo grupo de cliente
         
         self.info.tag_configure("odd", background="snow2" )
         self.info.tag_configure("even", background="white")
@@ -624,35 +638,54 @@ class LoadInfo():
             
             try:
                 dataframe["state"].append(client.state)
-                dataframe["days"].append(LoadInfo.get_days(client))
+                
+                try:
+                    dataframe["days"].append(LoadInfo.get_days(client))
+                    
+                except Exception as e:
+                    dataframe["days"].append('0')
+                    
                 dataframe["name"].append(client.name)
                 
-                if contact.last_contact_date:
+                try:
                     dataframe["last"].append(contact.last_contact_date)
+                
+                except Exception as e:
+                    dataframe["last"].append("0")
                     
-                else:
-                    dataframe["last"].append(".")
-                    
-                if contact.next_contact:
+                try:
                     dataframe['next'].append(f'{contact.next_contact}')
                     
-                else:
-                    dataframe['next'].append(f'{"."}')
-
+                except Exception as e:
+                    dataframe['next'].append(f'{"0"}')
+                    
                 dataframe["cp"].append(client.postal_code)  
-                dataframe["pop"].append(contact.pop_up)
+                
+                try:
+                    dataframe["pop"].append(contact.pop_up)
+                    
+                except Exception as e:
+                    dataframe["pop"].append('0')
                 #print(f"{client.name} - {contact.pop_up}")
+            #except ValueError:                
             except Exception as e:
-                print("load_contacts" , e)
-            
-            #print(dataframe)
+                print("[contacts_dataframe]: " , e)
+        print(f'###################################{dataframe["state"][0]}#############################################')
+        LoadInfo.dicts(dataframe)
+        print('################################################################################')
+        
         ordenado = pd.DataFrame(dataframe)
         ordenado = ordenado.sort_values(by = pd_filter , ascending = ascending_value)
         ordenado = ordenado.reset_index(drop = True)
         
         return ordenado
     
-    
+    def dicts(dataframe):
+        
+        for k,v in dataframe.items():
+            print(f"{k}: {len(v)}")
+        
+        
     def row_colors(self, clients , ordenado , date , bgcolor , contacts , dot):
         for i , client in enumerate(clients):
 
@@ -676,7 +709,13 @@ class LoadInfo():
                 else:
                     next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])}"
                     
-                self.info.insert("" , 0 , text = ordenado.at[i, 'state'] , values = (str(ordenado.at[i, 'days']).lstrip("0") , ordenado.at[i, 'name'] , MyCalendar.format_date_to_show(ordenado.at[i, 'last'])  , next_contact , ordenado.at[i, 'cp']) , tags=(color, font) )
+                if len(str(ordenado.at[i, 'cp'])) == 4:
+                    postal_code = f'0{ordenado.at[i, 'cp']}'
+                    
+                else:
+                    postal_code = ordenado.at[i, 'cp']
+                    
+                self.info.insert("" , 0 , text = ordenado.at[i, 'state'] , values = (str(ordenado.at[i, 'days']).lstrip("0") , ordenado.at[i, 'name'] , MyCalendar.format_date_to_show(ordenado.at[i, 'last'])  , next_contact , postal_code) , tags=(color, font) )
                
                 contacts += 1
                 bgcolor += 1
@@ -699,7 +738,7 @@ class LoadInfo():
         except Exception as e:
             print("get_days" , e) 
             days = 0
-            
+
         return days
     
     
@@ -755,7 +794,7 @@ class LoadInfo():
         
     def companies_state(self, event):  # Recibir valor del Combobox
         
-        item = self.combo_state.get()
+        item = self.combo_state_and_subcategories.get()
         #frame = MyCalendar.place_to_frame(self , place)
         fecha_seleccionada = self.frame_calendar.calendar.get_date()
         print(item, fecha_seleccionada)
@@ -776,6 +815,7 @@ class LoadInfo():
             state_sended = "All"
             
         LoadInfo.load_contacts(self , self.active_employee_id.get() , fecha_seleccionada , 'last' , state_sended) 
+        
     
     
     def combo_state_values(self , view):
@@ -788,27 +828,50 @@ class LoadInfo():
         
         except Exception as e:
             print(e)
+            
         print(f'********{view}********')
+        
         if view == 'crm':
-            self.employee['values'] = LoadInfo.employees_list() 
-            self.combo_state['values'] = ["Lead", "Candidate", "Contact" , "Pool" , 'All']
-            
-            try:
-                employee = db.session.get(Employee , self.active_employee_id.get())
-                alias = LoadInfo.employees_list().index(employee.employee_alias)
-                self.employee.current(newindex = alias) 
-            
-                alias = alias.employee_alias
-                
-            except AttributeError:
-                pass
-            
-            except Exception as e:
-                print(e)
+           
+           LoadInfo.crm_view(self)
             
         elif view == 'sales':
-            self.employee['values'] = ["Category 1", "Category 2", "Category 3" , "Category 4" , 'Category 5']
-            self.employee.current(newindex = 0)
+            
+            LoadInfo.sales_view(self)
+            
+            
+    def crm_view(self):
+        
+        self.employee_and_categories['values'] = LoadInfo.employees_list() 
+        self.combo_state_and_subcategories['values'] = ["Lead", "Candidate", "Contact" , "Pool" , 'All']
+        
+        try:
+            employee = db.session.get(Employee , self.active_employee_id.get())
+            alias = LoadInfo.employees_list().index(employee.employee_alias)
+            self.employee_and_categories.current(newindex = alias) 
+        
+            alias = alias.employee_alias
+            
+        except AttributeError:
+            pass
+        
+        except Exception as e:
+            print(e)
+            
+            
+    def sales_view(self):
+        
+        self.frame_tree.grid_forget()
+        self.frame_company.grid_forget() 
+        self.contact_frame.grid_forget()
+        self.company_contact_buttons.grid_forget()
+        self.new_company.grid_forget() #self.header
+        
+        self.employee_and_categories['values'] = ["Category 1", "Category 2", "Category 3" , "Category 4" , 'Category 5']
+        self.employee_and_categories.current(newindex = 0)
+        
+        self.combo_state_and_subcategories['values'] = ["SubCategory 1", "SubCategory 2", "SubCategory 3" , "SubCategory 4" , 'SubCategory 5']
+        self.combo_state_and_subcategories.current(newindex = 0)
             
 class GetInfo():
     
@@ -1798,7 +1861,7 @@ class Tabs:
             self.company_contact_buttons.grid(row = 2 , column = 5 , columnspan = 2 ,sticky = 'nswe' , padx   = 5 )
             self.new_company.grid(row = 0 , column = 0 , padx = 5)
             LoadInfo.combo_state_values(self , 'crm')
-            self.combo_state.current(newindex = 2)
+            self.combo_state_and_subcategories.current(newindex = 2)
             
 
         else:
