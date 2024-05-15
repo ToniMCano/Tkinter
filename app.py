@@ -46,11 +46,10 @@ class Main:
         self.frame_tree.grid_rowconfigure(3, weight=1)
         
         self.sales_frame = ttk.Frame(self.ventana_principal)
+        #LoadInfo.combo_state_values(self , 'crm')
         
         
-        
-        
-        
+
         self.info = ttk.Treeview(self.frame_tree,height = 20 , style="mystyle.Treeview")
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
         
@@ -78,9 +77,6 @@ class Main:
         self.fecha = StringVar()
         self.company_id = StringVar()
         Pops.login(self)
-        
-        
-        
         
         
         #IMAGENES 
@@ -120,7 +116,7 @@ class Main:
                 # AÑADIR CONTACTOS DESDE POOL
         
         self.new_company = ttk.Button(self.header , text = 'Add Company' , command = lambda: Pops.new_company(self)) 
-        self.new_company.grid(row = 0 , column = 0 , padx = 5) 
+         
      
         # LEAD, CANDIDATE , CONTACT
         
@@ -130,7 +126,7 @@ class Main:
         self.employee.grid(row = 0 , column = 3 , padx = 5)
         self.employee.bind("<<ComboboxSelected>>")
 
-        self.combo_state = ttk.Combobox(self.header ,state = "readonly",values=["Lead", "Candidate", "Contact" , "Pool" , 'All'] , width= 10)
+        self.combo_state = ttk.Combobox(self.header ,state = "readonly",values = ["Lead", "Candidate", "Contact" , "Pool" , 'All'], width= 10)
         self.combo_state.configure(background='lightblue')
         self.combo_state.grid(row = 0 , column = 4 , padx = 5)
         self.combo_state.bind("<<ComboboxSelected>>" , lambda e: LoadInfo.companies_state(self , e))
@@ -164,8 +160,8 @@ class Main:
         self.boton_fecha.config(cursor = 'arrow')
         self.boton_fecha.grid(row=0, column=1, sticky="ew")
         
-        self.frame_views = ttk.Frame(self.header , height = 10)
-        self.frame_views.grid(row = 0 , column = 6 , sticky = 'nswe' , padx = 5 , columnspan = 4) 
+        self.frame_views = ttk.Frame(self.header , height = 20 , width = 300)
+        self.frame_views.place(relx=0.4 , y = 10) 
         
         self.crm_view = CTkButton(self.frame_views , text = "CRM" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Tabs.toggle_view(self , 'CRM'))
         self.crm_view.place(relx=0.2, rely=0.5  , anchor=tk.CENTER)

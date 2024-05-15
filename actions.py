@@ -751,6 +751,39 @@ class LoadInfo():
             
         LoadInfo.load_contacts(self , self.active_employee_id.get() , fecha_seleccionada , 'last' , state_sended) 
     
+    
+    def combo_state_values(self , view):
+        
+        try:
+            view = view.get()
+            
+        except AttributeError:
+            pass
+        
+        except Exception as e:
+            print(e)
+        print(f'********{view}********')
+        if view == 'crm':
+            self.employee['values'] = LoadInfo.employees_list() 
+            self.combo_state['values'] = ["Lead", "Candidate", "Contact" , "Pool" , 'All']
+            
+            try:
+                employee = db.session.get(Employee , self.active_employee_id.get())
+                alias = LoadInfo.employees_list().index(employee.employee_alias)
+                self.employee.current(newindex = alias) 
+            
+                alias = alias.employee_alias
+                
+            except AttributeError:
+                pass
+            
+            except Exception as e:
+                print(e)
+            
+        elif view == 'sales':
+            self.employee['values'] = ["Category 1", "Category 2", "Category 3" , "Category 4" , 'Category 5']
+            self.employee.current(newindex = 0)
+            
 class GetInfo():
     
     def load_comments(self , nif):
@@ -1498,10 +1531,16 @@ class Tabs:
             self.frame_company.grid(row = 1 , column = 5 , sticky = "nswe" , columnspan = 4, padx = 5) 
             self.contact_frame.grid(row = 3 , column = 5 , columnspan=2 , rowspan = 2 ,  padx = 5 , sticky='nsew')
             self.company_contact_buttons.grid(row = 2 , column = 5 , columnspan = 2 ,sticky = 'nswe' , padx   = 5 )
-        
+            self.new_company.grid(row = 0 , column = 0 , padx = 5)
+            LoadInfo.combo_state_values(self , 'crm')
+            self.combo_state.current(newindex = 2)
+            
+
         else:
             self.frame_tree.grid_forget()
             self.frame_company.grid_forget() 
             self.contact_frame.grid_forget()
             self.company_contact_buttons.grid_forget()
+            self.state_values_view.set('sales')
+            
         
