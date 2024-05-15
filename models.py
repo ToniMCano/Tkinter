@@ -135,7 +135,7 @@ class Contact(Base):
     contact_person_id = Column(Integer , ForeignKey('contact_person.id_person'))
     pop_up = Column(Boolean)
 
-
+        
     def __init__(self , last_contact_date , next_contact , log , client_id , contact_employee_id , contact_person_id , contact_type = 'log' ,  contact_counter = 0 , pop_up = False):
         self.last_contact_date = last_contact_date
         self.next_contact = next_contact

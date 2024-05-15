@@ -669,20 +669,12 @@ class LoadInfo():
             #except ValueError:                
             except Exception as e:
                 print("[contacts_dataframe]: " , e)
-        print(f'###################################{dataframe["state"][0]}#############################################')
-        LoadInfo.dicts(dataframe)
-        print('################################################################################')
-        
+
         ordenado = pd.DataFrame(dataframe)
         ordenado = ordenado.sort_values(by = pd_filter , ascending = ascending_value)
         ordenado = ordenado.reset_index(drop = True)
         
         return ordenado
-    
-    def dicts(dataframe):
-        
-        for k,v in dataframe.items():
-            print(f"{k}: {len(v)}")
         
         
     def row_colors(self, clients , ordenado , date , bgcolor , contacts , dot):
@@ -872,7 +864,30 @@ class LoadInfo():
         self.combo_state_and_subcategories['values'] = ["SubCategory 1", "SubCategory 2", "SubCategory 3" , "SubCategory 4" , 'SubCategory 5']
         self.combo_state_and_subcategories.current(newindex = 0)
             
+            
+            
 class GetInfo():
+    
+    
+    def button_a_state(self , state):
+        
+        try:
+            
+            if state == 'Contact':
+                self.button_a_value.set("Terminate")
+                
+            elif state  == 'Lead':
+                self.button_a_value.set("Approve")
+                
+            elif state  == 'Candidate':
+                self.button_a_value.set("Start Contact")
+                
+        except AttributeError:
+            pass
+
+        except Exception as e:
+            print(f'[toggle_view]: {e}')
+    
     
     def load_comments(self , nif):
         
@@ -931,9 +946,11 @@ class GetInfo():
 
 
     def load_client_info(tree , client_name):
-        
+
         client = db.session.query(Client).filter(Client.name == client_name).first()
         contact_person = db.session.get(ContactPerson , client.contact_person)
+        
+        GetInfo.button_a_state(tree , client.state)
         
         try:
             tree.entry_company_name.delete(0 , END)
@@ -1366,8 +1383,7 @@ class Alerts():
                 GetInfo.load_client_info(self , name)
 
                 window.destroy()
-                
-            
+  
         
 class Logs:
 
@@ -1439,7 +1455,7 @@ class Logs:
                     if contact.id_contact in alerts:
                         alerts.remove(contact.id_contact)
                         
-                contact.pop_up = False
+                    contact.pop_up = False
                 
             print(f"********* Cleanning Old PopUps... > {alerts}************\n")
             
@@ -1459,7 +1475,7 @@ class Logs:
 
                 values = list(self.info.item(item , 'values'))
                 text = self.info.item(item , 'text')
-
+                
                 return [text , values , item]
     
 
@@ -1828,25 +1844,50 @@ class Update:
             else:
                 pass
 
-           
-           
-    def test(self , data , event):
-        
-        fields =  {'name' : Update.pnt(data) }
-        
-        fields[data]
-        #variable = self.entry_nif.get()
-        #data = str(variable).split("_")[0]
-        #client = db.session.query(Client).filter(Client.nif == variable).first()  
-        
-          
-        #print(f"--------{data}----------")
-        #print(client)
-        
-    def pnt(algo):
-        print('*********algo*********')
         
         
+    def change_state(self):
+        
+        client = db.session.get(Client , self.company_id.get())
+        employee = db.session.get(Employee , self.active_employee_id.get())
+        
+        if client.state == "Lead":
+            client.state = "Candidate"
+            
+        elif client.state == "Candidate":
+            client.state = "Contact"
+            
+        elif client.state == "Contact":
+            client.state = "Pool"
+            client.employee_id = 0
+            
+            terminate = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Terminated by: [{employee.id_employee}] {employee.employee_alias}' , client.id_client , employee.id_employee , client.contact_person  ,'Termninated'  , client.counter , False )
+            db.session.add(terminate)
+            
+            row = Logs.row_to_change(self , client.name) # return [text , values , item]
+            db.session.commit()
+            
+            Logs.confirm_unique_pop(terminate)
+            
+            row[1][3] = row[1][3].replace( '◉' , "")
+            
+            self.info.item( row[2] , text = "(Terminated)" , values = row[1] , tags=("font_red"))
+            
+            
+            
+            GetInfo.load_comments(self, client.nif)
+            
+        elif client.state == "Pool":
+            client.state = "Lead"
+            client.counter = client.counter + 1
+            
+        db.session.close()
+    
+    
+
+                
+
+                
         
 class Tabs:
     
@@ -1863,20 +1904,6 @@ class Tabs:
             self.combo_state_and_subcategories.current(newindex = 2)
             
             
-            client = db.session.get(Client , self.company_id)
-            
-            if client.state == 'Contact':
-                self.button_a_value.set("Terminate")
-                
-            elif client.state  == 'Lead':
-                self.button_a_value.set("Approve")
-                
-            elif client.state  == 'Candidate':
-                self.button_a_value.set("Start Contact")
-                
-            
-            
-
         else:
             self.frame_tree.grid_forget()
             self.frame_company.grid_forget() 
@@ -1884,4 +1911,5 @@ class Tabs:
             self.company_contact_buttons.grid_forget()
             self.state_values_view.set('sales')
             
-
+            
+    

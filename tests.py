@@ -268,22 +268,3 @@ def optimizar2():
         
 
 
-data = { "Dirección: " : "Street12012017 NCity120Province120"  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}
-           
-street = data["Dirección: "].split("-")[0] if "-" in data["Dirección: "] else ''
-number = data["Dirección: "].split("-")[1] if "-" in data["Dirección: "] else ''
-floor = data["Dirección: "].split("-")[2] if "-" in data["Dirección: "] else ''
-city = data["Dirección: "].split("-")[3] if "-" in data["Dirección: "] else ''
-province = data["Dirección: "].split("-")[4] if "-" in data["Dirección: "] else ''
-   
-
-
-   
-datos_muestra()
-#empleados()
-#contact()
-#contacts()
-#optimizar()
-
-
-
