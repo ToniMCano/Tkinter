@@ -123,7 +123,7 @@ class Pops:
         save_button.grid(row = 6 , column = 0 , columnspan = 2 , padx = 200 , pady = 5 , sticky = W+E)
         
         
-    def new_company(self, data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección: " : ""  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}):
+    def new_company(self, data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección: " : "" , "Código Postal: " : ""  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : '' , 'save' : True}):
     
         #load_image= Image.open("recursos/upload.png")
         #load_image.resize((6,6))
@@ -153,28 +153,32 @@ class Pops:
         
         company_name = ttk.Label(company_frame , text ="Nombre: ")
         company_name.grid(row =0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
-        
+       
         entry_company_name = ttk.Entry(company_frame)
+        entry_company_name.insert(0 , data["Nombre Empresa: "])
         entry_company_name.grid(row =0 , column = 1 , columnspan = 5 , padx = 5 , pady = 5 , sticky = W+E)
         
         company_nif = ttk.Label(company_frame , text  = "N.I.F.: ")
         company_nif.grid(row =0 , column = 6 , padx = 5 , pady = 5)
-        
+         
         entry_company_nif = ttk.Entry(company_frame)
+        entry_company_nif.insert(0 , data["N.I.F.: "])
         entry_company_nif.grid(row =0 , column = 7 , padx = 5 , pady = 5)
         
         company_activity = ttk.Label(company_frame , text ="Actividad: ")
         company_activity.grid(row =1 , column = 0 , columnspan= 7 , padx = 5 , pady = 5 , sticky = "w")
-        
+       
         nace_list_combo = ttk.Combobox(company_frame, state = 'readonly' , values = LoadInfo.nace_list())
+        #.insert(0 , data['"NACE: "'])
         nace_list_combo.grid(row =2 , column = 0 ,  columnspan= 7 , padx = 5 , pady = 5 , sticky = W+E)
         nace_list_combo.current(newindex = 0)
         #nace_list_combo.bind("<<ComboboxSelected>>" , self.test)
         
         number_of_employees = ttk.Label(company_frame, text = "Empleados: ")
         number_of_employees.grid(row = 1 , column = 7 , padx = 5 , pady = 5 , sticky = "w")
-        
+         
         number_of_employees_entry = ttk.Combobox(company_frame, state = 'readonly' , values =  [" < 10" , "10 - 50" , "50 - 250" , " > 250"])
+        #.insert(0 , data["Empleados: "])
         number_of_employees_entry.grid(row =2 , column = 7  , padx = 5 , pady = 5 , sticky = W+E)
         number_of_employees_entry.current(newindex = 0)
         number_of_employees_entry.bind("<<ComboboxSelected>>")
@@ -186,20 +190,27 @@ class Pops:
         
         company_street_label = ttk.Label(company_adress, text="Calle: ")
         company_street_label.grid(row=0, column=0, padx=5, pady=5, columnspan=3, sticky="we")
-
-        company_street = ttk.Entry(company_adress)
+        
+        street = data["Dirección: "].split("-")[0] if "-" in data["Dirección: "] else ''
+        company_street = ttk.Entry(company_adress) 
+        company_street.insert(0 , street)
         company_street.grid(row=1, column=0, columnspan=3, padx=5, pady=5, sticky="we")
 
+        
         company_street_label_number = ttk.Label(company_adress, text="Núm: ")
         company_street_label_number.grid(row=0, column=4, pady=5, sticky="we")
 
+        number = data["Dirección: "].split("-")[1] if "-" in data["Dirección: "] else ''
         company_street_number = ttk.Entry(company_adress , width = 6)
+        company_street_number.insert(0 , number)
         company_street_number.grid(row=1, column=4,  pady=5)
         
         company_street_label_floor = ttk.Label(company_adress, text="Piso: ")
         company_street_label_floor.grid(row=0, column=5, padx=5, pady=5, sticky="we")
         
+        floor = data["Dirección: "].split("-")[2] if "-" in data["Dirección: "] else ''
         company_street_floor = ttk.Entry(company_adress , width = 6)
+        company_street_floor.insert(0 , floor)
         company_street_floor.grid(row=1, column=5, padx=5, pady=5)
         
         company_adress2 = ttk.Frame(company_adress)
@@ -208,19 +219,24 @@ class Pops:
         company_city = ttk.Label(company_adress2 , text = "Ciudad: ")
         company_city.grid(row = 0 , column = 0 , padx = 5 , pady = 5)# , sticky = W+E)
         
+        city = data["Dirección: "].split("-")[3] if "-" in data["Dirección: "] else ''
         company_city_entry = ttk.Entry(company_adress2)
+        company_city_entry.insert(0 , city)
         company_city_entry.grid(row = 0 , column = 1, columnspan = 2 , padx = 5 , pady = 5 , sticky = W+E)
         
         company_province= ttk.Label(company_adress2 , text = "Provincia: ")
         company_province.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = E)
         
+        province = data["Dirección: "].split("-")[4] if "-" in data["Dirección: "] else ''
         company_province_entry = ttk.Entry(company_adress2)
+        company_province_entry.insert(0 , province)
         company_province_entry.grid(row = 0 , column = 4, columnspan = 2 , padx = 5 , pady = 5 , sticky = W+E)
         
         company_postal_code = ttk.Label(company_adress2 , text = "C.P.: ")
         company_postal_code.grid(row = 0 , column = 6 , padx = 5 , pady = 5 )# , sticky = W+E)
         
         company_postal_code_entry = ttk.Entry(company_adress2)
+        company_postal_code_entry.insert(0 , data["Código Postal: "])
         company_postal_code_entry.grid(row = 0 , column = 7 , padx = 5 , pady = 5 )# , sticky = W+E)
         
         company_contact = ttk.Labelframe(add_company_frame , text = "Contacto")   
@@ -233,24 +249,28 @@ class Pops:
         company_web.grid(row =2 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
         
         entry_company_web = ttk.Entry(company_contact)
+        entry_company_web.insert(0 , data["Web: "])
         entry_company_web.grid(row = 2 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
         
         company_mail = ttk.Label(company_contact , text ="Mail: ")
         company_mail.grid(row =2 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
         
         entry_company_mail = ttk.Entry(company_contact)
+        entry_company_mail.insert(0 , data["Mail Empresa: "])
         entry_company_mail.grid(row =2 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
         
         company_phone = ttk.Label(company_contact , text ="Teléfono: ")
         company_phone.grid(row =3 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
-        
+       
         entry_company_phone = ttk.Entry(company_contact)
+        entry_company_phone.insert(0 , data["Teléfono Empresa: "])
         entry_company_phone.grid(row =3 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
         
         company_phone2 = ttk.Label(company_contact , text ="Teléfono2: ")
         company_phone2.grid(row =3 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
-        
+         
         entry_company_phone2 = ttk.Entry(company_contact)
+        entry_company_phone2.insert(0 , data["Teléfono2 Empresa: "])
         entry_company_phone2.grid(row =3 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
         
         frame_contact_person = ttk.Labelframe(add_company_frame , text = "Contact Person")
@@ -264,39 +284,45 @@ class Pops:
         label_name.grid(row = 0 , column = 0 , padx = 5 , sticky = W+E)
         
         entry_name = ttk.Entry(frame_contact_person)
+        entry_name.insert(0 , data["Nombre Contacto: "])
         entry_name.grid(row = 1 , column = 0 , padx = 5 , sticky = W+E)
         
         label_surname = ttk.Label(frame_contact_person , text = "Apellidos")
         label_surname.grid(row = 0 , column = 1 , padx = 5 , sticky = W+E)
-        
+         
         entry_surname = ttk.Entry(frame_contact_person)
+        entry_surname.insert(0 , data["Apellidos Contacto: "])
         entry_surname.grid(row = 1 , column = 1 , padx = 5 , sticky = W+E)
         
         label_job_title = ttk.Label(frame_contact_person , text = "Cargo")
         label_job_title.grid(row = 0 , column = 2 , sticky = W+E , padx = 5)
         
         entry_job_title = ttk.Entry(frame_contact_person)
+        entry_job_title.insert(0 , data["Cargo: "])
         entry_job_title.grid(row = 1 , column = 2, sticky = W+E , padx = 5)
         
         label_mail = ttk.Label(frame_contact_person , text = "Mail")
         label_mail.grid(row = 2 , column = 0 , sticky = W+E , padx = 5)
         
         entry_mail = ttk.Entry(frame_contact_person)
+        entry_mail.insert(0 , data["Mail Contacto: "])
         entry_mail.grid(row = 3 , column = 0, sticky = W+E , padx = 5 , pady = 5)
         
         label_phone = ttk.Label(frame_contact_person , text = "Teléfono")
         label_phone.grid(row = 2 , column = 1 , sticky = W+E , padx = 5)
         
         entry_phone = ttk.Entry(frame_contact_person)
+        entry_phone.insert(0 , data["Teléfono Contacto: "])
         entry_phone.grid(row = 3 , column = 1, sticky = W+E , padx = 5 , pady = 5)
         
         label_mobile = ttk.Label(frame_contact_person , text = "Móvil")
         label_mobile.grid(row = 2 , column = 2 , sticky = W+E , padx = 5)
         
         entry_mobile = ttk.Entry(frame_contact_person)
+        entry_mobile.insert(0 , data["Móvil Contacto: "])
         entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
         
-        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: CheckInfo.test_add_company(self , add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}-{company_street_number.get()}-{company_street_floor.get()}-{company_city_entry.get()}-{company_province_entry.get()}" , "Código Postal: ": company_postal_code_entry.get() , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get()}))
+        save_company_button = ttk.Button(add_company_frame , text = "Add" , command = lambda: CheckInfo.test_add_company(self , add_company_frame , {"Nombre Empresa: " : entry_company_name.get(), "N.I.F.: " : entry_company_nif.get(), "NACE: " : nace_list_combo.get(), "Empleados: " : number_of_employees_entry.get(), "Dirección: " : f"{company_street.get()}-{company_street_number.get()}-{company_street_floor.get()}-{company_city_entry.get()}-{company_province_entry.get()}" , "Código Postal: ": company_postal_code_entry.get() , "Web: " : entry_company_web.get(), "Mail Empresa: " : entry_company_mail.get(), "Teléfono Empresa: " : entry_company_phone.get(), "Teléfono2 Empresa: " : entry_company_phone2.get(), "Nombre Contacto: " : entry_name.get(), "Apellidos Contacto: " : entry_surname.get(), "Cargo: " : entry_job_title.get(), "Mail Contacto: " : entry_mail.get(), "Teléfono Contacto: " : entry_phone.get(), "Móvil Contacto: " : entry_mobile.get() , 'save' : True}))
         save_company_button.grid(row = 5 , column = 0 , pady = 10)
         
         Pops.center_window(Pops , add_company_frame)
@@ -914,7 +940,6 @@ class GetInfo():
             
    
 class CheckInfo:
-    
         
     def check_name(self , name , wich_name , data , update = False):
         
@@ -923,13 +948,13 @@ class CheckInfo:
                 return name
             
             else:
-                data['Nombre Empresa: '] == False
+                data['save'] = False
                 raise Exception
         
         except Exception as e:
             mb.showwarning(f"{wich_name}" , f"El formato del {wich_name} no es correcto, comprueba el {wich_name}.")
-       
-       
+      
+      
     def check_surname(self , surname , data , update = False):
         
         try:
@@ -937,59 +962,80 @@ class CheckInfo:
                 return surname
             
             else:
-                data['Nombre Empresa: '] = False
+                data['save'] = False
                 raise Exception
         
         except Exception as e:
             mb.showwarning("Persona de Contacto (Apellido)" , f"El formato del Apellido no es correcto, comprueba el Apellido.")
 
-        
+     
     def check_phones(self , phone , which_phone , data , update = False):
-             
+      
         try: 
             if len(phone) == 9 and str(phone).isdigit():
                 return phone
             
             else:
-                data['Nombre Empresa: '] = False
-                raise Exception
+                if  which_phone == "Teléfono2 Empresa: " and phone == "":
+                    pass
+                
+                elif which_phone == "Móvil Contacto: "   and phone == "":
+                    pass
+                
+                else:
+                    data['save'] = False
+                    data[which_phone] = ""
+                    
+                    raise Exception
         
         except Exception as e:
-            mb.showwarning("Teléfonos" , f"El formato del {which_phone} no es correcto, comprueba el {which_phone}.")
-
+            print(f"[check_phones]: {e}")
+            
+            data['save'] = False
+            
+            mb.showwarning("Teléfonos" , f"""El formato del {which_phone} no es correcto, comprueba el {which_phone}.
+            {phone} [{len(phone)}] Teléfono: {phone} (isdigit: {str(phone).isdigit()} - Longitud: {len(phone) == 9})
+                            """)  
+            
     
     def check_mail(self , complete_mail , wich_mail , data , update = False):
           
         try: 
             mail = complete_mail.split(".")
             
-            if mail[0] != "www" and "@" in complete_mail and len(mail[-1] < 2):
+            if mail[0] != "www" and "@" in complete_mail and len(mail[-1]) > 2:
                 return complete_mail
             
             else:
-                data['Nombre Empresa: '] = False
+                data['save'] = False
+                data["Mail Empresa: "] = ""
+                data["Mail Contacto: "] = ""
                 raise Exception
         
         except Exception as e:
-            mb.showwarning("Teléfonos" , f"El formato del {wich_mail} no es correcto, comprueba el {wich_mail}.")
+            mb.showwarning("Teléfonos" , f"""El formato del {wich_mail} no es correcto, comprueba el {wich_mail}.
+            [{mail[0]}]: {mail[0] != "www"}  ({complete_mail} [{len(mail[-1]) > 2}]) - @ [{"@" in complete_mail}])
+                           """)
  
 
     def check_nif(self , nif , data , update = False):
         
         nif_check = ['a','b','c','e','f','g','h','j','p','q','r','s','u','v' , 'w' , 'n']
         try:             
-            if nif[0] in nif_check or len(nif) == 9:
+            if nif[0].lower() in nif_check and len(nif) == 9:
                 return nif
             
             else:
-                data['Nombre Empresa: '] = False
+                data['save'] = False
+                data["N.I.F.: "] = ""
                 raise Exception
         
         except Exception as e:
-            mb.showwarning("N.I.F." , f"El formato del N.I.F. no es correcto, comprueba el N.I.F.")
+            mb.showwarning("N.I.F." , f"""El formato del N.I.F. no es correcto, comprueba el N.I.F.
+            '{nif[0].lower()}' [{nif[0] in nif_check}] {nif} ({len(nif)}) [{len(nif) == 9}]
+                           """)
  
 
-    
     def check_postal_code(self , code , data , update = False):
         
         try:
@@ -999,11 +1045,11 @@ class CheckInfo:
                     print('OK')
                     
                 else:
-                    print(code)
                     return code
 
             else:
-                data['Nombre Empresa: '] = False
+                data['save'] = False
+                data["Código Postal: "] = ""
                 raise Exception
         
         except Exception as e:
@@ -1019,12 +1065,14 @@ class CheckInfo:
                 if len(web_test[-1]) >= 2:
                     return True
             else:
-                data['Nombre Empresa: '] = False
+                data['save'] = False
+                data["Web: "] = ""
+                
                 raise Exception
             
         except Exception as e:
-            print(e)
-            mb.showerror("Error en Web" , "\n\nEl formato de la web no correcto.\n\n")
+            print(f'[check_web]: {e}')
+            mb.showerror("Web" , f"\n\nEl formato de la web no correcto.\n\n [{web_test[0] == 'www'}] {web} ({web_test[-1]}) [{len(web_test[-1]) >= 2}]")
             
     
     def test_add_company(self , add_company_frame , data):
@@ -1035,48 +1083,26 @@ class CheckInfo:
             postal_code = CheckInfo.check_postal_code(self , data["Código Postal: "] , data , 'remplazar') 
             web = CheckInfo.check_web(self , data["Web: "] , 'remplazar')  ####
             company_mail = CheckInfo.check_mail(self , data["Mail Empresa: "] , "Mail Empresa" , data ,  'remplazar') 
-            company_phone = CheckInfo.check_phones(self , data["Teléfono Empresa: "] , 'Teléfono de Empresa' , data , 'remplazar')
-            company_phone2 = CheckInfo.check_phones(self , data["Teléfono2 Empresa: "] , 'Teléfono de Empresa2' , data , 'remplazar')
+            company_phone = CheckInfo.check_phones(self , data["Teléfono Empresa: "] , "Teléfono Empresa: " , data , 'remplazar')
+            company_phone2 = CheckInfo.check_phones(self , data["Teléfono2 Empresa: "] , "Teléfono2 Empresa: " , data , 'remplazar')
             
             contact_name = CheckInfo.check_name(self , data["Nombre Contacto: "] , 'Nombre Contacto' , data ,  'remplazar')
-            contact_surname = CheckInfo.check_surname(self , data["Apellidos Contacto: "] ,  data , 'remplazar')
-            contact_phone = CheckInfo.check_phones(self , data["Teléfono Contacto: "] , 'Teléfono de Contacto' , data , 'remplazar')
-            contact_mobile = CheckInfo.check_phones(self , data["Móvil Contacto: "] , 'Teléfono de Contacto' , data , 'remplazar')
+            contact_surname = CheckInfo.check_surname(self , data["Apellidos Contacto: "] ,  data , 'remplazar') 
+            contact_phone = CheckInfo.check_phones(self , data["Teléfono Contacto: "] , "Teléfono Contacto: " , data , 'remplazar')
+            contact_mobile = CheckInfo.check_phones(self , data["Móvil Contacto: "] , "Móvil Contacto: " , data , 'remplazar')
             contact_mail = CheckInfo.check_mail(self , data["Mail Contacto: "] , "Mail Contacto" , data ,  'remplazar') 
-            values_info = [company_name , nif , postal_code , web , company_mail , company_phone , company_phone2 , contact_name , contact_surname , contact_phone , contact_mobile , contact_mail]
+            #values_info = [company_name , nif , postal_code , web , company_mail , company_phone , company_phone2 , contact_name , contact_surname , contact_phone , contact_mobile , contact_mail]
 
-            if data["Nombre Empresa: "]:
-                
+            if data["save"]:
+
                 AddInfo.add_company(self , data , add_company_frame)
                             
             else:
-                mb.showwarning( "Faltan Datos:" , 
-                f"""Faltan Datos o son incorrectos, compruebalos.
-                
-                    Empresa:                               
-                
-                    Nombre:   {data['Nombre Empresa: ']}   
-                    N.I.F:    {data['N.I.F.: ']}       
-                    Teléfono: {data['Teléfono Empresa: ']} 
-                    Mail:     {data['Mail Empresa: '] }    
-                    
-                    Persona de Contacto: 
-                
-                    Nombre:    {data['Nombre Contacto: ']}
-                    Apellidos: {data['Apellidos Contacto: ']}
-                    Teléfono:  {data['Teléfono Contacto: ']}
-                    Mail: {data["Mail Contacto: "]}
-                """ 
-                )
-                
-                add_company_frame.destroy()
-                
-                Pops.new_company(data)
+                Pops.new_company(self , data)
             
         except Exception as e:
-            print(e)
+            print(f'test_add_company: {e}') 
                 
-
         
         
 class AddInfo():
@@ -1196,7 +1222,7 @@ class Alerts():
                 Alerts.pop_up_alert(self , employee_id , date , new_alerts)
             
         except Exception as e:
-            print(e)
+            print(f'[check_pop_ups]: {e}')
 
         
 
@@ -1259,7 +1285,7 @@ class Alerts():
             Alerts.check_pop_ups(self, employee_id)
             
         except Exception as e:
-            print(e)
+            print(f'refresh_alerts]: {e}')
             exit()
 
     
@@ -1472,39 +1498,276 @@ class Logs:
             
 class Update:
     
-    def update_info_entries(self, data , event):
+    def save_close():
+        db.session.commit()
+        db.session.close()  
         
+    
+    def update_company_info(self):
         
         try:
             identificator = self.entry_nif.get()
             company = db.session.query(Client).filter(and_(Client.nif == identificator , Client.state == 'Contact')).first()
-            new_data = data.get()
+            
+            return company
             
         except Exception as e:
-            print(f'[] {e}')
+            print(f'[update_company_info]: {e}')
             
-        if data not in [self.entry_adress , self.entry_employees , self.entry_activity]:
-            try:
+        
+    def update_contact(self):
+        
+        try:
+            company = Update.update_company_info(self)
+            contact = db.session.get(ContactPerson , company.contact_id) 
+            return contact
             
-                ""
+        except Exception as e:
+            print(f'[update_contact]: {e}')    
+      
+
+    def update_company_name(self, identificator):
         
-            except Exception as e:
-                print(f'[] {e}')
-        
-        elif data == self.entry_adress :
-            try:
-                print("ADRESS:" , data.get())
-        
-            except Exception as e:
-                print(f'[] {e}')
-        
-        else:
-            try:
-                print("COMBO:" , data.get())
+        company = Update.update_company_info(self)
+
+        if identificator == 'company_name':
+            identificator = CheckInfo.check_name(self , self.entry_ .get().get() , wich_name , data , update = True)
+
+            if identificator:
                 
-            except Exception as e:
-                print(f'[] {e}')
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_nif(self, identificator):
+        
+        company = Update.update_company_info(self)
+
+        if identificator == 'nif':
+            identificator = CheckInfo.check_nif(self , self.entry_ .get().get() , data , update = True)
+
+            if identificator:
                 
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_adress(self, identificator):
+        
+        company = Update.update_company_info(self)
+
+        if identificator == 'adress':
+            identificator = CheckInfo.check_postal_code(self , code , data , update = True)
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_activity(self, identificator):
+        
+        company = Update.update_company_info(self)
+
+        if identificator == 'activity':
+            identificator = self.entry_activity.get()
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_employees(self, identificator):
+        
+        company = Update.update_company_info(self)
+
+        if identificator == 'employees':
+            identificator = self.entry_employees.get()
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_web(self, identificator):
+        
+        company = Update.update_company_info(self)
+
+        if identificator == 'web':
+            identificator = CheckInfo.check_web(self , self.entry_ .get().get() , data , update = True)
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_company_mail(self, identificator):
+        
+        company = Update.update_company_info(self)
+
+        if identificator == 'company_mail':
+            identificator = CheckInfo.check_mail(self , self.entry_ .get().get() , wich_mail , data , update = True)
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_phone(self, identificator):
+        
+        company = Update.update_company_info(self)
+
+        if identificator == 'phone':
+            identificator = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_phone2(self, identificator):
+        
+        company = Update.update_company_info(self)
+
+        if identificator == 'phone2':
+            identificator = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+
+    
+    
+    def update_contact_name(self, identificator):
+        
+        contact = Update.update_contact(self)
+        
+        if identificator == 'contact_name':
+            identificator = CheckInfo.check_name(self , self.entry_ .get().get() , wich_name , data , update = True)
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_contact_surname(self, identificator):
+        
+        contact = Update.update_contact(self)
+        
+        if identificator == 'contact_surname':
+            identificator = CheckInfo.check_surname(self , self.entry_ .get().get() , data , update = True)
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_job_title(self, identificator):
+        
+        contact = Update.update_contact(self)
+        
+        if identificator == 'job_title':
+            identificator = self.entry_job_title
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_contact_mail(self, identificator):
+        
+        contact = Update.update_contact(self)
+        
+        if identificator == 'contact_mail':
+            identificator = CheckInfo.check_mail(self , self.entry_ .get().get() , wich_mail , data , update = True)
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_contact_phone(self, identificator):
+        
+        contact = Update.update_contact(self)
+        
+        if identificator == 'contact_phone':
+            identificator = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_mobile(self, identificator):
+        
+        contact = Update.update_contact(self)
+        
+        if identificator == 'mobile':
+            identificator = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+    
+    
+    def update_notes(self, identificator):
+        
+        contact = Update.update_contact(self)
+        
+        if identificator == 'notes':
+            identificator = self.notes.get(1.0, "end")
+
+            if identificator:
+                
+                Update.save_close()
+            
+            else:
+                pass
+
+           
+           
     def test(self , data , event):
         
         fields =  {'name' : Update.pnt(data) }
@@ -1520,6 +1783,8 @@ class Update:
         
     def pnt(algo):
         print('*********algo*********')
+        
+        
         
 class Tabs:
     
@@ -1543,4 +1808,4 @@ class Tabs:
             self.company_contact_buttons.grid_forget()
             self.state_values_view.set('sales')
             
-        
+

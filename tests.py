@@ -8,7 +8,7 @@ import db
 from models import Client , ContactPerson , Employee , Contact
 from datetime import datetime , timedelta
 import os
-from tkinter import *
+from tkinter import messagebox as mb
 import customtkinter
 from actions import GetInfo,LoadInfo
 import pandas as pd
@@ -264,16 +264,15 @@ def optimizar2():
         
 
 
-    
-values ={ 'uno' : False , 'dos': True}
-
-if values['dos']:
-    print('Se ejecuta' , datetime.now())
-else: 
-    print('no cuela')
-print("fin")
-
+data = { "Dirección: " : "Street12012017 NCity120Province120"  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : ''}
+           
+street = data["Dirección: "].split("-")[0] if "-" in data["Dirección: "] else ''
+number = data["Dirección: "].split("-")[1] if "-" in data["Dirección: "] else ''
+floor = data["Dirección: "].split("-")[2] if "-" in data["Dirección: "] else ''
+city = data["Dirección: "].split("-")[3] if "-" in data["Dirección: "] else ''
+province = data["Dirección: "].split("-")[4] if "-" in data["Dirección: "] else ''
    
+
 
    
 #datos_muestra()
@@ -284,3 +283,43 @@ print("fin")
 
 
 
+data = {"Nombre Empresa: " "N.I.F.: "  "Web: "  "Mail Empresa: " "Teléfono Empresa: "  "Teléfono2 Empresa: " :    "Mail Contacto: "  "Teléfono Contacto: " }
+       
+def check_phones(phone , which_phone , data , update = False):
+    
+    warning =  mb.showwarning("Teléfonos" , f"""El formato del {which_phone} no es correcto, comprueba el {which_phone}.
+                        {phone} [{len(phone)}] Teléfono: {phone} (isdigit: {str(phone).isdigit()} - Longitud: {len(phone) == 9})
+                        """)   
+    try: 
+        if len(phone) == 9 and str(phone).isdigit():
+            return phone
+        
+        else:
+            if which_phone == "Móvil Contacto: "  or which_phone == "Teléfono2 Empresa: " and phone == "":
+                pass
+            
+            elif which_phone == 'Teléfono de Contacto' or which_phone == "Teléfono Empresa: ":
+                data['save'] = False
+                data[which_phone] = ""
+                
+                raise Exception
+            
+            else:
+                answer = mb.askyesno("Teléfono Opcional" , "¿Deseas modificarlo o continuar?\n\n Y : modificarlo\nN: Continuar el registro.")
+                
+                if answer == 'yes':   
+                    data[which_phone] = ""
+                    data['save'] = False
+                    
+                else:
+                    pass
+    
+    except Exception as e:
+        print(f"[check_phones]: {e}")
+        data['save'] = False
+        warning
+        
+        
+check_phones()
+
+print(data)

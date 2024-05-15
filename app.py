@@ -234,8 +234,8 @@ class Main:
         
         self.entry_company_name = ttk.Entry(self.margin_frame_company)
         self.entry_company_name.grid(row = 2, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_company_name.bind("<Return>" , lambda e: Update.test(self , 'name' , e))
-        
+        self.entry_company_name.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_company_name , 'company_name', e))
+
         
         self.label_nif = ttk.Label(self.margin_frame_company  , text = "N.I.F.", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_nif.grid(row = 1 , column = 1 , sticky = W+E , padx = 2  , pady = 2)
@@ -243,6 +243,7 @@ class Main:
         self.entry_nif = ttk.Entry(self.margin_frame_company )
         self.entry_nif.grid(row = 2 , column = 1 , padx = 2  , pady = 2 , sticky = W+E)
         self.entry_nif.bind("<Return>" , lambda e: Update.update_info_entries(self , 'nif', e))
+
         
         self.label_adress = ttk.Label(self.margin_frame_company  , text = "Dirección" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_adress.grid(row = 3 , column = 0 , columnspan = 2 , sticky = "we" , padx = 2 , pady = 2) 
@@ -250,6 +251,7 @@ class Main:
         self.entry_adress = ttk.Entry(self.margin_frame_company )
         self.entry_adress.grid(row = 4 , column =0 , columnspan = 2 , sticky = "we" , padx = 2 , pady = 2)
         self.entry_adress.bind("<Return>" , lambda e: Update.update_info_entries(self , 'adress' , e))
+
                 
         self.label_activity = ttk.Label(self.margin_frame_company  , text = "Actividad", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_activity.grid(row = 5 , column = 0, sticky=W+E , padx = 2 , pady = 2)
@@ -293,6 +295,7 @@ class Main:
         self.entry_company_phone = ttk.Entry(self.margin_frame_company)
         self.entry_company_phone.grid(row = 10, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
         self.entry_company_phone.bind("<Return>" , lambda e: Update.update_info_entries(self , 'phone' , e))
+
         
         self.phone_button = ttk.Button(self.entry_company_phone , image = self.phone_icon)
         self.phone_button.config(cursor = 'arrow')
@@ -304,6 +307,7 @@ class Main:
         self.entry_company_phone2 = ttk.Entry(self.margin_frame_company)
         self.entry_company_phone2.grid(row = 10, column= 1  , padx = 2  , pady = 2 , sticky = W+E)
         self.entry_company_phone2.bind("<Return>" , lambda e: Update.update_info_entries(self , 'phone2' , e))
+
         
         self.phone2_button = ttk.Button(self.entry_company_phone2 , image = self.mobile_icon)
         self.phone2_button.config(cursor = 'arrow')
@@ -353,6 +357,7 @@ class Main:
         self.entry_job_title = ttk.Entry(self.margin_frame_contact)
         self.entry_job_title.grid(row = 4 , column = 0 , padx = 2, pady = 2 , sticky = W+E)
         self.entry_job_title.bind("<Return>" , lambda e: Update.update_info_entries(self , 'job_title' , e))
+
         
         self.label_contact_mail = ttk.Label(self.margin_frame_contact , text = "Mail" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_contact_mail.grid(row = 3 , column = 1 , padx = 2 , pady = 2  , sticky = W+E)
@@ -360,6 +365,7 @@ class Main:
         self.entry_contact_mail = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_mail.grid(row = 4, column = 1 , padx = 2 , pady = 2 , sticky = W+E)
         self.entry_contact_mail.bind("<Return>" , lambda e: Update.update_info_entries(self , 'contact_mail' , e))
+
         
         self.contact_mail_button = ttk.Button(self.entry_contact_mail , image = self.mail_icon) 
         self.mail_button.config(cursor = 'arrow')
@@ -371,6 +377,7 @@ class Main:
         self.entry_contact_phone = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_phone.grid(row = 6 , column = 0 , padx = 2 , pady = 2 , sticky = W+E)
         self.entry_contact_phone.bind("<Return>" , lambda e: Update.update_info_entries(self , 'contact_phone' , e))
+
         
         self.contact_phone_button = ttk.Button(self.entry_contact_phone , image = self.phone_icon)
         self.contact_phone_button.config(cursor = 'arrow')
