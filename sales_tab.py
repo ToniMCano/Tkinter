@@ -1,3 +1,5 @@
+# REVISAR
+# toggle_view
 
 from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs
 import tkinter as tk

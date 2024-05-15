@@ -571,7 +571,6 @@ class LoadInfo():
         date = datetime.strptime(self.fecha.get() + f' {datetime.now().year}' , '%d %B %Y')
         
         LoadInfo.load_contacts(self , employee_id , date , query , state_sended)
-        
 
 
     def load_contacts(self , employee_id_sended , date , query = 'last' , state_sended = "Contact"): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
@@ -1862,6 +1861,20 @@ class Tabs:
             self.new_company.grid(row = 0 , column = 0 , padx = 5)
             LoadInfo.combo_state_values(self , 'crm')
             self.combo_state_and_subcategories.current(newindex = 2)
+            
+            
+            client = db.session.get(Client , self.company_id)
+            
+            if client.state == 'Contact':
+                self.button_a_value.set("Terminate")
+                
+            elif client.state  == 'Lead':
+                self.button_a_value.set("Approve")
+                
+            elif client.state  == 'Candidate':
+                self.button_a_value.set("Start Contact")
+                
+            
             
 
         else:

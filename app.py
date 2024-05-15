@@ -76,6 +76,7 @@ class Main:
         self.active_employee_id = StringVar()
         self.fecha = StringVar()
         self.company_id = StringVar()
+        self.button_a_value = StringVar()
         Pops.login(self)
         
         
@@ -401,7 +402,7 @@ class Main:
         self.company_contact_buttons.grid_columnconfigure(1, weight = 1)
         self.company_contact_buttons.grid_columnconfigure(2, weight = 1)
         
-        self.button_a = CTkButton(self.company_contact_buttons , text = "Terminate" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Tabs.toggle_view(self , 'view'))
+        self.button_a = CTkButton(self.company_contact_buttons , textvariable = self.button_a_value , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Tabs.toggle_view(self , 'view'))
         self.button_a.grid(row = 0 , column = 0 , sticky = "we" , pady = 5 , padx = 5)
         
         self.button_b = CTkButton(self.company_contact_buttons , text = "Mail" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Tabs.toggle_view(self , 'view'))
