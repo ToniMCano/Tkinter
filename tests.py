@@ -248,23 +248,31 @@ def optimizar2():
         
         
 
-'''def date():
-    
-    last = []
-    next = []
-    
-    for x in range(25):
+clients = db.session.query(Client).all()
+contact_people = db.session.query(ContactPerson).all()
+clients_list = []
+contact_people_list = []
+ 
         
-        day = str(random.randint(1 , 15))
-        month = str(random.randint(2, 4))
-        
-        if len(day) < 2:
-            day =f"0{day}"
-            
-        month =f"0{month}"
-        day = str(random.randint(15 , 30))
-        
-        return f"2024-{month}-{day} 0{random.randint(6,9)}:00:00"'''
-        
+for x in clients:
+    clients_list.append(x.id_client)
 
-
+for x in contact_people:
+    contact_people_list.append(x.id_person)
+    
+for x in clients:
+    
+    if x.id_client not in contact_people_list:
+        #contact_name , contact_surname , contact_job_title, contact_phone , contact_mobile , contact_mail ,client_id , notes = "" , added_by = 0):
+        new_person = ContactPerson(f"Name{x.id_client}" , f"Surame{x.id_client}" , "General Manager" , int("9" + ''.join(random.choices(nif , k = 8))) , int("6" + ''.join(random.choices(nif , k = 8))) , f"mail@{x.name}.com" , x.id_client)  
+        
+        db.session.add(new_person)
+        db.session.commit()
+        
+        new_person.id_person = x.id_client 
+        db.session.commit()
+        
+        clients_list.remove(x.id_client)
+        
+        
+        

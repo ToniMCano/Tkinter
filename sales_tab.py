@@ -34,13 +34,13 @@ class SalesTab:
         self.description.set('Descripción Producto') # Será el nombre del producto seleccionado
         
         self.order_import = StringVar() 
-        self.order_import.set('215 €')
+        self.order_import.set('215')
         
         self.discount = StringVar()
-        self.discount.set('10 %')        
+        self.discount.set('10')        
         
         self.total_order_import = StringVar() 
-        self.total_order_import.set('238 €') 
+        self.total_order_import.set('238') 
                        
         self.sales_header = CTkFrame(self.sales_frame , fg_color = 'transparent' , height = 50 , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')
         self.sales_header.grid(row = 0 , column = 0 , columnspan = 2 , sticky = W+E, padx = 3 , pady = 3)
@@ -114,6 +114,7 @@ class SalesTab:
         self.discount_label.grid(row = 0 , column = 0 ,  sticky = W+E , padx = 5 , pady = 5)
                 
         self.discount_info = CTkEntry(self.discount_frame , textvariable = self.discount , fg_color = 'transparent' , text_color = 'gray' , border_color = "Lightblue4" , width = 60)
+        self.discount_info.focus_set()
         self.discount_info.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W )
         
         self.percentage_label = CTkLabel(self.discount_frame , text = '%' , fg_color = 'transparent' , state = 'disabled' , text_color = 'gray' )

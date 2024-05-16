@@ -51,12 +51,14 @@ class Pops:
         employee_alias.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = "w")
         
         employee_alias_entry = ttk.Entry(frame)
+        employee_alias_entry.focus_set()
         employee_alias_entry.grid(row = 0 , column = 1 , padx = 5 , pady = 10 , sticky = W+E)
         
         employee_password = ttk.Label(frame, text = "Password: ")
         employee_password.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = "w")
         
         employee_password_entry = ttk.Entry(frame)
+        employee_password_entry.config(show = '*')
         employee_password_entry.grid(row =1 , column = 1 , padx = 5 , pady = 10 , sticky = W+E)
         
         log_button = ttk.Button(login_window , text = "Login" , command = lambda: LoadInfo.check_employee(root , employee_password_entry.get() , employee_alias_entry.get() , login_window))
@@ -457,8 +459,8 @@ class MyCalendar():
                 
             else:
                 day = int(fecha_seleccionada[-2:])
-            
-            LoadInfo.load_contacts(self , self.employee_and_categories.get() , fecha_seleccionada)
+                     
+            LoadInfo.load_contacts(self , self.employee_and_categories.get() , fecha_seleccionada , "last" , self.combo_state_and_subcategories.get())
             
             self.fecha.set(datetime(year,month,day).strftime("%d %B")) 
             
@@ -615,6 +617,7 @@ class LoadInfo():
         self.info.tag_configure("odd", background="snow2" )
         self.info.tag_configure("even", background="white")
         self.info.tag_configure("font_red", foreground="red")
+        self.info.tag_configure("font_green", foreground="green")
         
         scrollbar = ttk.Scrollbar(self.frame_tree, orient="vertical", command=self.info.yview)
         scrollbar.grid(row = 0, column = 1 , sticky = "ns")
@@ -693,7 +696,7 @@ class LoadInfo():
                 
                 else:
                     color= "even"
-                #print(ordenado.at[i, 'pop'])
+
                 if ordenado.at[i, 'pop'] == True:
                     next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])} {dot}"
                 
@@ -721,15 +724,18 @@ class LoadInfo():
         try:
             date = client.start_contact_date
             
-            days = str(today - datetime.strptime(date, "%Y-%m-%d %H:%M:%S")).split(" ")[0] 
+            days = str(today - datetime.strptime(date, "%Y-%m-%d %H:%M:%S")).split(" ")[0]
+            
+            if int(days) < 1 :
+                days = '0'
             
             if len(days) == 1:
                 days = f'0{days}'
         
         except Exception as e:
-            print("get_days" , e) 
+            print(f"[get_days]: {e}") 
             days = 0
-
+        print(f"##########  DAYS {days}  ###########")
         return days
     
     
@@ -804,6 +810,8 @@ class LoadInfo():
         
         if item == "All":
             state_sended = "All"
+            
+        
             
         LoadInfo.load_contacts(self , self.active_employee_id.get() , fecha_seleccionada , 'last' , state_sended) 
         
@@ -898,9 +906,12 @@ class GetInfo():
             for log in frame_log.winfo_children():
                 log.destroy()
             
-        except UnboundLocalError:
-            print("NOT destroyed Logs")
-        #contact = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.last_contact_date).first()
+        except UnboundLocalError as e:
+            print(f"[load_comments](UnboundLocalError): {e}")
+            
+        except Exception as e:
+            print(f"[load_comments]: {e}")
+
         client = db.session.query(Client).filter(Client.nif == nif).first()
         comments = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.id_contact.desc()).all()
         comments_counter = 0
@@ -922,8 +933,9 @@ class GetInfo():
             comments_counter += 1
             
         self.company_id.set(client.id_client)
-        self.active_employee_id.set(client.employee_id)
-        #print('client ID' , client.id_client)
+        
+        if client.state != 'Pool':
+            self.active_employee_id.set(client.employee_id)
         
 
     def load_info_log(client_by_id , last_contact , contact_type):
@@ -1449,13 +1461,13 @@ class Logs:
        
         try:
             for i , contact in enumerate(contacts):
-                if contact.id_contact in alerts:
-                    print(f"*** [{contact.id_contact}]({len(contacts)}/{i+1}) < Alerts Antes de remover : {alerts} ***")
+                print(f"*** [{contact.id_contact}]({len(contacts)}/{i+1}) < Alerts Antes de remover : {alerts} ***")
                     
-                    if contact.id_contact in alerts:
-                        alerts.remove(contact.id_contact)
-                        
+                if contact.id_contact in alerts:
+                    alerts.remove(contact.id_contact)
+                    
                     contact.pop_up = False
+                    db.session.commit()
                 
             print(f"********* Cleanning Old PopUps... > {alerts}************\n")
             
@@ -1855,37 +1867,54 @@ class Update:
             client.state = "Candidate"
             
         elif client.state == "Candidate":
-            client.state = "Contact"
+            Update.change_candidate_state(self , client ,employee)
             
         elif client.state == "Contact":
-            client.state = "Pool"
-            client.employee_id = 0
-            
-            terminate = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Terminated by: [{employee.id_employee}] {employee.employee_alias}' , client.id_client , employee.id_employee , client.contact_person  ,'Termninated'  , client.counter , False )
-            db.session.add(terminate)
-            
-            row = Logs.row_to_change(self , client.name) # return [text , values , item]
-            db.session.commit()
-            
-            Logs.confirm_unique_pop(terminate)
-            
-            row[1][3] = row[1][3].replace( '◉' , "")
-            
-            self.info.item( row[2] , text = "(Terminated)" , values = row[1] , tags=("font_red"))
-            
-            
-            
-            GetInfo.load_comments(self, client.nif)
+            Update.change_contact_state(self , client ,employee)
             
         elif client.state == "Pool":
             client.state = "Lead"
             client.counter = client.counter + 1
             
+        db.session.commit()   
+        GetInfo.load_comments(self, client.nif)
         db.session.close()
     
     
+    def change_contact_state(self , client ,employee):
+        
+        client.state = "Pool"
+        client.employee_id = 0
+        
+        terminate = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Terminated by: [{employee.id_employee}] {employee.employee_alias}' , client.id_client , employee.id_employee , client.contact_person  ,'Termninated'  , client.counter , False )
+        db.session.add(terminate)
+        
+        row = Logs.row_to_change(self , client.name) # return [text , values , item]
+        db.session.commit()
+        
+        Logs.confirm_unique_pop(terminate)
+        
+        row[1][3] = row[1][3].replace( '◉' , "")
+        
+        self.info.item( row[2] , text = "(Terminated)" , values = row[1] , tags=("font_red"))
 
-                
+        
+    def change_candidate_state(self , client ,employee):  
+                                                                                                                
+        contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Cheked by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Candidate'  , client.counter , False )
+        db.session.add(contact)
+        
+        client.state = "Contact"
+        client.start_contact_date = str(datetime.now())[0:16]
+        
+        row = Logs.row_to_change(self , client.name) # return [text , values , item]
+        row[1][2] = str(datetime.now())[0:16]
+        row[1][3] = str(datetime.now())[0:16]
+        
+        self.info.item( row[2] , text = "Contact" , values = row[1] , tags=("font_green"))
+        
+        
+            
 
                 
         

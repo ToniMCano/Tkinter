@@ -73,6 +73,7 @@ class Main:
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
         self.info.bind("<ButtonRelease-1>" , lambda event: LoadInfo.get_client_name(self , event))
+        
         self.active_employee_id = StringVar()
         self.fecha = StringVar()
         self.company_id = StringVar()
