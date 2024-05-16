@@ -894,6 +894,9 @@ class GetInfo():
             elif state  == 'Candidate':
                 self.button_a_value.set("Start Contact")
                 
+            else:
+                self.button_a_value.set("Add")
+                
         except AttributeError:
             pass
 
@@ -1868,7 +1871,7 @@ class Update:
         employee = db.session.get(Employee , self.active_employee_id.get())
         
         if client.state == "Lead":
-            client.state = "Candidate"
+            Update.change_lead_state(self , client ,employee)
             
         elif client.state == "Candidate":
             Update.change_candidate_state(self , client ,employee)
@@ -1877,8 +1880,7 @@ class Update:
             Update.change_contact_state(self , client ,employee)
             
         elif client.state == "Pool":
-            client.state = "Lead"
-            client.counter = client.counter + 1
+            Update.change_pool_state(self , client ,employee)
             
         db.session.commit()   
         GetInfo.load_comments(self, client.nif)
@@ -1905,19 +1907,55 @@ class Update:
         
     def change_candidate_state(self , client ,employee):  
                                                                                                                 
-        contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Cheked by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Candidate'  , client.counter , False )
+        contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Started by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Candidate'  , client.counter , False )
         db.session.add(contact)
         
         client.state = "Contact"
+        
         client.start_contact_date = str(datetime.now())[0:16]
         
-        row = Logs.row_to_change(self , client.name) # return [text , values , item]
-        row[1][2] = str(datetime.now())[0:16]
-        row[1][3] = str(datetime.now())[0:16]
+        row = Update.update_row(self, client)
         
         self.info.item( row[2] , text = "Contact" , values = row[1] , tags=("font_green"))
         
+    
+    def change_pool_state(self , client ,employee):
+  
+        client.counter = client.counter + 1  
+        client.employee_id = employee.id_employee
+                                                                                                                
+        contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Add by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Pool'  , client.counter , False )
+        db.session.add(contact)
         
+        client.state = "Lead"
+        
+        row = Update.update_row(self, client)
+        
+        self.info.item( row[2] , text = "Lead" , values = row[1] , tags=("font_green"))
+    
+    
+    def change_lead_state(self , client ,employee):
+        
+        contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Checked by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Pool'  , client.counter , False )
+        db.session.add(contact)
+        
+        client.state = "Candidate"
+        
+        row = Update.update_row(self, client)
+        
+        self.info.item( row[2] , text = "Candidate" , values = row[1] , tags=("font_green"))
+        
+            
+        
+    def update_row(self, client):
+        
+        client.start_contact_date = str(datetime.now())[0:16]
+        
+        row = Logs.row_to_change(self , client.name) # return [text , values , item]
+        row[1][2] = MyCalendar.format_date_to_show(str(datetime.now())[0:16])
+        row[1][3] = MyCalendar.format_date_to_show(str(datetime.now())[0:16])
+        
+        return row    
         
 class Tabs:
     
