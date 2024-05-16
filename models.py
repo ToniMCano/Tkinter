@@ -1,6 +1,6 @@
 import db
 from db import Base
-from sqlalchemy import String, Boolean, Integer, ForeignKey, Column
+from sqlalchemy import String, Boolean, Integer, ForeignKey, Column , Float
 from sqlalchemy.orm import sessionmaker , relationship # Comprobar si es necesaria.
 
 
@@ -150,3 +150,62 @@ class Contact(Base):
 
     def __str__(self):
         return f"[{self.id_contact}-{self.pop_up}] Last Contact: {self.last_contact_date} - Log: {self.log} - ID Employee: {self.contact_employee_id} - Next Contact: {self.next_contact} - Client ID: {self.client_id}"
+    
+    
+    
+class Products(Base):
+    
+    __tablename__ = "products"
+    #__table_args__ = {"sqlite_autoincrement" : True}
+    
+    reference = Column(Integer , primary_key = True)
+    product_name = Column(String , nullable = False)
+    price = Column(Float , nullable = False)
+    units = Column(Integer , nullable = False)
+    expiration = Column(String)
+    category = Column(String , nullable = False)
+    subcategory = Column(String , nullable = False)
+    
+    
+    def __init__(self , reference , product_name , price , units , expiration , category , subcategory):
+        
+        self.reference = reference
+        self.product_name = product_name
+        self.price = price
+        self.units = units
+        self.expiration = expiration
+        self.category = category
+        self.subcategory = subcategory
+        
+        
+    def __str__(self):
+        return f"[Nuevo Producto] \n Ref: {self.reference} \nProducto: {self.product_name}\nPrecio: {self.price}\nStock: {self.units}\nCategoría: {self.category}\nSubcategoría: {self.subcategory}"
+        
+        
+class Orders(Base):
+    
+    __tablename__ = "Orders"
+    __table_args__ = {"sqlite_autoincrement" : True}
+    
+    null_id = Column(Integer , primary_key = True)
+    id_order = Column(Integer , nullable = False)
+    product_reference = Column(Integer , ForeignKey('products.reference'))
+    product_units = Column(Integer , nullable = False)
+    order_client_id = Column(Integer , ForeignKey('client.id_client'))
+    seller_id = Column(Integer , ForeignKey('employee.id_employee'))
+    order_date = Column(Integer , nullable = False)
+    total_import = Column(Float , nullable = False)
+    
+    def __init__(self , id_order , product_reference , product_units , order_client_id , seller_id , order_date , total_import):
+        
+        self.id_order = id_order
+        self.product_reference = product_reference
+        self.product_units = product_units
+        self.order_client_id = order_client_id
+        self.seller_id = seller_id
+        self. order_date = order_date
+        self.total_import = total_import
+        
+    
+        
+        

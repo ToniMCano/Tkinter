@@ -5,7 +5,7 @@ import random
 import sqlalchemy
 from sqlalchemy import and_ , or_
 import db
-from models import Client , ContactPerson , Employee , Contact
+from models import Client , ContactPerson , Employee , Contact , Products , Orders
 from datetime import datetime , timedelta
 import os
 from tkinter import messagebox as mb
@@ -247,32 +247,88 @@ def optimizar2():
     db.session.close()
         
         
+def otro():    
 
-clients = db.session.query(Client).all()
-contact_people = db.session.query(ContactPerson).all()
-clients_list = []
-contact_people_list = []
+    clients = db.session.query(Client).all()
+    contact_people = db.session.query(ContactPerson).all()
+    clients_list = []
+    contact_people_list = []
+    
+            
+    for x in clients:
+        clients_list.append(x.id_client)
+
+    for x in contact_people:
+        contact_people_list.append(x.id_person)
+        
+    for x in clients:
+        
+        if x.id_client not in contact_people_list:
+            #contact_name , contact_surname , contact_job_title, contact_phone , contact_mobile , contact_mail ,client_id , notes = "" , added_by = 0):
+            new_person = ContactPerson(f"Name{x.id_client}" , f"Surame{x.id_client}" , "General Manager" , int("9" + ''.join(random.choices(nif , k = 8))) , int("6" + ''.join(random.choices(nif , k = 8))) , f"mail@{x.name}.com" , x.id_client)  
+            
+            db.session.add(new_person)
+            db.session.commit()
+            
+            new_person.id_person = x.id_client 
+            db.session.commit()
+            
+            clients_list.remove(x.id_client)
+            
+import random
+
+
+        
+def fecha():
+
+    caducidad = f'{random.randint(2024,2025)}-{random.randint(6,12)}-{random.randint(1,28)}'
+    caducidad = caducidad.split("-")
+    if len(caducidad[1]) == 1:
+        
+        caducidad[1] = f"0{caducidad[1]}"
+
+    if len(caducidad[2]) == 1:    
+        caducidad[2] = f"0{caducidad[2]}"
+    #new = Products(product[0] , product[1] , product[2] , product[3] , product[4] , product[5] , product[6])
+    caducidad = "-".join(caducidad)   
+    return caducidad
+            
+# Definición de categorías y subcategorías
+categorias = ['Frutas', 'Vegetales', 'Lácteos', 'Carnes']
+subcategorias = {
+    'Frutas': ['Frescas', 'Congeladas', 'Enlatadas'],
+    'Vegetales': ['Frescos', 'Congelados', 'Enlatados'],
+    'Lácteos': ['Leche', 'Queso', 'Yogur'],
+    'Carnes': ['Res', 'Pollo', 'Pescado']
+}
+
+# Función para generar productos aleatorios
+def generar_producto():
+    referencia = random.randint(1000, 9999)
+    nombre = f"Producto {referencia}"
+    precio = round(random.uniform(1, 10), 2)
+    unidades = random.randint(50, 200)
+    caducidad = fecha()
+    categoria = random.choice(categorias)
+    subcategoria = random.choice(subcategorias[categoria])
+    return [referencia, nombre, precio, unidades, caducidad , categoria, subcategoria]
+
+listado = []
+# Generar 500 productos
+productos = [generar_producto() for _ in range(500)]
+
+# Mostrar algunos productos para verificar
+for i in range(500):
+    listado.append(productos[i])
+    
+#  reference , product_name , price , units , expiration , category , subcategory):
  
-        
-for x in clients:
-    clients_list.append(x.id_client)
-
-for x in contact_people:
-    contact_people_list.append(x.id_person)
-    
-for x in clients:
-    
-    if x.id_client not in contact_people_list:
-        #contact_name , contact_surname , contact_job_title, contact_phone , contact_mobile , contact_mail ,client_id , notes = "" , added_by = 0):
-        new_person = ContactPerson(f"Name{x.id_client}" , f"Surame{x.id_client}" , "General Manager" , int("9" + ''.join(random.choices(nif , k = 8))) , int("6" + ''.join(random.choices(nif , k = 8))) , f"mail@{x.name}.com" , x.id_client)  
-        
-        db.session.add(new_person)
+              
+for product in listado:
+    try:
+        new = Products(product[0] , product[1] ,  product[2] , product[3] , product[4] , product[5] , product[6])
+        db.session.add(new)
         db.session.commit()
-        
-        new_person.id_person = x.id_client 
-        db.session.commit()
-        
-        clients_list.remove(x.id_client)
-        
-        
-        
+    except Exception as e:
+        product[0] = product[0] + 1
+db.session.close()
