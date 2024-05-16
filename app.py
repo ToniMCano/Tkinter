@@ -132,7 +132,7 @@ class Main:
         self.combo_state_and_subcategories = ttk.Combobox(self.header ,state = "readonly",values = ["Lead", "Candidate", "Contact" , "Pool" , 'All'], width= 10)
         self.combo_state_and_subcategories.configure(background='lightblue')
         self.combo_state_and_subcategories.grid(row = 0 , column = 4 , padx = 5)
-        self.combo_state_and_subcategories.bind("<<ComboboxSelected>>" , lambda e: LoadInfo.companies_state(self , e))
+        self.combo_state_and_subcategories.bind("<<ComboboxSelected>>" , lambda e: LoadInfo.companies_state(self , self.active_employee_id.get() , e))
 
         # CALENDAR
         
