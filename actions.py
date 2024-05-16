@@ -696,7 +696,7 @@ class LoadInfo():
                 
                 else:
                     color= "even"
-
+                #print(ordenado.at[i, 'pop'])
                 if ordenado.at[i, 'pop'] == True:
                     next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])} {dot}"
                 
@@ -724,10 +724,10 @@ class LoadInfo():
         try:
             date = client.start_contact_date
             
-            days = str(today - datetime.strptime(date, "%Y-%m-%d %H:%M:%S")).split(" ")[0]
+            days = str(today - datetime.strptime(date, "%Y-%m-%d %H:%M:%S")).split(" ")[0] 
             
-            if int(days) < 1 :
-                days = '0'
+            if int(days) < 1:
+                days = '0' 
             
             if len(days) == 1:
                 days = f'0{days}'
@@ -735,7 +735,7 @@ class LoadInfo():
         except Exception as e:
             print(f"[get_days]: {e}") 
             days = 0
-        print(f"##########  DAYS {days}  ###########")
+        print("##########  DAYS {days}  ###########")
         return days
     
     
@@ -789,12 +789,14 @@ class LoadInfo():
         return employees_list
         
         
-    def companies_state(self, event):  # Recibir valor del Combobox
+    def companies_state(self, employee , event):  # Recibir valor del Combobox
         
         item = self.combo_state_and_subcategories.get()
-        #frame = MyCalendar.place_to_frame(self , place)
+
         fecha_seleccionada = self.frame_calendar.calendar.get_date()
-        print(item, fecha_seleccionada)
+        
+        if item != 'Pool':
+            employee = self.active_employee_id.get()  
         
         if item == "Lead":
             state_sended = "Lead"
@@ -810,10 +812,12 @@ class LoadInfo():
         
         if item == "All":
             state_sended = "All"
-            
+        
+        #if item != "Pool":
+             
         
             
-        LoadInfo.load_contacts(self , self.active_employee_id.get() , fecha_seleccionada , 'last' , state_sended) 
+        LoadInfo.load_contacts(self , employee , fecha_seleccionada , 'last' , state_sended) 
         
     
     
@@ -1914,9 +1918,6 @@ class Update:
         self.info.item( row[2] , text = "Contact" , values = row[1] , tags=("font_green"))
         
         
-            
-
-                
         
 class Tabs:
     
