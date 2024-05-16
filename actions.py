@@ -701,7 +701,7 @@ class LoadInfo():
                     next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])}"
                     
                 if len(str(ordenado.at[i, 'cp'])) == 4:
-                    postal_code = f'0{ordenado.at[i, 'cp']}'
+                    postal_code = f"0{ordenado.at[i, 'cp']}"
                     
                 else:
                     postal_code = ordenado.at[i, 'cp']
