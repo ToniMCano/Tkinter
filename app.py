@@ -261,14 +261,14 @@ class Main:
         
         self.entry_activity = ttk.Combobox(self.margin_frame_company , values = LoadInfo.nace_list())
         self.entry_activity.grid(row = 6 , column = 0 , sticky = W+E , padx = 2  , pady = 2)
-        self.entry_activity.bind("<Return>" , lambda e: Update.update_info_entries(self , 'activity' , e)) 
+        self.entry_activity.bind("<Return>" , lambda e: Update.update_activity(self , e)) 
         
         self.label_employees = ttk.Label(self.margin_frame_company , text = "Empleados", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_employees.grid(row = 5 , column = 1, sticky=W+E , padx = 2 , pady = 2)
         
         self.entry_employees = ttk.Combobox(self.margin_frame_company , values = [" < 10" , "10 - 50" , "50 - 250" , " > 250"], font = ("" , 9 , 'bold'))
         self.entry_employees.grid(row = 6 , column = 1 , sticky = W+E , padx = 2  , pady = 2)
-        self.entry_employees.bind("<Return>" , lambda e: Update.update_info_entries(self , 'employees' , e)) 
+        self.entry_employees.bind("<Return>" , lambda e: Update.update_employees(self , e)) 
         
         self.label_web = ttk.Label(self.margin_frame_company , text = "Web", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_web.grid(row = 7 , column = 0,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)

@@ -334,9 +334,16 @@ for product in listado:
 db.session.close()'''
 
 refact = db.session.query(Client).all()
+today = datetime.now()
 
 for x in refact:
-    if len(x.start_contact_date) > 15:
-        x.start_contact_date = x.start_contact_date[0:16]
-        db.session.commit()
-db.session.close()
+
+    dates = x.start_contact_date
+
+    days = str(today - datetime.strptime(dates, "%Y-%m-%d %H:%M")).split(" ")[0]
+    if len(days) > 3:
+        days = '0'
+    if len(days) == 1:
+        days = f"0{days}"
+    
+    print(days)
