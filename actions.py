@@ -330,7 +330,7 @@ class Pops:
         Pops.center_window(Pops , add_company_frame)
     
        
-    def show_new_company(company_name , contact_name , contact_surname , contact_job):
+    def show_new_company(self, company_name , contact_name , contact_surname , contact_job):
         
         show = Toplevel()
         show.title("Se ha creado una nueva Empresa") 
@@ -353,14 +353,25 @@ class Pops:
         """ , justify = 'left')
         message.grid(row = 0 , column =0 , columnspan = 2 ,  sticky = W+E)
         
-        show_button = ttk.Button(show , text = "Ver Empresa" , width = 20)
+        show_button = ttk.Button(show , text = "Ver Empresa" , width = 20 , command = lambda: Pops.new_company_window(self , 'show' , show , company_name))
         show_button.grid(row = 1 , column = 0 , padx = 10 , pady = 10 , sticky = W+E)
         
-        continue_button = ttk.Button(show , text = "Continuar" , width = 20)
+        continue_button = ttk.Button(show , text = "Continuar" , width = 20 , command = lambda: Pops.new_company_window(self , '' , show , company_name) )
         continue_button.grid(row = 1 , column = 1 , padx = 10 , pady = 10 , sticky = W+E)
         
         Pops.center_window(Pops , show)
+    
+    
+    def new_company_window(self , option , window , company_name):
         
+            if option == 'show':
+                
+                LoadInfo.load_contacts(self , self.active_employee_id.get() , self.frame_calendar.calendar.get_date() , 'last' , 'Pool' , company_name)
+                                
+                window.destroy()
+                
+            else:
+                window.destroy()
  
     def current_combo(data, combo):
         
@@ -575,7 +586,7 @@ class LoadInfo():
         LoadInfo.load_contacts(self , employee_id , date , query , state_sended)
 
 
-    def load_contacts(self , employee_id_sended , date , query = 'last' , state_sended = "Contact"): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
+    def load_contacts(self , employee_id_sended , date , query = 'last' , state_sended = "Contact" , company_name = ""): # last_gestion =db.session.query(func.max(Contact.contact_counter )).scalar() Hay que tener en cuenta el counter para que no muestre contactos de una gestión anterior
         
         dot = '◉'  # ASCII
         dataframe = {"state" : [] , "days" : [] , "name" : [] , "last" : [] , 'next' : [] , "cp" : [] , "pop" : []}
@@ -626,6 +637,15 @@ class LoadInfo():
         ordenado = LoadInfo.contacts_dataframe(self, clients, dataframe, pd_filter , ascending_value)
         
         contacts = LoadInfo.row_colors(self, clients , ordenado , date , bgcolor , contacts , dot)
+        
+        if company_name:
+            try:
+                selected_row = Logs.row_to_change(self , company_name) # return [text , values , item]
+                # Establecer el foco en la fila seleccionada
+                self.info.selection_set(selected_row[-1])
+            
+            except Exception as e:
+                pass
                 
         self.contacts.set(f"Contactos: {contacts}")
         print("*** Llamada desde load_contacts")
@@ -643,7 +663,7 @@ class LoadInfo():
                 
                 try:
                     dataframe["days"].append(LoadInfo.get_days(client))
-                    print(f"##########DAYS  {LoadInfo.get_days(client)}###################")
+
                 except Exception as e:
                     dataframe["days"].append('0')
                     
@@ -1071,22 +1091,21 @@ class CheckInfo:
                 return phone
             
             else:
-                if  which_phone == "Teléfono2 Empresa: " and phone == "":
+                if  which_phone == "phone2" and phone == "":
                     pass
                 
-                elif which_phone == "Móvil Contacto: "   and phone == "":
+                elif which_phone == "mobile"   and phone == "":
                     pass
                 
                 else:
-                    data['save'] = False
-                    data[which_phone] = ""
+                    if data:
+                        data['save'] = False
+                        data[which_phone] = ""
                     
                     raise Exception
         
         except Exception as e:
             print(f"[check_phones]: {e}")
-            
-            data['save'] = False
             
             mb.showwarning("Teléfonos" , f"""El formato del {which_phone} no es correcto, comprueba el {which_phone}.
             {phone} [{len(phone)}] Teléfono: {phone} (isdigit: {str(phone).isdigit()} - Longitud: {len(phone) == 9})
@@ -1096,20 +1115,27 @@ class CheckInfo:
     def check_mail(self , complete_mail , wich_mail , data):
           
         try: 
-            mail = complete_mail.split(".")
-            
-            if mail[0] != "www" and "@" in complete_mail and len(mail[-1]) > 2:
-                return complete_mail
-            
+            if '@' in complete_mail and '.' in complete_mail:
+                if len(complete_mail.split("@")[0].split(".")[0]) > 1 and len(complete_mail.split("@")[-1].split(".")[-1]) > 2:
+
+                   return complete_mail
+                   
+                else:
+                   raise Exception
+               
             else:
-                data['save'] = False
-                data["Mail Empresa: "] = ""
-                data["Mail Contacto: "] = ""
+                if data:
+                    data['save'] = False
+                    data["Mail Empresa: "] = ""
+                    data["Mail Contacto: "] = ""
+                        
                 raise Exception
         
         except Exception as e:
             mb.showwarning("Teléfonos" , f"""El formato del {wich_mail} no es correcto, comprueba el {wich_mail}.
-            [{mail[0]}]: {mail[0] != "www"}  ({complete_mail} [{len(mail[-1]) > 2}]) - @ [{"@" in complete_mail}])
+
+
+Envíado: {complete_mail}    Formato Correcto: xxx@xxxx.xx...
                            """)
  
 
@@ -1136,11 +1162,7 @@ class CheckInfo:
         try:
             if len(code) == 5 and str(code).isdigit():
                 
-                if update is not False:
-                    print('OK')
-                    
-                else:
-                    return code
+                return code
 
             else:
                 data['save'] = False
@@ -1155,18 +1177,30 @@ class CheckInfo:
         
         try:
             web_test = web.split(".")
-            
-            if web_test[0] == "www":
-                if len(web_test[-1]) >= 2:
+
+            if web_test[0] == "www" and len(web_test) == 3 and len(web_test[1]) > 0:
+                if len(web_test[-1]) >= 2 and len(web_test) > 1 and data:
                     return True
-            else:
-                data['save'] = False
-                data["Web: "] = ""
                 
-                raise Exception
+                elif len(web_test[-1]) >= 2 and len(web_test) > 1 and not data:
+                    return web
+                
+                else:
+                    raise Exception
+                
+            else:
+                if not data:
+                    raise Exception
+                
+                else:
+                    data['save'] = False
+                    data["Web: "] = ""
+                    
+                    raise Exception
             
         except Exception as e:
             print(f'[check_web]: {e}')
+            
             mb.showerror("Web" , f"\n\nEl formato de la web no correcto.\n\n [{web_test[0] == 'www'}] {web} ({web_test[-1]}) [{len(web_test[-1]) >= 2}]")
             
     
@@ -1174,9 +1208,9 @@ class CheckInfo:
         
         try:
             company_name = CheckInfo.check_name(self , data["Nombre Empresa: "] , data , 'Nombre Empresa')
-            nif = CheckInfo.check_nif(self , data["N.I.F.: "])              
+            nif = CheckInfo.check_nif(self , data["N.I.F.: "] , data)              
             postal_code = CheckInfo.check_postal_code(self , data["Código Postal: "] , data) 
-            web = CheckInfo.check_web(self , data["Web: "])  ####
+            web = CheckInfo.check_web(self , data["Web: "] , data)  ####
             company_mail = CheckInfo.check_mail(self , data["Mail Empresa: "] , "Mail Empresa" , data) 
             company_phone = CheckInfo.check_phones(self , data["Teléfono Empresa: "] , "Teléfono Empresa: " , data)
             company_phone2 = CheckInfo.check_phones(self , data["Teléfono2 Empresa: "] , "Teléfono2 Empresa: " , data)
@@ -1196,7 +1230,7 @@ class CheckInfo:
                 Pops.new_company(self , data)
             
         except Exception as e:
-            print(f'test_add_company: {e}') 
+            print(f'[test_add_company]: {e}') 
                 
         
         
@@ -1210,7 +1244,7 @@ class AddInfo():
             employee_adder = self.active_employee_id.get()
             vcontact_person = AddInfo.add_contact_person(data , employee_adder)
             
-            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Código Postal: "], data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee_adder , "Pool", data["Empleados: "] , str(datetime.now())[0:16],)
+            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Código Postal: "], data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee_adder , "Pool", data["Empleados: "] , str(datetime.now())[0:16], 0 , self.active_employee_id.get())
             vcontact_person.client_id = vcontact_person.id_person
             
             db.session.add(company)
@@ -1223,16 +1257,16 @@ class AddInfo():
             
             add_company_frame.destroy() 
              
-            Pops.show_new_company(data['Nombre Empresa: '] , data['Nombre Contacto: '] , data['Apellidos Contacto: '] , data['Cargo: '])
+            Pops.show_new_company(self , data['Nombre Empresa: '] , data['Nombre Contacto: '] , data['Apellidos Contacto: '] , data['Cargo: '])
 
         except Exception as e:
             
             if isinstance(e, IntegrityError) or isinstance(e, SQLAlchemyError) :
-                print("add_company" , e)
+                print("[add_company SQL]" , e)
                 mb.showerror("Error de Integridad" , f"La empresa ya existe, el Nombre o el N.I.F. ya existen en la Base de Datos.")
                 
             else:
-                print("add_company" , e)
+                print("[add_company]" , e)
                 mb.showerror("Ha ocurrido un error inesperado" , f"{e}")
                 
             db.session.delete(vcontact_person.id_person)
@@ -1591,8 +1625,15 @@ class Logs:
 class Update:
     
     def save_close():
-        db.session.commit()
-        db.session.close()  
+        
+        try:
+            db.session.commit()
+            db.session.close()  
+            
+        except Exception as e:
+            db.session.rollback()
+            
+            print(f"[save_close]: {e}")
         
     
     def get_client_info(self):
@@ -1666,87 +1707,88 @@ class Update:
     
     def update_activity(self, e):
         
-        company = Update.get_client_info(self)
+        try:
+            company = Update.get_client_info(self)
 
-        company.activity = self.entry_activity.get()
+            company.activity = self.entry_activity.get()
 
-        Update.save_close()
+            Update.save_close()
+        
+        except Exception as e:
+            print(f"[update_activity]: {e}")
  
     
     def update_employees(self, e):
         
-        company = Update.get_client_info(self)
+        try:
+            company = Update.get_client_info(self)
 
-        company.number_of_employees = self.entry_employees.get()
-        
-        Update.save_close()
-    
-    
-    def update_web(self, company):
-        
-        company = Update.get_client_info(self)
-
-        if company == 'web':
-            company = CheckInfo.check_web(self , self.entry_ .get().get() , data , update = True)
-
-            if company:
-                
-                Update.save_close()
+            company.number_of_employees = self.entry_employees.get()
             
-            else:
-                pass
-    
-    
-    def update_company_mail(self, company):
+            Update.save_close()
         
-        company = Update.get_client_info(self)
-
-        if company == 'company_mail':
-            company = CheckInfo.check_mail(self , self.entry_ .get().get() , wich_mail , data , update = True)
-
-            if company:
+        except Exception as e:
+            print(f"[update_employees]: {e}")
+    
+    
+    def update_web(self, e):
                 
-                Update.save_close()
+        try:
+            company = Update.get_client_info(self)
+
+            company.web = CheckInfo.check_web(self , self.entry_web.get() , "")
             
-            else:
-                pass
-    
-    
-    def update_phone(self, company):
+            Update.save_close()
         
-        company = Update.get_client_info(self)
+        except Exception as e:
+            print(f"[update_web]: {e}")
 
-        if company == 'phone':
-            company = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
-
-            if company:
+    
+    def update_mail(self, place , e):
                 
-                Update.save_close()
+        try:
+            company = Update.get_client_info(self)
             
+            if place == "company_mail":
+                company.mail = CheckInfo.check_mail(self , self.entry_company_mail.get() , 'company_mail' , "")
+                
             else:
-                pass
-    
-    
-    def update_phone2(self, company):
+                contact_person = db.session.get(ContactPerson , company.contact_person)
+                
+                contact_person.contact_mail = CheckInfo.check_mail(self , self.entry_contact_mail.get() , place , "")
+                
+            Update.save_close()
+  
+        except Exception as e:
+            print(f"[update_company_mail]({place}): {e}") 
+            
+                
+    def update_phone(self, place , e):
         
-        company = Update.get_client_info(self)
-
-        if company == 'phone2':
-            company = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
-
-            if company:
-                
-                Update.save_close()
+        try:
+            company = Update.get_client_info(self) 
+            contact_person = db.session.get(ContactPerson , company.contact_person)
             
-            else:
-                pass
+            if place == "phone":                       
+                company.phone = CheckInfo.check_phones(self , self.entry_company_phone.get() , place , "")
+            
+            elif place == "phone2":
+                company.phone2 = CheckInfo.check_phones(self , self.entry_company_phone2.get() , place , "")
+  
+            elif place == "contact_phone":
+                contact_person.contact_phone = CheckInfo.check_phones(self , self.entry_contact_phone.get() , place , "")
+                
+            elif place == "mobile":
+                contact_person.contact_mobile = CheckInfo.check_phones(self , self.entry_mobile.get() , place , "")
+                
+            Update.save_close()
+  
+        except Exception as e:
+            print(f"[update_phone]({place}): {e}") 
 
-    
-    
+
     def update_contact_name(self, company):
-        
-        
-        
+
         if company == 'contact_name':
             company = CheckInfo.check_name(self , self.entry_ .get().get() , wich_name , data , update = True)
 
@@ -1759,9 +1801,7 @@ class Update:
     
     
     def update_contact_surname(self, company):
-        
-        
-        
+
         if company == 'contact_surname':
             company = CheckInfo.check_surname(self , self.entry_ .get().get() , data , update = True)
 
@@ -1775,8 +1815,6 @@ class Update:
     
     def update_job_title(self, company):
         
-        
-        
         if company == 'job_title':
             company = self.entry_job_title
 
@@ -1787,51 +1825,7 @@ class Update:
             else:
                 pass
     
-    
-    def update_contact_mail(self, company):
-        
-        
-        
-        if company == 'contact_mail':
-            company = CheckInfo.check_mail(self , self.entry_ .get().get() , wich_mail , data , update = True)
 
-            if company:
-                
-                Update.save_close()
-            
-            else:
-                pass
-    
-    
-    def update_contact_phone(self, company):
-        
-        
-        
-        if company == 'contact_phone':
-            company = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
-
-            if company:
-                
-                Update.save_close()
-            
-            else:
-                pass
-    
-    
-    def update_mobile(self, company):
-        
-        
-        
-        if company == 'mobile':
-            company = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
-
-            if company:
-                
-                Update.save_close()
-            
-            else:
-                pass
-    
     
     def update_notes(self, company):
         

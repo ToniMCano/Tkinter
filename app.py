@@ -71,6 +71,7 @@ class Main:
         
         self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
         self.ventana_principal.grid_columnconfigure(5, weight=3)
+        self.ventana_principal.grid_rowconfigure(2, weight=1)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
         self.info.bind("<ButtonRelease-1>" , lambda event: LoadInfo.get_client_name(self , event))
         
@@ -143,12 +144,9 @@ class Main:
         MyCalendar.calendar(self  , "next")
         self.frame_calendar_pop = tk.Frame(self.ventana_principal , highlightbackground = 'LightBlue4' , highlightthickness = 1)
         MyCalendar.calendar(self  , "pop")
-        
-                  
 
         # HEADER
 
-        
         self.frame_calendar_button = CTkFrame(self.header , fg_color = 'white' , border_width = 0)
         #self.frame_calendar_button.config(height=1)
         self.frame_calendar_button.grid(row = 0 , column = 5 , padx = 5)
@@ -218,9 +216,7 @@ class Main:
         
         # FRAME EMPRESA
         
-        self.frame_company = CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray") 
-        
-        
+        self.frame_company = CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray")         
         self.frame_company.grid_columnconfigure(1, weight=1)
         self.frame_company.grid_columnconfigure(0, weight=1)
         
@@ -275,7 +271,7 @@ class Main:
         
         self.entry_web = ttk.Entry(self.margin_frame_company)
         self.entry_web.grid(row = 8 , column= 0 , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_web.bind("<Return>" , lambda e: Update.update_info_entries(self , 'web' , e))
+        self.entry_web.bind("<Return>" , lambda e: Update.update_web(self , e))
         
         self.web_button = ttk.Button(self.entry_web ,  image = self.web_icon , command = self.abrir_enlace)
         self.web_button.config(cursor = 'arrow')
@@ -286,7 +282,7 @@ class Main:
         
         self.entry_company_mail = ttk.Entry(self.margin_frame_company)
         self.entry_company_mail.grid(row = 8 , column = 1,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_company_mail.bind("<Return>" , lambda e: Update.update_info_entries(self , 'company_mail' , e))
+        self.entry_company_mail.bind("<Return>" , lambda e: Update.update_mail(self , 'company_mail' , e))
         
         self.mail_button = ttk.Button(self.entry_company_mail, image = self.mail_icon)
         self.mail_button.config(cursor = 'arrow')
@@ -297,7 +293,7 @@ class Main:
         
         self.entry_company_phone = ttk.Entry(self.margin_frame_company)
         self.entry_company_phone.grid(row = 10, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_company_phone.bind("<Return>" , lambda e: Update.update_info_entries(self , 'phone' , e))
+        self.entry_company_phone.bind("<Return>" , lambda e: Update.update_phone(self , 'phone' , e))
 
         
         self.phone_button = ttk.Button(self.entry_company_phone , image = self.phone_icon)
@@ -309,17 +305,33 @@ class Main:
         
         self.entry_company_phone2 = ttk.Entry(self.margin_frame_company)
         self.entry_company_phone2.grid(row = 10, column= 1  , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_company_phone2.bind("<Return>" , lambda e: Update.update_info_entries(self , 'phone2' , e))
+        self.entry_company_phone2.bind("<Return>" , lambda e: Update.update_phone(self , 'phone2' , e))
 
         
         self.phone2_button = ttk.Button(self.entry_company_phone2 , image = self.mobile_icon)
         self.phone2_button.config(cursor = 'arrow')
         self.phone2_button.pack(side = "right")      
         
+        self.company_contact_buttons = CTkFrame(self.ventana_principal , fg_color = 'transparent')        
+        self.company_contact_buttons.grid_columnconfigure(0, weight = 1)
+        self.company_contact_buttons.grid_columnconfigure(1, weight = 1)
+        self.company_contact_buttons.grid_columnconfigure(2, weight = 1)
+        
+        #FRAME BUTTONS
+        
+        self.button_a = CTkButton(self.company_contact_buttons , textvariable = self.button_a_value , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: States.change_state(self))
+        self.button_a.grid(row = 0 , column = 0 , sticky = "we" , pady = 5 , padx = 5)
+        
+        self.button_b = CTkButton(self.company_contact_buttons , text = "Mail" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Tabs.toggle_view(self , 'view'))
+        self.button_b.grid(row = 0 , column = 1 , sticky = "we" , pady = 5 , padx = 5)
+        
+        self.button_c = CTkButton(self.company_contact_buttons , text = "Save" , height = 2 , fg_color = "#f4f4f4" , text_color = 'LightBlue4' , border_color = "LightBlue4" , border_width = 2 , hover_color = 'LightBlue4')
+        self.button_c.grid(row = 0 , column = 2 , sticky = "we" , pady = 5 , padx = 5)
+        
         #FRAME CONTACTO
         
         self.contact_frame = CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray" ) 
-        
+        self.contact_frame.grid_rowconfigure(7,weight=1)
         self.contact_frame.grid_columnconfigure(1, weight=1)
         self.contact_frame.grid_columnconfigure(0, weight=1)
         self.contact_frame.grid_columnconfigure(0, weight=1)      
@@ -367,7 +379,7 @@ class Main:
         
         self.entry_contact_mail = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_mail.grid(row = 4, column = 1 , padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_contact_mail.bind("<Return>" , lambda e: Update.update_info_entries(self , 'contact_mail' , e))
+        self.entry_contact_mail.bind("<Return>" , lambda e: Update.update_mail(self , 'contact_mail' , e))
 
         
         self.contact_mail_button = ttk.Button(self.entry_contact_mail , image = self.mail_icon) 
@@ -379,7 +391,7 @@ class Main:
         
         self.entry_contact_phone = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_phone.grid(row = 6 , column = 0 , padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_contact_phone.bind("<Return>" , lambda e: Update.update_info_entries(self , 'contact_phone' , e))
+        self.entry_contact_phone.bind("<Return>" , lambda e: Update.update_phone(self , 'contact_phone' , e))
 
         
         self.contact_phone_button = ttk.Button(self.entry_contact_phone , image = self.phone_icon)
@@ -391,27 +403,11 @@ class Main:
         
         self.entry_mobile = ttk.Entry(self.margin_frame_contact)
         self.entry_mobile.grid(row = 6 , column = 1 , pady = 2 , padx = 2 , sticky = W+E)
-        self.entry_mobile.bind("<Return>" , lambda e: Update.update_info_entries(self , 'mobile' , e))
+        self.entry_mobile.bind("<Return>" , lambda e: Update.update_phone(self , 'mobile' , e))
         
         self.mobile_button = ttk.Button(self.entry_mobile , image = self.mobile_icon , width = 2)
         self.mobile_button.config(cursor = 'arrow')
         self.mobile_button.pack(side = "right")
-                                                                       # Centrar texto------------------------
-        self.company_contact_buttons = CTkFrame(self.ventana_principal , fg_color = 'transparent')
-        self.contact_frame.grid_rowconfigure(7,weight=1)
-        
-        self.company_contact_buttons.grid_columnconfigure(0, weight = 1)
-        self.company_contact_buttons.grid_columnconfigure(1, weight = 1)
-        self.company_contact_buttons.grid_columnconfigure(2, weight = 1)
-        
-        self.button_a = CTkButton(self.company_contact_buttons , textvariable = self.button_a_value , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: States.change_state(self))
-        self.button_a.grid(row = 0 , column = 0 , sticky = "we" , pady = 5 , padx = 5)
-        
-        self.button_b = CTkButton(self.company_contact_buttons , text = "Mail" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Tabs.toggle_view(self , 'view'))
-        self.button_b.grid(row = 0 , column = 1 , sticky = "we" , pady = 5 , padx = 5)
-        
-        self.button_c = CTkButton(self.company_contact_buttons , text = "Save" , height = 2 , fg_color = "#f4f4f4" , text_color = 'LightBlue4' , border_color = "LightBlue4" , border_width = 2 , hover_color = 'LightBlue4')
-        self.button_c.grid(row = 0 , column = 2 , sticky = "we" , pady = 5 , padx = 5)
         
         self.notes = Text(self.contact_frame)
         self.notes.config(height = 3)

@@ -333,7 +333,7 @@ for product in listado:
         product[0] = product[0] + 1
 db.session.close()'''
 
-refact = db.session.query(Client).all()
+'''refact = db.session.query(Client).all()
 today = datetime.now()
 
 for x in refact:
@@ -346,4 +346,13 @@ for x in refact:
     if len(days) == 1:
         days = f"0{days}"
     
-    print(days)
+    print(days)'''
+   
+company_name = "dsf" 
+
+if company_name:
+    print("ok")
+else:
+    print('no pasa')
+    
+    
