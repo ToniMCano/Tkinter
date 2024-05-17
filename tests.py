@@ -313,7 +313,7 @@ def generar_producto():
     subcategoria = random.choice(subcategorias[categoria])
     return [referencia, nombre, precio, unidades, caducidad , categoria, subcategoria]
 
-listado = []
+'''listado = []
 # Generar 500 productos
 productos = [generar_producto() for _ in range(500)]
 
@@ -331,4 +331,12 @@ for product in listado:
         db.session.commit()
     except Exception as e:
         product[0] = product[0] + 1
+db.session.close()'''
+
+refact = db.session.query(Client).all()
+
+for x in refact:
+    if len(x.start_contact_date) > 15:
+        x.start_contact_date = x.start_contact_date[0:16]
+        db.session.commit()
 db.session.close()

@@ -534,7 +534,7 @@ class LoadInfo():
                 exists = True
                 window.destroy()
                 
-                LoadInfo.load_contacts(root , employee.id_employee , date = datetime.now())
+                LoadInfo.load_contacts(root , employee.id_employee , date = str(datetime.now())[0:16])
                 print(f" Empleado {employee.id_employee}")
                 
                 alias = LoadInfo.employees_list().index(alias)
@@ -565,13 +565,13 @@ class LoadInfo():
         elif query == 'last':
             query = "last"
         elif query == 'next':
-            query = 'next'
+            query = 'next' 
         elif query == 'postal_code':
-            query = 'cp'
-        
+            query = 'cp'                                             #datetime.strptime(self.fecha.get() + f' {datetime.now().year}' , '%d %B %Y')
+                                                                     #2024-05-16 00:00:00
         employee_id = self.active_employee_id.get()
         date = datetime.strptime(self.fecha.get() + f' {datetime.now().year}' , '%d %B %Y')
-        
+        #self.fecha.set(datetime.now().strftime("%d %B").title())
         LoadInfo.load_contacts(self , employee_id , date , query , state_sended)
 
 
@@ -643,7 +643,7 @@ class LoadInfo():
                 
                 try:
                     dataframe["days"].append(LoadInfo.get_days(client))
-                    
+                    print(f"##########DAYS  {LoadInfo.get_days(client)}###################")
                 except Exception as e:
                     dataframe["days"].append('0')
                     
@@ -685,7 +685,7 @@ class LoadInfo():
 
             if ordenado.at[i, 'next'] <= str(date)[:11] + "23:59":               
               
-                if int(ordenado.at[i, "days"]) >= 80:
+                if int(ordenado.at[i, "days"]) >= 60:
                     font = "font_red"
                     
                 else:
@@ -724,7 +724,7 @@ class LoadInfo():
         try:
             date = client.start_contact_date
             
-            days = str(today - datetime.strptime(date, "%Y-%m-%d %H:%M:%S")).split(" ")[0] 
+            days = str(today - datetime.strptime(date, "%Y-%m-%d %H:%M")).split(" ")[0] 
             
             if int(days) < 1:
                 days = '0' 
@@ -734,8 +734,8 @@ class LoadInfo():
         
         except Exception as e:
             print(f"[get_days]: {e}") 
-            days = 0
-        print("##########  DAYS {days}  ###########")
+            return '0'
+        
         return days
     
     
@@ -1213,7 +1213,7 @@ class AddInfo():
             employee_adder = self.active_employee_id.get()
             vcontact_person = AddInfo.add_contact_person(data , employee_adder)
             
-            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Código Postal: "], data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee_adder , "Pool", data["Empleados: "] , datetime.now(),)
+            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Código Postal: "], data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee_adder , "Pool", data["Empleados: "] , str(datetime.now())[0:16],)
             vcontact_person.client_id = vcontact_person.id_person
             
             db.session.add(company)
@@ -1376,8 +1376,6 @@ class Alerts():
     def refresh_alerts(self , employee_id):
         
         threading.Timer(60 , Alerts.refresh_alerts, args=[self , employee_id]).start()
- 
-        print("*** Refresh Alerts" , datetime.now() , "***")
 
         try:
             Alerts.check_pop_ups(self, employee_id)
@@ -1603,34 +1601,64 @@ class Update:
     def update_company_info(self):
         
         try:
-            identificator = self.entry_nif.get()
-            company = db.session.query(Client).filter(and_(Client.nif == identificator , Client.state == 'Contact')).first()
-            
+            company = db.session.get(Client , self.company_id.get())
+        
             return company
             
         except Exception as e:
             print(f'[update_company_info]: {e}')
-            
+
+
+    def update_name(self, place , e):
         
-    def update_contact(self):
-        
+        company = Update.update_company_info(self)
+  
         try:
-            company = Update.update_company_info(self)
-            contact = db.session.get(ContactPerson , company.contact_id) 
-            return contact
+            row = Logs.row_to_change(self , company.name) # return [text , values , item]
+            
+            if place == 'company_name' and self.entry_company_name.get() != "":
+                company.name = self.entry_company_name.get()
+                
+                row[1][1] = self.entry_company_name.get()
+            
+                self.info.item(row[2] , text = row[0] , values = row[1])
+            
+            else:
+                if self.entry_contact_name.get() != "":
+                    contact_person = db.session.get(ContactPerson , company.contact_person)
+                    contact_person.contact_name = self.entry_contact_name.get()
+
+            Update.save_close()
             
         except Exception as e:
-            print(f'[update_contact]: {e}')    
-      
-
-    def update_company_name(self, identificator):
+            print(f"[update_company_name]: {e}")
+            
+            mb.showerror("Nombre" , "No se han podido realizar los cambios en el nombre.")
+    
+    
+    def update_nif(self, e):
+        
+        company = Update.update_company_info(self)
+  
+        try:
+            company.nif = self.entry_nif.get()
+    
+            Update.save_close()
+            
+        except Exception as e:
+            print(f"[update_nif]: {e}")
+            
+            mb.showerror("N.I.F." , "No se han podido realizar los cambios en el N.I.F..")
+    
+    
+    def update_adress(self, company):
         
         company = Update.update_company_info(self)
 
-        if identificator == 'company_name':
-            identificator = CheckInfo.check_name(self , self.entry_ .get().get() , wich_name , data , update = True)
+        if company == 'adress':
+            company = CheckInfo.check_postal_code(self , code , data , update = True)
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1638,14 +1666,14 @@ class Update:
                 pass
     
     
-    def update_nif(self, identificator):
+    def update_activity(self, company):
         
         company = Update.update_company_info(self)
 
-        if identificator == 'nif':
-            identificator = CheckInfo.check_nif(self , self.entry_ .get().get() , data , update = True)
+        if company == 'activity':
+            company = self.entry_activity.get()
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1653,14 +1681,14 @@ class Update:
                 pass
     
     
-    def update_adress(self, identificator):
+    def update_employees(self, company):
         
         company = Update.update_company_info(self)
 
-        if identificator == 'adress':
-            identificator = CheckInfo.check_postal_code(self , code , data , update = True)
+        if company == 'employees':
+            company = self.entry_employees.get()
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1668,14 +1696,14 @@ class Update:
                 pass
     
     
-    def update_activity(self, identificator):
+    def update_web(self, company):
         
         company = Update.update_company_info(self)
 
-        if identificator == 'activity':
-            identificator = self.entry_activity.get()
+        if company == 'web':
+            company = CheckInfo.check_web(self , self.entry_ .get().get() , data , update = True)
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1683,14 +1711,14 @@ class Update:
                 pass
     
     
-    def update_employees(self, identificator):
+    def update_company_mail(self, company):
         
         company = Update.update_company_info(self)
 
-        if identificator == 'employees':
-            identificator = self.entry_employees.get()
+        if company == 'company_mail':
+            company = CheckInfo.check_mail(self , self.entry_ .get().get() , wich_mail , data , update = True)
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1698,14 +1726,14 @@ class Update:
                 pass
     
     
-    def update_web(self, identificator):
+    def update_phone(self, company):
         
         company = Update.update_company_info(self)
 
-        if identificator == 'web':
-            identificator = CheckInfo.check_web(self , self.entry_ .get().get() , data , update = True)
+        if company == 'phone':
+            company = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1713,44 +1741,14 @@ class Update:
                 pass
     
     
-    def update_company_mail(self, identificator):
+    def update_phone2(self, company):
         
         company = Update.update_company_info(self)
 
-        if identificator == 'company_mail':
-            identificator = CheckInfo.check_mail(self , self.entry_ .get().get() , wich_mail , data , update = True)
+        if company == 'phone2':
+            company = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
 
-            if identificator:
-                
-                Update.save_close()
-            
-            else:
-                pass
-    
-    
-    def update_phone(self, identificator):
-        
-        company = Update.update_company_info(self)
-
-        if identificator == 'phone':
-            identificator = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
-
-            if identificator:
-                
-                Update.save_close()
-            
-            else:
-                pass
-    
-    
-    def update_phone2(self, identificator):
-        
-        company = Update.update_company_info(self)
-
-        if identificator == 'phone2':
-            identificator = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
-
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1759,14 +1757,14 @@ class Update:
 
     
     
-    def update_contact_name(self, identificator):
+    def update_contact_name(self, company):
         
-        contact = Update.update_contact(self)
         
-        if identificator == 'contact_name':
-            identificator = CheckInfo.check_name(self , self.entry_ .get().get() , wich_name , data , update = True)
+        
+        if company == 'contact_name':
+            company = CheckInfo.check_name(self , self.entry_ .get().get() , wich_name , data , update = True)
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1774,14 +1772,14 @@ class Update:
                 pass
     
     
-    def update_contact_surname(self, identificator):
+    def update_contact_surname(self, company):
         
-        contact = Update.update_contact(self)
         
-        if identificator == 'contact_surname':
-            identificator = CheckInfo.check_surname(self , self.entry_ .get().get() , data , update = True)
+        
+        if company == 'contact_surname':
+            company = CheckInfo.check_surname(self , self.entry_ .get().get() , data , update = True)
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1789,14 +1787,14 @@ class Update:
                 pass
     
     
-    def update_job_title(self, identificator):
+    def update_job_title(self, company):
         
-        contact = Update.update_contact(self)
         
-        if identificator == 'job_title':
-            identificator = self.entry_job_title
+        
+        if company == 'job_title':
+            company = self.entry_job_title
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1804,14 +1802,14 @@ class Update:
                 pass
     
     
-    def update_contact_mail(self, identificator):
+    def update_contact_mail(self, company):
         
-        contact = Update.update_contact(self)
         
-        if identificator == 'contact_mail':
-            identificator = CheckInfo.check_mail(self , self.entry_ .get().get() , wich_mail , data , update = True)
+        
+        if company == 'contact_mail':
+            company = CheckInfo.check_mail(self , self.entry_ .get().get() , wich_mail , data , update = True)
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1819,14 +1817,14 @@ class Update:
                 pass
     
     
-    def update_contact_phone(self, identificator):
+    def update_contact_phone(self, company):
         
-        contact = Update.update_contact(self)
         
-        if identificator == 'contact_phone':
-            identificator = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
+        
+        if company == 'contact_phone':
+            company = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1834,14 +1832,14 @@ class Update:
                 pass
     
     
-    def update_mobile(self, identificator):
+    def update_mobile(self, company):
         
-        contact = Update.update_contact(self)
         
-        if identificator == 'mobile':
-            identificator = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
+        
+        if company == 'mobile':
+            company = CheckInfo.check_phones(self , self.entry_ .get().get() , which_phone , data , update = True)
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
@@ -1849,21 +1847,22 @@ class Update:
                 pass
     
     
-    def update_notes(self, identificator):
+    def update_notes(self, company):
         
-        contact = Update.update_contact(self)
         
-        if identificator == 'notes':
-            identificator = self.notes.get(1.0, "end")
+        
+        if company == 'notes':
+            company = self.notes.get(1.0, "end")
 
-            if identificator:
+            if company:
                 
                 Update.save_close()
             
             else:
                 pass
 
-        
+
+class States:       
         
     def change_state(self):
         
@@ -1871,16 +1870,16 @@ class Update:
         employee = db.session.get(Employee , self.active_employee_id.get())
         
         if client.state == "Lead":
-            Update.change_lead_state(self , client ,employee)
+            States.change_lead_state(self , client ,employee)
             
         elif client.state == "Candidate":
-            Update.change_candidate_state(self , client ,employee)
+            States.change_candidate_state(self , client ,employee)
             
         elif client.state == "Contact":
-            Update.change_contact_state(self , client ,employee)
+            States.change_contact_state(self , client ,employee)
             
         elif client.state == "Pool":
-            Update.change_pool_state(self , client ,employee)
+            States.change_pool_state(self , client ,employee)
             
         db.session.commit()   
         GetInfo.load_comments(self, client.nif)
@@ -1912,9 +1911,9 @@ class Update:
         
         client.state = "Contact"
         
-        client.start_contact_date = str(datetime.now())[0:16]
+        client.start_contact_date = str(datetime.now()[0:16])
         
-        row = Update.update_row(self, client)
+        row = States.update_row(self, client)
         
         self.info.item( row[2] , text = "Contact" , values = row[1] , tags=("font_green"))
         
@@ -1929,7 +1928,7 @@ class Update:
         
         client.state = "Lead"
         
-        row = Update.update_row(self, client)
+        row = States.update_row(self, client)
         
         self.info.item( row[2] , text = "Lead" , values = row[1] , tags=("font_green"))
     
@@ -1941,7 +1940,7 @@ class Update:
         
         client.state = "Candidate"
         
-        row = Update.update_row(self, client)
+        row = States.update_row(self, client)
         
         self.info.item( row[2] , text = "Candidate" , values = row[1] , tags=("font_green"))
         
@@ -1956,6 +1955,8 @@ class Update:
         row[1][3] = MyCalendar.format_date_to_show(str(datetime.now())[0:16])
         
         return row    
+        
+        
         
 class Tabs:
     

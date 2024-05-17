@@ -9,7 +9,7 @@ from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
 from sqlalchemy import and_ , or_  
-from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs
+from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs , States
 from datetime import datetime , timedelta
 #import locale
 from tkinter import messagebox as mb
@@ -146,7 +146,7 @@ class Main:
         
                   
 
-        # Agregar contenido al Frame
+        # HEADER
 
         
         self.frame_calendar_button = CTkFrame(self.header , fg_color = 'white' , border_width = 0)
@@ -237,7 +237,7 @@ class Main:
         
         self.entry_company_name = ttk.Entry(self.margin_frame_company)
         self.entry_company_name.grid(row = 2, column= 0  , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_company_name.bind("<Return>" , lambda e: upd.update_info_entries(self.entry_company_name , 'company_name', e))
+        self.entry_company_name.bind("<Return>" , lambda e: Update.update_name(self , 'company_name', e))
 
         
         self.label_nif = ttk.Label(self.margin_frame_company  , text = "N.I.F.", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
@@ -245,7 +245,7 @@ class Main:
         
         self.entry_nif = ttk.Entry(self.margin_frame_company )
         self.entry_nif.grid(row = 2 , column = 1 , padx = 2  , pady = 2 , sticky = W+E)
-        self.entry_nif.bind("<Return>" , lambda e: Update.update_info_entries(self , 'nif', e))
+        self.entry_nif.bind("<Return>" , lambda e: Update.update_nif(self , e))
 
         
         self.label_adress = ttk.Label(self.margin_frame_company  , text = "Dirección" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
@@ -345,7 +345,7 @@ class Main:
         
         self.entry_contact_name = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_name.grid(row = 2 , column = 0 ,  padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_contact_name.bind("<Return>" , lambda e: Update.update_info_entries(self , 'contact_name' , e))
+        self.entry_contact_name.bind("<Return>" , lambda e: Update.update_name(self , 'contact_name' , e))
         
         self.label_contact_surname = ttk.Label(self.margin_frame_contact , text = "Apellidos" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_contact_surname.grid(row = 1 , column = 1 , sticky = W+E, padx = 2 , pady = 2) 
@@ -404,7 +404,7 @@ class Main:
         self.company_contact_buttons.grid_columnconfigure(1, weight = 1)
         self.company_contact_buttons.grid_columnconfigure(2, weight = 1)
         
-        self.button_a = CTkButton(self.company_contact_buttons , textvariable = self.button_a_value , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Update.change_state(self))
+        self.button_a = CTkButton(self.company_contact_buttons , textvariable = self.button_a_value , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: States.change_state(self))
         self.button_a.grid(row = 0 , column = 0 , sticky = "we" , pady = 5 , padx = 5)
         
         self.button_b = CTkButton(self.company_contact_buttons , text = "Mail" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Tabs.toggle_view(self , 'view'))
