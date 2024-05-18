@@ -1048,7 +1048,7 @@ class GetInfo():
         
         street , number , floor , city , province = adress.split("-")
         
-        adress_to_show = f'{street}, {number}  {floor} {city} ({str(cp)})'
+        adress_to_show = f'{street}, {number}  {floor} {province} {city} ({str(cp)})'
         
         return adress_to_show
         
@@ -1165,9 +1165,14 @@ Envíado: {complete_mail}    Formato Correcto: xxx@xxxx.xx...
                 return code
 
             else:
-                data['save'] = False
-                data["Código Postal: "] = ""
-                raise Exception
+                if data:
+                    data['save'] = False
+                    data["Código Postal: "] = ""
+                    
+                    raise Exception
+            
+                else:
+                    return code
         
         except Exception as e:
             mb.showwarning("Código Postal" , f"El formato del Código Postal no es correcto, comprueba el Código Postal")
@@ -1640,8 +1645,11 @@ class Update:
         
         try:
             company = db.session.get(Client , self.company_id.get())
-        
-            return company
+            
+            if company:
+                return company
+            else: 
+                raise Exception
             
         except Exception as e:
             print(f'[get_client_info]: {e}')
@@ -1660,11 +1668,21 @@ class Update:
                 row[1][1] = self.entry_company_name.get()
             
                 self.info.item(row[2] , text = row[0] , values = row[1])
-            
+                
             else:
-                if self.entry_contact_name.get() != "":
-                    contact_person = db.session.get(ContactPerson , company.contact_person)
-                    contact_person.contact_name = self.entry_contact_name.get()
+                contact_person = db.session.get(ContactPerson , company.contact_person)
+                
+                if place == "contact_name":
+                    if self.entry_contact_name.get() != "":
+                        contact_person.contact_name = self.entry_contact_name.get()
+
+                elif place == "surname":
+                    if self.entry_contact_surname.get() != "":
+                        contact_person.contact_surname = self.entry_contact_surname.get()
+                        
+                elif place == "job":
+                    if self.entry_contact_name.get() != "":
+                        contact_person.contact_job_title = self.entry_contact_job.get()
 
             Update.save_close()
             
@@ -1690,21 +1708,102 @@ class Update:
             mb.showerror("N.I.F." , "No se han podido realizar los cambios en el N.I.F..")
     
     
-    def update_adress(self, company): # ESTA LA ÚLTIMA PORQUE TIENE MÁS TRABAJO
+    def update_adress(self, e): # ESTA LA ÚLTIMA PORQUE TIENE MÁS TRABAJO
         
         company = Update.get_client_info(self)
-
-        if company == 'adress':
-            company = CheckInfo.check_postal_code(self , code , "")
-
-            if company:
-                
-                Update.save_close()
+        
+        self.frame_update_adress = CTkFrame(self.margin_frame_company , fg_color='#f4f4f4' , border_width = 1 , border_color = 'Lightblue4')
+        self.frame_update_adress.grid(row = 4 , column = 0 , columnspan = 2 , sticky = W+E)
+        self.frame_update_adress.grid_columnconfigure(0 , weight = 8)
+        self.frame_update_adress.grid_columnconfigure(1 , weight = 1)
+        self.frame_update_adress.grid_columnconfigure(2 , weight = 1)
+        self.frame_update_adress.grid_columnconfigure(3 , weight = 3)
+        self.frame_update_adress.grid_columnconfigure(4 , weight = 3)
+        self.frame_update_adress.grid_columnconfigure(5 , weight = 3)
+        #self.frame_update_adress.grid_columnconfigure(6 , weight = 3)
+       
+        self.street  = StringVar()
+        self.number = StringVar()
+        self.floor = StringVar() 
+        self.province = StringVar()
+        self.city = StringVar() 
+        self.postal_code = StringVar()
+        
+        try:
+            adress_data = company.adress.split("-")
             
-            else:
-                pass
+            self.street.set(adress_data[0])
+            self.number.set(adress_data[1])
+            self.floor.set(adress_data[2]) 
+            self.province.set(adress_data[3])
+            self.city.set(adress_data[4]) 
+            self.postal_code.set(company.postal_code)
+            
+        except Exception as e:
+            pass
+        
+        self.close_update_button = CTkButton(self.frame_update_adress , text = 'x' , height = 5 , width = 20, fg_color = 'Lightblue4' , command = lambda: self.frame_update_adress.grid_forget())
+        self.close_update_button.grid(row = 0 , column =0 , sticky = W)
+        
+        self.entry_update_street = CTkEntry(self.frame_update_adress , textvariable = self.street , width = 150 , fg_color = "white" , border_width = 1 , border_color = 'Lightblue4' , corner_radius = 3 , text_color = 'gray')
+        self.entry_update_street.grid(row = 1 , column = 0 , sticky = W+E , padx = 5 , pady = 5)
+                
+        self.entry_update_number = CTkEntry(self.frame_update_adress , textvariable = self.number , width = 35 , fg_color = "white" , border_width = 1 , border_color = 'Lightblue4' , corner_radius = 3 , text_color = 'gray')
+        self.entry_update_number.grid(row = 1 , column = 1 , sticky = W+E , padx = 5 , pady = 5)
+                
+        self.entry_update_floor = CTkEntry(self.frame_update_adress , textvariable = self.floor , width = 35 , fg_color = "white" , border_width = 1 , border_color = 'Lightblue4' , corner_radius = 3 , text_color = 'gray')
+        self.entry_update_floor.grid(row = 1 , column = 2 , sticky = W+E , padx = 5 , pady = 5)
+        
+        self.entry_update_province = CTkEntry(self.frame_update_adress , textvariable = self.province , width = 60 , fg_color = "white" , border_width = 1 , border_color = 'Lightblue4' , corner_radius = 3 , text_color = 'gray')
+        self.entry_update_province.grid(row = 1 , column = 3 , sticky = W+E , padx = 5 , pady = 5)
+        
+        self.entry_update_city = CTkEntry(self.frame_update_adress , textvariable = self.city , width = 60 , fg_color = "white" , border_width = 1 , border_color = 'Lightblue4' , corner_radius = 3 , text_color = 'gray')
+        self.entry_update_city.grid(row = 1 , column = 4 , sticky = W+E , padx = 5 , pady = 5)
+        
+        self.entry_update_postal_code = CTkEntry(self.frame_update_adress , textvariable = self.postal_code , width = 60 , fg_color = "white" , border_width = 1 , border_color = 'Lightblue4' , corner_radius = 3 , text_color = 'gray')
+        self.entry_update_postal_code.grid(row = 1 , column = 5 , sticky = W+E , padx = 5 , pady = 5)
+        
+        self.update_adress_button = CTkButton(self.frame_update_adress , text = 'Save' , width = 60 , fg_color = 'Lightblue4' , corner_radius = 2 , height = 10 , command = lambda: Update.update_adress_fields(self))
+        self.update_adress_button.grid(row = 2 , column = 0 , columnspan = 6  , padx = 5 , pady = 5)
     
     
+    def update_adress_fields(self):
+        
+        company =Update.get_client_info(self)
+        
+        try:
+            street = self.street.get()
+            number = self.number.get()
+            floor = self.floor.get() 
+            province = self.province.get()
+            city = self.city.get() 
+            postal_code =  CheckInfo.check_postal_code(self , self.postal_code.get() , "")
+            print(street)
+            print(number)
+            print(floor)
+            print(province)
+            print(city)
+            
+            company.adress = f"{street}-{number}-{floor}-{province}-{city}"
+            company.postal_code = postal_code
+            
+            Update.save_close()
+            
+            company =Update.get_client_info(self)
+            
+            new_adress = GetInfo.format_adress_to_Show(company.adress , company.postal_code)
+            
+            self.entry_adress.delete(0 , "end")
+            self.entry_adress.insert(0 , new_adress)
+            
+        except Exception as e:
+            print(f"[update_adress_fields]: {e}")
+
+        Update.save_close()
+        
+        self.frame_update_adress.grid_forget()
+        
+        
     def update_activity(self, e):
         
         try:
@@ -1785,61 +1884,12 @@ class Update:
   
         except Exception as e:
             print(f"[update_phone]({place}): {e}") 
-
-
-    def update_contact_name(self, company):
-
-        if company == 'contact_name':
-            company = CheckInfo.check_name(self , self.entry_ .get().get() , wich_name , data , update = True)
-
-            if company:
-                
-                Update.save_close()
-            
-            else:
-                pass
     
-    
-    def update_contact_surname(self, company):
-
-        if company == 'contact_surname':
-            company = CheckInfo.check_surname(self , self.entry_ .get().get() , data , update = True)
-
-            if company:
-                
-                Update.save_close()
-            
-            else:
-                pass
-    
-    
-    def update_job_title(self, company):
-        
-        if company == 'job_title':
-            company = self.entry_job_title
-
-            if company:
-                
-                Update.save_close()
-            
-            else:
-                pass
-    
-
     
     def update_notes(self, company):
-        
-        
-        
-        if company == 'notes':
-            company = self.notes.get(1.0, "end")
-
-            if company:
-                
-                Update.save_close()
-            
-            else:
-                pass
+  
+        company = Update.get_client_info(self) 
+        contact_person = db.session.get(ContactPerson , company.contact_person)
 
 
 class States:       
@@ -1923,9 +1973,8 @@ class States:
         row = States.update_row(self, client)
         
         self.info.item( row[2] , text = "Candidate" , values = row[1] , tags=("font_green"))
-        
-            
-        
+
+
     def update_row(self, client):
         
         client.start_contact_date = str(datetime.now())[0:16]

@@ -249,9 +249,8 @@ class Main:
 
         self.entry_adress = ttk.Entry(self.margin_frame_company )
         self.entry_adress.grid(row = 4 , column =0 , columnspan = 2 , sticky = "we" , padx = 2 , pady = 2)
-        self.entry_adress.bind("<Return>" , lambda e: Update.update_info_entries(self , 'adress' , e))
+        self.entry_adress.bind("<Button-1>" , lambda e: Update.update_adress(self , e))
 
-                
         self.label_activity = ttk.Label(self.margin_frame_company  , text = "Actividad", font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_activity.grid(row = 5 , column = 0, sticky=W+E , padx = 2 , pady = 2)
         
@@ -315,7 +314,7 @@ class Main:
         self.company_contact_buttons = CTkFrame(self.ventana_principal , fg_color = 'transparent')        
         self.company_contact_buttons.grid_columnconfigure(0, weight = 1)
         self.company_contact_buttons.grid_columnconfigure(1, weight = 1)
-        self.company_contact_buttons.grid_columnconfigure(2, weight = 1)
+        #self.company_contact_buttons.grid_columnconfigure(2, weight = 1)
         
         #FRAME BUTTONS
         
@@ -364,14 +363,14 @@ class Main:
         
         self.entry_contact_surname = ttk.Entry(self.margin_frame_contact)
         self.entry_contact_surname.grid(row = 2 , column = 1 , padx = 2 , pady = 2 , sticky = W+E)
-        self.entry_contact_surname.bind("<Return>" , lambda e: Update.update_info_entries(self , 'contact_surname' , e))
+        self.entry_contact_surname.bind("<Return>" , lambda e: Update.update_name(self , 'surname' , e))
         
         self.label_job_title = ttk.Label(self.margin_frame_contact, text = "Cargo" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
         self.label_job_title.grid(row = 3 , column = 0, padx = 2 , pady = 2 , sticky = W+E)
         
         self.entry_job_title = ttk.Entry(self.margin_frame_contact)
         self.entry_job_title.grid(row = 4 , column = 0 , padx = 2, pady = 2 , sticky = W+E)
-        self.entry_job_title.bind("<Return>" , lambda e: Update.update_info_entries(self , 'job_title' , e))
+        self.entry_job_title.bind("<Return>" , lambda e: Update.update_name(self , 'job' , e))
 
         
         self.label_contact_mail = ttk.Label(self.margin_frame_contact , text = "Mail" ,  font = ("" , 9 , 'bold') , foreground = 'LightBlue4')
