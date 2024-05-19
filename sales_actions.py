@@ -44,6 +44,21 @@ class ProductsClass:
                 
             self.products_tree.insert("" , 0 , text = product.reference , values = (product.product_name , product.price , product.units , product.category , product.subcategory) , tags=(font))
 
+        try:
+            client = db.session.get(Client , self.company_id.get())
+            
+            if client is not None:
+                self.order_header.set(f'[{client.id_client}] {client.name}')
+                                
+            else:
+                self.order_header.set('Pedido')
+            
+            
+            
+        except Exception as e:
+            print(f'[sales_view]: {e}')
+            
+            
         
     def row_colors(self, clients , ordenado , date , bgcolor , contacts , dot):
         for i , client in enumerate(clients):
@@ -82,12 +97,23 @@ class ProductsClass:
         return contacts
     
     
-class LoadProducts:
+class LoadsProducts:
     
     def get_product(self , e):
+
+        try:
+            reference = LoadInfo.get_item(self , "products" , self.products_tree , e)
+            print(reference)
+            product = db.session.query(Products).filter(Products.reference == reference).first()
+            
+            self.header_description.set(f"[{product.reference}] {product.product_name}")
+            self.product_description.delete(1.0 , 'end')
+            self.product_description.insert('end' , product.description)
+            self.expiration.set(MyCalendar.format_date_to_show(f'{product.expiration} 08:00')[0:-6])
+            
+        except Exception as e:
+            print(e)
         
-        reference , name = LoadInfo.get_item(self , "products" , self.products_tree , e)
-        self.description.set(f"[{reference}] {name}")
         
         
-        
+    def add_product(self , e)    

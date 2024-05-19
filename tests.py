@@ -10,7 +10,7 @@ from datetime import datetime , timedelta
 import os
 from tkinter import messagebox as mb
 import customtkinter
-from actions import GetInfo,LoadInfo
+from actions import GetInfo,LoadInfo , MyCalendar
 import pandas as pd
 import threading
 import time
@@ -346,13 +346,16 @@ for x in refact:
     if len(days) == 1:
         days = f"0{days}"
     
-    print(days)'''
+    print(days)
+    
+    
+   ''' 
    
-company_name = "dsf" 
-
-if company_name:
-    print("ok")
-else:
-    print('no pasa')
+products = db.session.query(Products).all()
+ 
+for product in products:
+    dates = MyCalendar.format_date_to_show(f'{product.expiration} 08:00')
+    product.description = f"Descripción del producto {product.reference} {product.product_name} elaborado en mi pueblo, con un peso de {random.randint(500 , 3000)} g... Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
     
-    
+    db.session.commit()
+db.session.close()    

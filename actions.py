@@ -769,7 +769,7 @@ class LoadInfo():
                 GetInfo.load_client_info(self , client_name)
                 
             else:
-                return item['text'] , item['values'][0]
+                return item['text']
         
         except IndexError:
             pass
@@ -896,8 +896,7 @@ class LoadInfo():
         self.employee_and_categories.current(newindex = 0)
         
         self.combo_state_and_subcategories['values'] = ["SubCategory 1", "SubCategory 2", "SubCategory 3" , "SubCategory 4" , 'SubCategory 5']
-        self.combo_state_and_subcategories.current(newindex = 0)
-            
+        self.combo_state_and_subcategories.current(newindex = 0)           
             
             
 class GetInfo():

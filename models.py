@@ -186,7 +186,7 @@ class Products(Base):
         
 class Orders(Base):
     
-    __tablename__ = "Orders"
+    __tablename__ = "orders"
     __table_args__ = {"sqlite_autoincrement" : True}
     
     null_id = Column(Integer , primary_key = True)
