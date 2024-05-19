@@ -2,6 +2,7 @@
 # toggle_view
 
 from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs
+from sales_actions import ProductsClass , LoadProducts
 import tkinter as tk
 from tkinter import ttk , messagebox
 from tkinter import *
@@ -30,6 +31,8 @@ class SalesTab:
         #self.sales_frame.grid_columnconfigure(1 , weight = 2)
         self.sales_frame.grid_rowconfigure(1 , weight = 1)
         
+        
+        
         self.description = StringVar() 
         self.description.set('Descripción Producto') # Será el nombre del producto seleccionado
         
@@ -50,9 +53,35 @@ class SalesTab:
         self.sales_content_frame.grid_columnconfigure(0 , weight = 1)
         self.sales_content_frame.grid_rowconfigure(0 , weight = 1)
         
-        self.products_frame = CTkScrollableFrame(self.sales_content_frame , corner_radius = 3 , border_width = 1 , border_color = 'lightgray' , fg_color = 'transparent' )
+        self.products_frame = CTkFrame(self.sales_content_frame , corner_radius = 3 , border_width = 1 , border_color = 'lightgray' , fg_color = 'transparent' )
         self.products_frame.grid(row = 0 , column =  0, sticky = 'nswe')
+        self.products_frame.grid_columnconfigure(0 , weight = 1)
         
+        self.products_tree = ttk.Treeview(self.products_frame, height = 15 , style="mystyle.Treeview")
+        self.products_tree.grid(row = 0 , column = 0 , sticky = 'nsew')
+        
+        scrollbar = ttk.Scrollbar(self.products_frame, orient="vertical", command=self.products_tree.yview)
+        scrollbar.grid(row = 0, column = 1 , sticky = "ns")
+        self.products_tree.configure(yscroll=scrollbar.set)
+        
+        self.products_tree["columns"] = ( "#0" , "#1" , "#2" , "#3" ,  "#4")
+        self.products_tree.heading("#0" , text = "Referencia" , command = lambda: LoadInfo.on_heading_click(self , "state"))
+        self.products_tree.heading("#1" , text = "Nombre" , command = lambda: LoadInfo.on_heading_click(self , "days"))
+        self.products_tree.heading("#2" , text  ="Precio" , command = lambda: LoadInfo.on_heading_click(self , "client"))
+        self.products_tree.heading("#3" , text = "Stock" , command = lambda: LoadInfo.on_heading_click(self , "last"))
+        self.products_tree.heading("#4" , text = "Categoría" , command = lambda: LoadInfo.on_heading_click(self , "next"))
+        self.products_tree.heading("#5" , text = "Subcategoría" , command = lambda: LoadInfo.on_heading_click(self , "postal_code"))
+        
+        self.products_tree.column("#0" , width = 40 , anchor="center")  
+        self.products_tree.column("#1" , width = 220 , anchor="center")
+        self.products_tree.column("#2" , width = 25)
+        self.products_tree.column("#3" , width = 25 , anchor="center")
+        self.products_tree.column("#4" , width = 80 , anchor="w")
+        self.products_tree.column("#5" , width = 80 , anchor="w")
+        self.products_tree.bind("<ButtonRelease-1>" , lambda event: LoadProducts.get_product(self , event))
+        
+        
+        ProductsClass.prdoducts_dataframe(self)
         
         self.product_description_label = CTkLabel(self.sales_content_frame , textvariable = self.description , fg_color = 'Lightblue4' , corner_radius = 3)
         self.product_description_label.grid(row = 2 , column = 0 , sticky = W+E)

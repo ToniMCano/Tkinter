@@ -756,15 +756,20 @@ class LoadInfo():
             
         
             
-    def get_client_name(tree , event):
+    def get_item(self , place , tree , event):
         
         try:
-            row = tree.info.focus()
-            print(row)
-            item = tree.info.item(row)
-            client_name = item['values'][1]
+            row = tree.focus()
             
-            GetInfo.load_client_info(tree , client_name)
+            item = tree.item(row)
+            
+            if place == 'crm':
+                client_name = item['values'][1]
+            
+                GetInfo.load_client_info(self , client_name)
+                
+            else:
+                return item['text'] , item['values'][0]
         
         except IndexError:
             pass

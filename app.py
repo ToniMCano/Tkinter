@@ -38,7 +38,7 @@ class Main:
         #style.configure("
          # style.configure("mystyle.Treeview" ,font = ("" , 9), bg = "lightgrey" )Modificar la fuente de la tabla
         #style.configure("mystyle.Treeview.Heading" , font = ("" , 11 , ) , foreground = 'white')   # Modificar la fuente de las cabeceras
-        style.configure("Treeview.Heading", background='LightBlue4')  # Cambia "blue" al color deseado
+        style.configure("Treeview.Heading", background='LightBlue4')  
         style.layout("mystyle.Treeview" , [("mystyle.Treeview.treearea", {'sticky' : 'nswe'})]) # Eliminar los bordes??
        
         self.frame_tree = ttk.Frame(self.ventana_principal)
@@ -73,7 +73,7 @@ class Main:
         self.ventana_principal.grid_columnconfigure(5, weight=3)
         self.ventana_principal.grid_rowconfigure(2, weight=1)
         self.ventana_principal.grid_rowconfigure(3, weight=1)
-        self.info.bind("<ButtonRelease-1>" , lambda event: LoadInfo.get_client_name(self , event))
+        self.info.bind("<ButtonRelease-1>" , lambda event: LoadInfo.get_item(self , "crm" , self.info , event))
         
         self.active_employee_id = StringVar()
         self.fecha = StringVar()

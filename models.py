@@ -165,9 +165,10 @@ class Products(Base):
     expiration = Column(String)
     category = Column(String , nullable = False)
     subcategory = Column(String , nullable = False)
+    description = Column(String)
     
     
-    def __init__(self , reference , product_name , price , units , expiration , category , subcategory):
+    def __init__(self , reference , product_name , price , units , expiration , category , subcategory , description):
         
         self.reference = reference
         self.product_name = product_name
@@ -176,6 +177,7 @@ class Products(Base):
         self.expiration = expiration
         self.category = category
         self.subcategory = subcategory
+        self.description = description
         
         
     def __str__(self):
@@ -195,8 +197,9 @@ class Orders(Base):
     seller_id = Column(Integer , ForeignKey('employee.id_employee'))
     order_date = Column(Integer , nullable = False)
     total_import = Column(Float , nullable = False)
+    order_notes = Column(String)
     
-    def __init__(self , id_order , product_reference , product_units , order_client_id , seller_id , order_date , total_import):
+    def __init__(self , id_order , product_reference , product_units , order_client_id , seller_id , order_date , total_import , order_notes):
         
         self.id_order = id_order
         self.product_reference = product_reference
@@ -205,6 +208,7 @@ class Orders(Base):
         self.seller_id = seller_id
         self. order_date = order_date
         self.total_import = total_import
+        self.order_notes = order_notes
         
     
         
