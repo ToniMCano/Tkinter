@@ -166,9 +166,10 @@ class Products(Base):
     category = Column(String , nullable = False)
     subcategory = Column(String , nullable = False)
     description = Column(String)
+    discount = Column(Integer , nullable = False)
     
     
-    def __init__(self , reference , product_name , price , units , expiration , category , subcategory , description):
+    def __init__(self , reference , product_name , price , units , expiration , category , subcategory , description , discount = 0):
         
         self.reference = reference
         self.product_name = product_name
@@ -178,6 +179,7 @@ class Products(Base):
         self.category = category
         self.subcategory = subcategory
         self.description = description
+        self.discount = discount
         
         
     def __str__(self):

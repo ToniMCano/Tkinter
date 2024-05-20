@@ -522,7 +522,7 @@ class MyCalendar():
 
             except Exception as e:
                 print(e)
-                mb.showwarning("Error al Introducir la Hora" , f'\nFecha introducida: {date[-5:]}\n\nFormato Válid: 08:25 (HH:MM)')
+                mb.showwarning("Error al Introducir la Hora" , f'\nFecha introducida: {date[-5:]}\n\nFormato Válido: 08:25 (HH:MM)')
     
         else:
             pass

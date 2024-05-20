@@ -97,7 +97,7 @@ class OrderFunctions:
         return contacts
     
     
-    def get_product(self , e , place = ""):
+    def get_product(self , e):
 
         try:
             reference = LoadInfo.get_item(self , "products" , self.products_tree , e)
@@ -106,7 +106,7 @@ class OrderFunctions:
             
             OrderFunctions.load_product(self , product)
             
-            if place == "order":
+            if e == "order":
                 OrderFunctions.add_product(self , product)
             
         except Exception as e:
@@ -129,6 +129,70 @@ class OrderFunctions:
         
         client = db.session.get(Client , self.company_id.get())
         
-        self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price ,))
-        self.product_description.delete(1.0 , 'end')
-        self.product_description.insert('end' , product.description)
+        if self.product_units_entry.get().isdigit():      
+            row_import = round(int(self.product_units_entry.get()) * product.price , 2)
+            
+            if product.discount != 0:
+                row_import = row_import - (row_import * int(product.discount) / 100)
+                
+            self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , self.product_units_entry.get() , f"{product.discount} %" , row_import))
+            self.product_description.delete(1.0 , 'end')
+            self.product_description.insert('end' , product.description)
+            
+            OrderFunctions.calculate_import(self)
+            
+        else:
+            mb.showwarning("Unidades" , "Las unidades deben ser un número entero.")
+            
+            
+    def calculate_import(self , e = ""):
+        
+        order = self.order_tree.get_children()
+        total = []
+        for item in order:
+            row_import = float(self.order_tree.item(item , 'values')[-1])
+
+            total.append(row_import)
+                                
+        self.order_import.set(round(sum(total) , 2))
+        
+        if self.discount.get():
+            width_discount =  sum(total) - (sum(total) * int(self.discount.get()) / 100)
+            total_order_import = width_discount + width_discount * 8 / 100
+            
+        else:
+            total_order_import = sum(total) + (sum(total) * 8 / 100)
+            
+        self.total_order_import.set(round(total_order_import , 2))
+        #item = self.info.selection_set(item)
+        
+        
+    def eliminate_product(self):
+        
+        item = self.order_tree.focus()
+        
+        self.order_tree.delete(item)
+        
+        OrderFunctions.calculate_import(self , e = "")
+        
+        
+    def send_order(self): 
+        
+        id_order = db.session.query(Orders).order_by(Orders.id_order.desc()).first()
+        
+        if id_order is not None:
+            id_order = id_order.id_order + 1
+                           
+        else:    
+            id_order = 1 
+               
+        order = self.order_tree.get_children()
+        
+        for x in order:#         id_order , product_reference ,                product_units ,                        order_client_id ,                 seller_id ,                   order_date ,                total_import                         , order_notes):
+        
+            order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") )
+            
+            db.session.add(order_entry)
+            db.session.commit()
+            
+        db.session.close()
