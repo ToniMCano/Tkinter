@@ -4,7 +4,7 @@ from tkinter import ttk , filedialog
 from tkinter import *
 from PIL import Image, ImageTk
 from tkcalendar import Calendar
-from models import Employee , Client , Contact , ContactPerson , Products
+from models import Employee , Client , Contact , ContactPerson , Products , Orders
 import db
 import openpyxl
 from sqlalchemy import and_ , or_ , func ,asc , desc
@@ -16,9 +16,9 @@ import pandas as pd
 
 
 
-class ProductsClass:
+class OrderFunctions:
     
-    def prdoducts_dataframe(self): 
+    def show_products(self): 
         
         self.products_tree.tag_configure("odd", background="snow2" )
         self.products_tree.tag_configure("even", background="white")
@@ -32,7 +32,7 @@ class ProductsClass:
                 self.products_tree.delete(x)
                         
         except Exception as e:
-            print("[prdoducts_dataframe]: (Clean): " , e)
+            print("[show_products]: (Clean): " , e)
 
         products = db.session.query(Products).order_by(Products.category).all()
         
@@ -97,23 +97,38 @@ class ProductsClass:
         return contacts
     
     
-class LoadsProducts:
-    
-    def get_product(self , e):
+    def get_product(self , e , place = ""):
 
         try:
             reference = LoadInfo.get_item(self , "products" , self.products_tree , e)
             print(reference)
             product = db.session.query(Products).filter(Products.reference == reference).first()
             
+            OrderFunctions.load_product(self , product)
+            
+            if place == "order":
+                OrderFunctions.add_product(self , product)
+            
+        except Exception as e:
+            print(f'[get_product]: {e}')
+        
+    
+    def load_product(self , product):
+       
+        try:
             self.header_description.set(f"[{product.reference}] {product.product_name}")
             self.product_description.delete(1.0 , 'end')
             self.product_description.insert('end' , product.description)
             self.expiration.set(MyCalendar.format_date_to_show(f'{product.expiration} 08:00')[0:-6])
-            
+        
         except Exception as e:
-            print(e)
+            print(f"[load_product]: {e}")
         
         
+    def add_product(self , product):
         
-    def add_product(self , e)    
+        client = db.session.get(Client , self.company_id.get())
+        
+        self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price ,))
+        self.product_description.delete(1.0 , 'end')
+        self.product_description.insert('end' , product.description)

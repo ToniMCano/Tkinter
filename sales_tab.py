@@ -2,7 +2,7 @@
 # toggle_view
 
 from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs
-from sales_actions import ProductsClass , LoadsProducts
+from sales_actions import OrderFunctions , OrderFunctions
 import tkinter as tk
 from tkinter import ttk , messagebox
 from tkinter import * 
@@ -41,6 +41,7 @@ class SalesTab:
         self.description = StringVar() 
         self.expiration = StringVar()
         
+        self.product_units = StringVar()
         
         self.order_import = StringVar() 
         self.order_import.set('215')
@@ -88,12 +89,12 @@ class SalesTab:
         self.products_tree.column("#3" , width = 25 , anchor="center")
         self.products_tree.column("#4" , width = 80 , anchor="w")
         self.products_tree.column("#5" , width = 80 , anchor="w")
-        self.products_tree.bind("<ButtonRelease-1>" , lambda event: LoadsProducts.get_product(self , event))
+        self.products_tree.bind("<ButtonRelease-1>" , lambda event: OrderFunctions.get_product(self , event))
         self.products_tree.bind("<Double-1>" , lambda event: Prod.get_product(self , event))
         
         
         
-        ProductsClass.prdoducts_dataframe(self)
+        OrderFunctions.show_products(self)
         
         self.product_description_label = CTkLabel(self.sales_content_frame , textvariable = self.header_description , fg_color = 'Lightblue4' , corner_radius = 3)
         self.product_description_label.grid(row = 2 , column = 0 , sticky = W+E)
@@ -142,31 +143,41 @@ class SalesTab:
         self.order_tree.column("#3" , width = 80 , anchor="center")
         self.order_tree.column("#4" , width = 80 , anchor="w")
         
-        self.order_tree.bind("<ButtonRelease-1>" , lambda event: LoadsProducts.get_product(self , event))
+        self.order_tree.bind("<ButtonRelease-1>" , lambda event: OrderFunctions.get_product(self , event))
         
         
-        ProductsClass.prdoducts_dataframe(self)
+        OrderFunctions.show_products(self)
         
         #ORDER DASHBOARD
         
         self.sales_order_dashboard = CTkFrame(self.sales_order_frame , fg_color = 'transparent' , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')
         self.sales_order_dashboard.grid(row = 2 , column = 0 , sticky = 'nswe', padx = 5)
         
-        self.sales_order_dashboard.grid_columnconfigure(0 , weight = 1)
-        self.sales_order_dashboard.grid_columnconfigure(1 , weight = 1)
-        self.sales_order_dashboard.grid_columnconfigure(2 , weight = 1)
+        #self.sales_order_dashboard.grid_columnconfigure(0 , weight = 1)
+        #self.sales_order_dashboard.grid_columnconfigure(1 , weight = 1)
+        #self.sales_order_dashboard.grid_columnconfigure(2 , weight = 1)
+        #self.sales_order_dashboard.grid_columnconfigure(3 , weight = 1)
+        #self.sales_order_dashboard.grid_columnconfigure(5 , weight = 1)
         
-        self.delete_button = CTkButton(self.sales_order_dashboard , text = 'Eliminar' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 1 , border_color = "gray")
-        self.delete_button.grid(row = 0 , column = 0 , sticky = W+E , padx = 5 , pady = 5)
+        self.product_units_entry = CTkLabel(self.sales_order_dashboard , text = "Unidades: " , text_color = 'gray' , width = 30)
+        self.product_units_entry.grid(row = 0 , column = 0 , sticky = W , padx = 5 , pady = 5)
         
-        self.refresh_button = CTkButton(self.sales_order_dashboard , text = 'Button' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 1 , border_color = "gray")
-        self.refresh_button.grid(row = 0 , column = 1 , sticky = W+E , padx = 5 , pady = 5)
         
-        self.delete_button = CTkButton(self.sales_order_dashboard , text = 'Terminar' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 1 , border_color = "gray")
+        self.product_units_entry = CTkEntry(self.sales_order_dashboard , textvariable = self.product_units , corner_radius = 4 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 2 , border_color = "Lightblue4" , width = 35)
+        self.product_units_entry.grid(row = 0 , column = 0 , sticky = E , padx = 5 , pady = 5)
+        self.product_units_entry .focus()
+        
+        self.add_units_button = CTkButton(self.sales_order_dashboard , text = 'Añadir' , corner_radius = 2 , fg_color = 'Lightblue4' , height = 15 , text_color = 'white' , width = 50)
+        self.add_units_button.grid(row = 0 , column = 1 , sticky = W+E , padx = 5 , pady = 5)
+        
+        self.delete_button = CTkButton(self.sales_order_dashboard , text = 'Eliminar' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 1 , border_color = "gray" , width = 50)
         self.delete_button.grid(row = 0 , column = 2 , sticky = W+E , padx = 5 , pady = 5)
         
+        self.send_order = CTkButton(self.sales_order_dashboard , text = 'Realizar Pedido' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'Lightblue4' , border_width = 2 , border_color = "Lightblue4" , width = 50)
+        self.send_order.grid(row = 0 , column = 3 , sticky = W+E , padx = 5 , pady = 5)
+        
         self.sales_order_info = CTkFrame(self.sales_order_dashboard , fg_color = 'transparent' , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')
-        self.sales_order_info.grid(row = 1 , column = 0 , columnspan = 3 , sticky = 'nswe', padx = 5 , pady = 5)
+        self.sales_order_info.grid(row = 1 , column = 0 , columnspan = 4 , sticky = 'nswe', padx = 5 , pady = 5)
         
         self.sales_order_info.grid_columnconfigure(0 , weight = 1)
         self.sales_order_info.grid_columnconfigure(1 , weight = 1)
@@ -210,10 +221,10 @@ class SalesTab:
         self.euro2_label.grid(row = 1 , column = 1 , sticky = W , padx = 5 , pady = 5)
         
         self.aditional_order_info = CTkFrame(self.sales_order_dashboard , fg_color = "lightgray")
-        self.aditional_order_info.grid(row = 2 , column = 0 , columnspan = 3 ,  sticky = W+E , padx = 10 , pady = 10)
+        self.aditional_order_info.grid(row = 2 , column = 0 , columnspan = 4 ,  sticky = W+E , padx = 10 , pady = 10)
         
         self.delivery_date_frame = CTkFrame(self.sales_order_dashboard , fg_color = "lightgray", height = 30)
-        self.delivery_date_frame.grid(row = 3 , column = 0 , columnspan = 3 ,  sticky = W+E , padx = 10 , pady = 10)
+        self.delivery_date_frame.grid(row = 3 , column = 0 , columnspan = 4 ,  sticky = W+E , padx = 10 , pady = 10)
         
         self.delivery_date_label = CTkLabel(self.delivery_date_frame , text = "Fecha de Entrega: " , anchor = 'w' , text_color = 'gray')
         self.delivery_date_label.grid(row = 0 , column = 0  ,  sticky = W+E , padx = 5 , pady = 5)
