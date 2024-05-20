@@ -359,3 +359,27 @@ for product in products:
     
     db.session.commit()
 db.session.close()    
+
+
+     for i, order_view in enumerate(single_order):   # Recorremos los productos y ...
+                products.append(order_view.product_units)
+                imports.append(order_view.total_import)
+            
+        
+                self.reference_view = ttk.Frame(self.orders_view)
+                self.reference_view.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+                
+                self.product_name_view = ttk.Frame(self.orders_view)
+                self.product_name_view.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
+                
+                self.units_view = ttk.Frame(self.orders_view)
+                self.units_view.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
+                
+                self.price_view = ttk.Frame(self.orders_view)
+                self.price_view.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
+                
+                self.date_view = ttk.Frame(self.orders_view)
+                self.date_view.grid(row = 0 , column = 4 , padx = 5 , pady = 5 , sticky = W+E)
+                
+                self.button_view = ttk.Frame(self.orders_view)
+                self.button_view.grid(row = 0 , column = 5 , padx = 5 , pady = 5 , sticky = W+E)

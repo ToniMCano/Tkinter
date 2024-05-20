@@ -173,6 +173,7 @@ class OrderFunctions:
         
         self.order_tree.delete(item)
         
+        
         OrderFunctions.calculate_import(self , e = "")
         
         
@@ -191,7 +192,7 @@ class OrderFunctions:
         order = self.order_tree.get_children()
         
         for x in order:#         id_order , product_reference ,                product_units ,                        order_client_id ,                 seller_id ,         buyer_id ,            order_date ,                total_import                         , order_notes):
-        
+            
             order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") )
             
             db.session.add(order_entry)
@@ -199,30 +200,67 @@ class OrderFunctions:
             
         db.session.close()
         
+        OrderFunctions.clean_order(self)
+    
+    
+    def clean_order(self):
+        
+        clean = self.order_tree.get_children()
+        
+        for x in clean:
+            self.order_tree.delete(x)
+        
+        self.discount.set("")
+        self.total_order_import.set("")
+        self.order_import.set("")
+    
     
     def sales_historical(self):
         
         window = Toplevel()  
         window.configure(bg = "#f4f4f4")
+        window.geometry("800x300")
+        window.resizable(0,0)
         window.title(f"Historial de Ventas")
         window.grid_columnconfigure(0 , weight = 1)
         window.grid_rowconfigure(0 , weight = 1)
         
-        client = db.session.get(Client , self.client_id.get())
+        client = db.session.get(Client , self.company_id.get())
  
-        self.historial_frame = CTkFrame(window)
-        self.historial_frame.grid(row = 0 , column = 0 , sticky = "nswe")
+        self.historial_frame = CTkFrame(window , fg_color = 'transparent')
+        self.historial_frame.grid(row = 0 , column = 0 , padx = 10 , pady = 10 , sticky = "nswe")
         self.historial_frame.grid_columnconfigure(0 , weight = 1)
-        self.historial_frame.grid_rowconfigure(1 , weight = 1)
+        #self.historial_frame.grid_rowconfigure(1 , weight = 1)
         
-        self.historial_header = CTkFrame(self.historial_frame , border_width = 1 , border_color = 'gray')
-        self.historial_header.grid(row = 0 , column = 0 ,  sticky = W+E , padx = 5 , pady = 5)
+        self.historial_header = CTkFrame(self.historial_frame , border_width = 1 , border_color = 'gray' , fg_color = 'transparent' , height = 40)
+        self.historial_header.grid(row = 0 , column = 0 ,  sticky = W+E , padx = 3 , pady = 3)
+        self.historial_header.grid_columnconfigure(0 , weight = 1)
+        self.historial_header.grid_columnconfigure(1 , weight = 1)
+        self.historial_header.grid_columnconfigure(2 , weight = 1)
+        self.historial_header.grid_columnconfigure(3 , weight = 1)
+        self.historial_header.grid_columnconfigure(4 , weight = 1)
         
-        self.historial_content = CTkFrame(self.historial_frame , border_width = 1 , border_color = 'gray')
-        self.historial_content.grid(row = 1 , column = 0 ,  sticky = W+E , padx = 5 , pady = 5)
+        self.reference_view_header = CTkLabel(self.historial_header , text = f"Referencia" , text_color = 'gray')
+        self.reference_view_header.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
         
+        self.units_view_header = CTkLabel(self.historial_header , text = "Total Productos", text_color = 'gray')
+        self.units_view_header.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W)
+        
+        self.price_view_header = CTkLabel(self.historial_header , text ="Importe" , text_color = 'gray')
+        self.price_view_header.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = W)
+        
+        self.date_view_header = CTkLabel(self.historial_header , text = "Fecha" , text_color = 'gray')
+        self.date_view_header.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W)
+        
+        self.date_view_header = CTkLabel(self.historial_header , text = f"Hasta: {MyCalendar.format_date_to_show(str(datetime.now())[:16])}" , width = 100 , fg_color = 'Lightblue4' , corner_radius = 4)
+        self.date_view_header.grid(row = 0 , column = 4 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        self.historial_content = CTkScrollableFrame(self.historial_frame , border_width = 1 , border_color = 'gray' , fg_color = 'transparent' , scrollbar_fg_color = 'transparent' )
+        self.historial_content.grid(row = 1 , column = 0 ,  sticky = W+E , padx = 3 , pady = 3)
+        self.historial_content.grid_columnconfigure(0 , weight = 1)
         
         Pops.center_window(self , window)
+        
         window.lift()
         
         OrderFunctions.group_orders(self)
@@ -230,13 +268,60 @@ class OrderFunctions:
         
     def group_orders(self):
         
-        orders = db.session.query(Orders).filter(Orders.order_client_id == self.compnay_id.get()).all()
+        orders = db.session.query(Orders).filter(Orders.order_client_id == self.company_id.get()).all()
         
         orders_id = []
         
-        for order in orders:          # Obtenemos un único id pro pedido
+        for order in orders:          # Obtenemos un único id por pedido
+            
+            if order.id_order not in orders_id:
+                orders_id.append(order.id_order)
+            print(f"Lista de Ids: {orders_id}")
+        for i, single_id in enumerate(orders_id):  # Obtenemos todos los productos del pedido con ese id
+            single_order = db.session.query(Orders).filter(Orders.id_order == single_id).all()
+            
+            products = []
+            imports = []
+            
+            self.orders_view = CTkFrame(self.historial_content , fg_color = 'lightgray' , corner_radius = 4)
+            self.orders_view.grid(row = i , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+            self.orders_view.grid_columnconfigure(0 , weight = 1)
+            self.orders_view.grid_columnconfigure(1 , weight = 1)
+            self.orders_view.grid_columnconfigure(2 , weight = 1)
+            self.orders_view.grid_columnconfigure(3 , weight = 1)
+            self.orders_view.grid_columnconfigure(4 , weight = 1)
+            
+            
+            for order_view in single_order:   # Recorremos los productos y ...
+                products.append(order_view.product_units)
+                imports.append(order_view.total_import)
+                product = db.session.get(Products , order_view.product_reference)
+            
+    
+            self.reference_view = CTkLabel(self.orders_view , text = f"Pedido ID[{orders_id[i]}]" , text_color = 'gray')
+            self.reference_view.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            self.units_view = CTkLabel(self.orders_view , text = str(sum(products)) , text_color = 'gray')
+            self.units_view.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            self.price_view = CTkLabel(self.orders_view , text ="{:.2f}".format((sum(imports))) , text_color = 'gray' , anchor = "e")
+            self.price_view.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            self.date_view = CTkLabel(self.orders_view , text = MyCalendar.format_date_to_show(order_view.order_date) , text_color = 'gray')
+            self.date_view.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            self.date_view = CTkButton(self.orders_view , text = "Ver Pedido" , width = 80 , fg_color = 'Lightblue4' , corner_radius = 4 , command = lambda order_id_to = orders_id[i]: OrderFunctions.view_single_order(self , order_id_to))
+            self.date_view.grid(row = 0 , column = 4 , padx = 5 , pady = 5 , sticky = E)
+            
+            
+    def view_single_order(self , order_id):
+                
+        orders = db.session.query(Orders).filter(Orders.order_client_id == self.compnay_id.get()).all()
+        orders_id = []
+        
+        for order in orders:          # Obtenemos un único id por pedido
             if order.order_client_id not in orders_id:
-                orders_id.append(order.order_id)
+                orders_id.append(order.id_order)
 
         for single_id in orders_id:  # Obtenemos todos los productos del pedido con ese id
             single_order = db.session.query(Orders).filter(Orders.id_order == single_order).all()
@@ -245,7 +330,20 @@ class OrderFunctions:
             self.orders_view.grid(row = i , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
             
             for i, order_view in enumerate(single_order):   # Recorremos los productos y ...
-                pass
+
+                product = db.session.get(Products , order_view.product_reference)
             
-        
+                self.reference_view = CTkLabel(self.orders_view , text = order_view.product_reference)
+                self.reference_view.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
                 
+                self.product_name_view = CTkLabel(self.orders_view , text = product.product_name)
+                self.product_name_view.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
+                
+                self.units_view = CTkLabel(self.orders_view , text = order_view.product_units)
+                self.units_view.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
+                
+                self.price_view = CTkLabel(self.orders_view , text = product.price)
+                self.price_view.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
+                
+                self.date_view = CTkLabel(self.orders_view , text = order_view.order_date)
+                self.date_view.grid(row = 0 , column = 4 , padx = 5 , pady = 5 , sticky = W+E)
