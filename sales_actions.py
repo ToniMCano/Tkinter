@@ -179,6 +179,8 @@ class OrderFunctions:
     def send_order(self): 
         
         id_order = db.session.query(Orders).order_by(Orders.id_order.desc()).first()
+        buyer = db.session.get(Client , self.company_id.get())
+        buyer = buyer.contact_person
         
         if id_order is not None:
             id_order = id_order.id_order + 1
@@ -188,11 +190,62 @@ class OrderFunctions:
                
         order = self.order_tree.get_children()
         
-        for x in order:#         id_order , product_reference ,                product_units ,                        order_client_id ,                 seller_id ,                   order_date ,                total_import                         , order_notes):
+        for x in order:#         id_order , product_reference ,                product_units ,                        order_client_id ,                 seller_id ,         buyer_id ,            order_date ,                total_import                         , order_notes):
         
-            order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") )
+            order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") )
             
             db.session.add(order_entry)
             db.session.commit()
             
         db.session.close()
+        
+    
+    def sales_historical(self):
+        
+        window = Toplevel()  
+        window.configure(bg = "#f4f4f4")
+        window.title(f"Historial de Ventas")
+        window.grid_columnconfigure(0 , weight = 1)
+        window.grid_rowconfigure(0 , weight = 1)
+        
+        client = db.session.get(Client , self.client_id.get())
+ 
+        self.historial_frame = CTkFrame(window)
+        self.historial_frame.grid(row = 0 , column = 0 , sticky = "nswe")
+        self.historial_frame.grid_columnconfigure(0 , weight = 1)
+        self.historial_frame.grid_rowconfigure(1 , weight = 1)
+        
+        self.historial_header = CTkFrame(self.historial_frame , border_width = 1 , border_color = 'gray')
+        self.historial_header.grid(row = 0 , column = 0 ,  sticky = W+E , padx = 5 , pady = 5)
+        
+        self.historial_content = CTkFrame(self.historial_frame , border_width = 1 , border_color = 'gray')
+        self.historial_content.grid(row = 1 , column = 0 ,  sticky = W+E , padx = 5 , pady = 5)
+        
+        
+        Pops.center_window(self , window)
+        window.lift()
+        
+        OrderFunctions.group_orders(self)
+        
+        
+    def group_orders(self):
+        
+        orders = db.session.query(Orders).filter(Orders.order_client_id == self.compnay_id.get()).all()
+        
+        orders_id = []
+        
+        for order in orders:          # Obtenemos un único id pro pedido
+            if order.order_client_id not in orders_id:
+                orders_id.append(order.order_id)
+
+        for single_id in orders_id:  # Obtenemos todos los productos del pedido con ese id
+            single_order = db.session.query(Orders).filter(Orders.id_order == single_order).all()
+            
+            self.orders_view = ttk.Frame(self.historial_content)
+            self.orders_view.grid(row = i , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            for i, order_view in enumerate(single_order):   # Recorremos los productos y ...
+                pass
+            
+        
+                

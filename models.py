@@ -197,17 +197,20 @@ class Orders(Base):
     product_units = Column(Integer , nullable = False)
     order_client_id = Column(Integer , ForeignKey('client.id_client'))
     seller_id = Column(Integer , ForeignKey('employee.id_employee'))
+    buyer_id = Column(Integer, ForeignKey('contact_person.id_person'))
     order_date = Column(Integer , nullable = False)
     total_import = Column(Float , nullable = False)
     order_notes = Column(String)
     
-    def __init__(self , id_order , product_reference , product_units , order_client_id , seller_id , order_date , total_import , order_notes):
+    
+    def __init__(self , id_order , product_reference , product_units , order_client_id , seller_id , buyer_id, order_date , total_import , order_notes):
         
         self.id_order = id_order
         self.product_reference = product_reference
         self.product_units = product_units
         self.order_client_id = order_client_id
         self.seller_id = seller_id
+        self.buyer_id = buyer_id
         self. order_date = order_date
         self.total_import = total_import
         self.order_notes = order_notes
