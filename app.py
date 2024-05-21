@@ -15,6 +15,7 @@ from datetime import datetime , timedelta
 from tkinter import messagebox as mb
 from ttkthemes import ThemedTk
 from customtkinter import *
+
 from sales_tab import SalesTab , OrderFunctions
 #locale.setlocale(locale.LC_ALL, '')
 
@@ -23,12 +24,12 @@ from sales_tab import SalesTab , OrderFunctions
 class Main:
     
     def __init__(self, root):
-        self.ventana_principal = root
-        self.ventana_principal.title("MyCRM")
-        self.ventana_principal.resizable(1,1)
-        self.ventana_principal.geometry('1200x800')
-        self.ventana_principal.configure(bg="#f4f4f4") 
-        Pops.center_window(self, self.ventana_principal)
+        self.main_window = root
+        self.main_window.title("MyCRM")
+        self.main_window.resizable(1,1)
+        self.main_window.geometry('1200x800')
+        self.main_window.configure(bg="#f4f4f4") 
+        Pops.center_window(self, self.main_window)
         
         
         
@@ -41,11 +42,11 @@ class Main:
         style.configure("Treeview.Heading", background='LightBlue4')  
         style.layout("mystyle.Treeview" , [("mystyle.Treeview.treearea", {'sticky' : 'nswe'})]) # Eliminar los bordes??
        
-        self.frame_tree = ttk.Frame(self.ventana_principal)
+        self.frame_tree = ttk.Frame(self.main_window)
         self.frame_tree.grid_columnconfigure(0, weight=1)
         self.frame_tree.grid_rowconfigure(3, weight=1)
         
-        self.sales_frame = ttk.Frame(self.ventana_principal)
+        self.sales_frame = ttk.Frame(self.main_window)
         #LoadInfo.combo_state_values(self , 'crm')
         
         
@@ -69,10 +70,10 @@ class Main:
         self.info.column("#5" , width = 10 , anchor="w")
         
         
-        self.ventana_principal.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
-        self.ventana_principal.grid_columnconfigure(5, weight=3)
-        self.ventana_principal.grid_rowconfigure(2, weight=1)
-        self.ventana_principal.grid_rowconfigure(3, weight=1)
+        self.main_window.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
+        self.main_window.grid_columnconfigure(5, weight=3)
+        self.main_window.grid_rowconfigure(2, weight=1)
+        self.main_window.grid_rowconfigure(3, weight=1)
         self.info.bind("<ButtonRelease-1>" , lambda event: LoadInfo.get_item(self , "crm" , self.info , event))
         
         self.active_employee_id = StringVar()
@@ -112,7 +113,7 @@ class Main:
         
         # HEADER
         
-        self.header = ttk.Frame(self.ventana_principal)
+        self.header = ttk.Frame(self.main_window)
         self.header.grid(row = 0 , column = 0 , columnspan = 6, pady = 5 , padx = 5 , sticky = W+E)
         self.header.columnconfigure(10, weight = 1)
         self.header.columnconfigure(6, weight = 1)
@@ -126,9 +127,8 @@ class Main:
         
         self.employee_and_categories = ttk.Combobox(self.header ,state = "readonly", values =  LoadInfo.employees_list() , width= 10)
         self.employee_and_categories.configure(background='lightblue')
-               
         self.employee_and_categories.grid(row = 0 , column = 3 , padx = 5)
-        self.employee_and_categories.bind("<<ComboboxSelected>>")
+        self.employee_and_categories.bind("<<ComboboxSelected>>" , lambda e: Pops.change_employee(self ,  e))
 
         self.combo_state_and_subcategories = ttk.Combobox(self.header ,state = "readonly",values = ["Lead", "Candidate", "Contact" , "Pool" , 'All'], width= 10)
         self.combo_state_and_subcategories.configure(background='lightblue')
@@ -138,11 +138,11 @@ class Main:
         # CALENDAR
         
         # Crear un Frame que se mostrará/ocultará self.frame_button
-        self.frame_calendar = tk.Frame(self.ventana_principal , highlightbackground = 'LightBlue4' , highlightthickness = 1)
+        self.frame_calendar = tk.Frame(self.main_window , highlightbackground = 'LightBlue4' , highlightthickness = 1)
         MyCalendar.calendar(self , "general")
-        self.frame_calendar_next = tk.Frame(self.ventana_principal , highlightbackground = 'LightBlue4' , highlightthickness = 1)
+        self.frame_calendar_next = tk.Frame(self.main_window , highlightbackground = 'LightBlue4' , highlightthickness = 1)
         MyCalendar.calendar(self  , "next")
-        self.frame_calendar_pop = tk.Frame(self.ventana_principal , highlightbackground = 'LightBlue4' , highlightthickness = 1)
+        self.frame_calendar_pop = tk.Frame(self.main_window , highlightbackground = 'LightBlue4' , highlightthickness = 1)
         MyCalendar.calendar(self  , "pop")
 
         # HEADER
@@ -164,7 +164,7 @@ class Main:
         self.frame_views = ttk.Frame(self.header , height = 20 , width = 300)
         self.frame_views.place(relx=0.4 , y = 10) 
         
-        self.crm_view = CTkButton(self.frame_views , text = "CRM" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Tabs.toggle_view(self , 'CRM'))
+        self.crm_view = CTkButton(self.frame_views , text = "CRM" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Tabs.crm_view(self , 'CRM'))
         self.crm_view.place(relx=0.2, rely=0.5  , anchor=tk.CENTER)
         
         self.sales_view = CTkButton(self.frame_views , text = "Venta" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: SalesTab.sales_root(self))
@@ -216,7 +216,7 @@ class Main:
         
         # FRAME EMPRESA
         
-        self.frame_company = CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray")         
+        self.frame_company = CTkFrame(self.main_window , fg_color = "transparent" , border_width = 1 , border_color = "lightgray")         
         self.frame_company.grid_columnconfigure(1, weight=1)
         self.frame_company.grid_columnconfigure(0, weight=1)
         
@@ -311,7 +311,7 @@ class Main:
         self.phone2_button.config(cursor = 'arrow')
         self.phone2_button.pack(side = "right")      
         
-        self.company_contact_buttons = CTkFrame(self.ventana_principal , fg_color = 'transparent')        
+        self.company_contact_buttons = CTkFrame(self.main_window , fg_color = 'transparent')        
         self.company_contact_buttons.grid_columnconfigure(0, weight = 1)
         self.company_contact_buttons.grid_columnconfigure(1, weight = 1)
         #self.company_contact_buttons.grid_columnconfigure(2, weight = 1)
@@ -321,7 +321,7 @@ class Main:
         self.button_a = CTkButton(self.company_contact_buttons , textvariable = self.button_a_value , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: States.change_state(self))
         self.button_a.grid(row = 0 , column = 0 , sticky = "we" , pady = 5 , padx = 5)
         
-        #self.button_b = CTkButton(self.company_contact_buttons , text = "Mail" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Tabs.toggle_view(self , 'view'))
+        #self.button_b = CTkButton(self.company_contact_buttons , text = "Mail" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Tabs.crm_view(self , 'view'))
         #self.button_b.grid(row = 0 , column = 1 , sticky = "we" , pady = 5 , padx = 5)
         
         self.button_c = CTkButton(self.company_contact_buttons , text = "Historial" , height = 2 , fg_color = "#f4f4f4" , text_color = 'LightBlue4' , border_color = "LightBlue4" , border_width = 2 , hover_color = 'LightBlue4' , command = lambda: OrderFunctions.sales_historical(self))
@@ -329,7 +329,7 @@ class Main:
         
         #FRAME CONTACTO
         
-        self.contact_frame = CTkFrame(self.ventana_principal , fg_color = "transparent" , border_width = 1 , border_color = "lightgray" ) 
+        self.contact_frame = CTkFrame(self.main_window , fg_color = "transparent" , border_width = 1 , border_color = "lightgray" ) 
         self.contact_frame.grid_rowconfigure(7,weight=1)
         self.contact_frame.grid_columnconfigure(1, weight=1)
         self.contact_frame.grid_columnconfigure(0, weight=1)
@@ -339,10 +339,9 @@ class Main:
         self.contact_header.grid(row = 0 , column = 0 , columnspan = 2  ,sticky=W+E)
         
         self.new_contact = CTkButton(self.contact_header , text = "+"  ,  command = lambda: Pops.create_contact(self) , width = 30 , corner_radius = 3 , fg_color = "#f4f4f4" , text_color = "gray")
-        self.new_contact.pack(side = "right")
+        self.new_contact.pack(side = "right") 
         
-        self.other_contact = ttk.Button(self.contact_header , image = self.triangle_icon)
-        self.other_contact.config(cursor = 'arrow')
+        self.other_contact = CTkButton(self.contact_header , self.triangle_icon  ,  command = lambda: Pops.create_contact(self) , width = 30 , corner_radius = 3 , fg_color = "#f4f4f4")
         self.other_contact.pack(side = "left" , fill = "y")
         
         self.margin_frame_contact = tk.Frame(self.contact_frame) 
@@ -380,7 +379,6 @@ class Main:
         self.entry_contact_mail.grid(row = 4, column = 1 , padx = 2 , pady = 2 , sticky = W+E)
         self.entry_contact_mail.bind("<Return>" , lambda e: Update.update_mail(self , 'contact_mail' , e))
 
-        
         self.contact_mail_button = ttk.Button(self.entry_contact_mail , image = self.mail_icon) 
         self.mail_button.config(cursor = 'arrow')
         self.contact_mail_button.pack(side = "right")
@@ -432,9 +430,8 @@ class Main:
         self.rcontact_label_responsable_id = Label(self.ids_frame , textvariable = self.active_employee_id , bg = 'LightBlue4' , fg = 'white' , anchor = "w")
         self.rcontact_label_responsable_id.grid(row = 0 , column = 3 , sticky = W+E)
 
-        Tabs.toggle_view(self , 'CRM')
-        #LoadInfo.sales_root(self)
-        #SalesTab.sales_root(self)
+        Tabs.crm_view(self , 'CRM')
+
         
     
     def abrir_enlace(self):

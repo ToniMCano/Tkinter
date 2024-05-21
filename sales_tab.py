@@ -1,5 +1,5 @@
 # REVISAR
-# toggle_view
+# crm_view
 
 from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs
 from sales_actions import OrderFunctions , OrderFunctions
@@ -25,7 +25,7 @@ class SalesTab:
         
         LoadInfo.combo_state_values(self , 'sales')
         
-        self.ventana_principal.update()
+        self.main_window.update()
         
         self.sales_frame.grid(row = 2, column = 0, columnspan = 6 , rowspan = 2 , sticky = 'nswe')
         self.sales_frame.grid_columnconfigure(0 , weight = 6)
@@ -243,7 +243,22 @@ class SalesTab:
                 
         self.delivery_date = CTkLabel(self.delivery_date_frame , textvariable = self.delivery_date_text , anchor = 'w' , text_color = 'gray')
         self.delivery_date.grid(row = 0 , column = 1  ,  sticky = W+E , padx = 5 , pady = 5)
-                
+        
+        # HEADER
+        
+        self.frame_calendar_button.grid_forget() 
+        
+        self.label_calendar_button.grid_forget()
+        
+        self.boton_fecha.grid_forget()
+        
+        self.combo_state_and_subcategories.grid_forget()
+        
+        self.employee_and_categories.grid_forget()
+
+
+        
+
         
         
  

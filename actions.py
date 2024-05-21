@@ -36,6 +36,8 @@ class Pops:
         
         
     def login(root):
+        global admin
+        admin = False
                 
         login_window = Toplevel()
         login_window.title("Login")
@@ -66,6 +68,54 @@ class Pops:
         
         login_window.lift()
         Pops.center_window(Pops , login_window)
+    
+              
+    def admin_activate(self , e):
+        
+        global admin 
+        
+        employee = db.session.get(Employee , self.active_employee_id.get()) 
+        
+        if employee.permissions == 0 or admin == True:
+            
+            admin = True
+            
+            self.admin_mode = CTkButton(self.header , text = 'Admin Logout' ,command = lambda: Pops.deactivate_admin(self) , width = 80)
+            self.admin_mode.place(relx = 0.7 , rely = 0.1)
+    
+
+    def change_employee(self , e):
+        
+        global admin
+        
+        if admin:
+            employee = db.session.query(Employee).filter(Employee.employee_alias == self.employee_and_categories.get()).first()
+            
+            self.active_employee_id.set(employee.id_employee)
+            
+            LoadInfo.load_contacts(self , employee.id_employee , date = str(datetime.now())[0:16])
+            
+        else:
+            alias = db.session.get(Employee , self.active_employee_id.get())
+            mb.showinfo("Permisos" , "Se necesitan permisos de Administrador para realizar esta acción.")
+            self.employee_and_categories.set(alias.employee_alias)
+    
+    
+    def deactivate_admin(self):
+        
+        global admin
+        admin = False
+        
+        self.admin_mode.place_forget()
+        
+        self.active_employee_id.set("")
+        
+        clean = self.info.get_children()
+        
+        for x in clean:
+            self.info.delete(x)
+        
+        Pops.login(self)
         
      
     def create_contact(self , company = ""): # #ecibir el id de la empresa.
@@ -77,7 +127,7 @@ class Pops:
         frame.grid_columnconfigure(0 , weight = 1)
         
         Pops.center_window(Pops , frame)
-        
+                
         frame_info = ttk.Frame(frame)
         frame_info.grid(row = 0 , column = 0, padx = 5 , pady = 10 , sticky = W+E)
         frame_info.grid_columnconfigure(0 , weight = 1)
@@ -121,9 +171,58 @@ class Pops:
         entry_mobile = ttk.Entry(frame_contact_person)
         entry_mobile.grid(row = 3 , column = 2, sticky = W+E , padx = 5 , pady = 5)
         
-        save_button = ttk.Button(frame_info, text = "Guardar")  # Cambiar función
+        save_button = ttk.Button(frame_info, text = "Guardar" , command = lambda: Pops.get_person_data(self , [entry_name.get() , entry_surname.get() , entry_job_title.get() , entry_mail.get() , entry_phone.get() , entry_mobile.get()] , frame))  
         save_button.grid(row = 6 , column = 0 , columnspan = 2 , padx = 200 , pady = 5 , sticky = W+E)
         
+        frame.lift()
+        
+    def get_person_data(self , form_data , window):
+        
+        data = dict()
+        
+        try:
+            contact_name = CheckInfo.check_name(self , form_data[0] , 'Nombre Contacto' , data)
+            contact_surname = CheckInfo.check_name(self , form_data[1] , "Apellidos" , data) 
+            job_title =  CheckInfo.check_name(self , form_data[2] , "Cargo" , data) 
+            contact_phone = CheckInfo.check_phones(self , form_data[4] , "Teléfono Contacto: " , data)
+            contact_mobile = CheckInfo.check_phones(self , form_data[5] , "mobile" , data)
+            contact_mail = CheckInfo.check_mail(self , form_data[3] , "Mail Contacto" , data) 
+            
+            
+            data["Nombre Contacto: "] = contact_name
+            data["Apellidos Contacto: "] = contact_surname
+            data["Cargo: "] = job_title
+            data["Teléfono Contacto: "] = contact_phone
+            
+            if contact_mobile is not None:
+                data["Móvil Contacto: "] = contact_mobile
+                
+            else:
+                data["Móvil Contacto: "] = ""
+                
+            data["Mail Contacto: "] = contact_mail
+            
+            employee_adder = self.active_employee_id.get()
+            
+            data_values = data.values()
+            
+            if None not in data_values:
+                AddInfo.add_contact_person(self, data , employee_adder , 'new')
+                
+                window.destroy()
+            
+            else:
+                raise Exception
+            
+                
+        except Exception as e:
+            window.destroy()
+            
+            Pops.create_contact(self , company = "")
+            
+            print(f"[get_person_data]: {e}")
+                 
+            
         
     def new_company(self, data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección: " : "" , "Código Postal: " : ""  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : '' , 'save' : True}):
     
@@ -530,10 +629,6 @@ class MyCalendar():
 
 class LoadInfo():
 
-    def sales_root(self):
-        
-        print(f"-----------------------------LOAD INFO{self.active_employee_id.get()}")
-    
     def check_employee(root , employee_password , alias , window):
                 
         employees =  db.session.query(Employee).all()
@@ -556,7 +651,10 @@ class LoadInfo():
                 root.active_employee_id.set(employee.id_employee)
                                
                 Alerts.refresh_alerts(root , employee.id_employee)
-               
+            
+                if employee.employee_alias == "ADMN":
+                    Pops.admin_activate(root , "")
+                    
         if not exists:
             mb.showwarning("Login Error" , "El usuario o la contraseña no son correctos")
             window.lift()
@@ -578,11 +676,11 @@ class LoadInfo():
         elif query == 'next':
             query = 'next' 
         elif query == 'postal_code':
-            query = 'cp'                                             #datetime.strptime(self.fecha.get() + f' {datetime.now().year}' , '%d %B %Y')
-                                                                     #2024-05-16 00:00:00
+            query = 'cp'                                             
+                                                                     
         employee_id = self.active_employee_id.get()
         date = datetime.strptime(self.fecha.get() + f' {datetime.now().year}' , '%d %B %Y')
-        #self.fecha.set(datetime.now().strftime("%d %B").title())
+        
         LoadInfo.load_contacts(self , employee_id , date , query , state_sended)
 
 
@@ -922,7 +1020,7 @@ class GetInfo():
             pass
 
         except Exception as e:
-            print(f'[toggle_view]: {e}')
+            print(f'[crm_view]: {e}')
     
     
     def load_comments(self , nif):
@@ -1225,7 +1323,7 @@ Envíado: {complete_mail}    Formato Correcto: xxx@xxxx.xx...
             company_phone2 = CheckInfo.check_phones(self , data["Teléfono2 Empresa: "] , "Teléfono2 Empresa: " , data)
             
             contact_name = CheckInfo.check_name(self , data["Nombre Contacto: "] , 'Nombre Contacto' , data)
-            contact_surname = CheckInfo.check_surname(self , data["Apellidos Contacto: "] ,  data) 
+            contact_surname = CheckInfo.check_name(self , data["Apellidos Contacto: "] , 'Apellidos' ,  data) 
             contact_phone = CheckInfo.check_phones(self , data["Teléfono Contacto: "] , "Teléfono Contacto: " , data)
             contact_mobile = CheckInfo.check_phones(self , data["Móvil Contacto: "] , "Móvil Contacto: " , data)
             contact_mail = CheckInfo.check_mail(self , data["Mail Contacto: "] , "Mail Contacto" , data) 
@@ -1251,7 +1349,7 @@ class AddInfo():
         
         try:
             employee_adder = self.active_employee_id.get()
-            vcontact_person = AddInfo.add_contact_person(data , employee_adder)
+            vcontact_person = AddInfo.add_contact_person(self , data , employee_adder)
             
             company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Código Postal: "], data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee_adder , "Pool", data["Empleados: "] , str(datetime.now())[0:16], 0 , self.active_employee_id.get())
             vcontact_person.client_id = vcontact_person.id_person
@@ -1321,10 +1419,17 @@ class AddInfo():
             mb.showwarning("Errores en la inserción de Empresas" , f"Empresas que no han podido ser insertadas: {errores}")    
             
      
-    def add_contact_person(data , employee_adder):
+    def add_contact_person(self, data , employee_adder , place = ""):
+        
+        if place == 'new':
+            company_id = self.company_id.get()
+            
+        else:
+            
+           company_id=  "Id de la Empresa"
         
         try:                                                                                                                                                                                                # TO-DO sustituir por la empresa adminstradora
-            contact_person = ContactPerson(data["Nombre Contacto: "] , data["Apellidos Contacto: "] , data["Cargo: "] , data["Teléfono Contacto: "] , data["Móvil Contacto: "] , data["Mail Contacto: "] , "Id de la Empresa" , employee_adder)
+            contact_person = ContactPerson(data["Nombre Contacto: "] , data["Apellidos Contacto: "] , data["Cargo: "] , data["Teléfono Contacto: "] , data["Móvil Contacto: "] , data["Mail Contacto: "] , company_id , employee_adder)
                 
             db.session.add(contact_person)
             db.session.commit()
@@ -1691,7 +1796,7 @@ class Update:
             Update.save_close()
             
         except Exception as e:
-            print(f"[update_company_name]: {e}")
+            print(f"[update_name]: {e}")
             
             mb.showerror("Nombre" , "No se han podido realizar los cambios en el nombre.")
     
@@ -1945,7 +2050,7 @@ class States:
         
         client.state = "Contact"
         
-        client.start_contact_date = str(datetime.now()[0:16])
+        client.start_contact_date = str(datetime.now())[0:16]
         
         row = States.update_row(self, client)
         
@@ -1993,7 +2098,7 @@ class States:
         
 class Tabs:
     
-    def toggle_view(self , view):
+    def crm_view(self , view):
         
         if view == 'CRM':
             self.sales_frame.grid_forget()
@@ -2002,16 +2107,22 @@ class Tabs:
             self.contact_frame.grid(row = 3 , column = 5 , columnspan=2 , rowspan = 2 ,  padx = 5 , sticky='nsew')
             self.company_contact_buttons.grid(row = 2 , column = 5 , columnspan = 2 ,sticky = 'nswe' , padx   = 5 )
             self.new_company.grid(row = 0 , column = 0 , padx = 5)
+            self.label_calendar_button.grid(row = 0, column = 6)
+            self.boton_fecha.grid(row=0, column=1, sticky="ew")
+            self.combo_state_and_subcategories.grid(row = 0 , column = 4 , padx = 5)
+            self.employee_and_categories.grid(row = 0 , column = 3 , padx = 5)
+            self.frame_calendar_button.grid(row = 0 , column = 5 , padx = 5)
+            
             LoadInfo.combo_state_values(self , 'crm')
+            
             self.combo_state_and_subcategories.current(newindex = 2)
             
-            
-        else:
+        '''else:
             self.frame_tree.grid_forget()
             self.frame_company.grid_forget() 
             self.contact_frame.grid_forget()
             self.company_contact_buttons.grid_forget()
-            self.state_values_view.set('sales')
+            self.state_values_view.set('sales')'''
             
             
     

@@ -127,20 +127,23 @@ class OrderFunctions:
         
     def add_product(self , product):
         
-        client = db.session.get(Client , self.company_id.get())
-        
         if self.product_units_entry.get().isdigit():      
             row_import = round(int(self.product_units_entry.get()) * product.price , 2)
             
-            if product.discount != 0:
-                row_import = row_import - (row_import * int(product.discount) / 100)
+            try:
+                if product.discount != 0:
+                    row_import = row_import - (row_import * int(product.discount) / 100)
+                    
+                self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , self.product_units_entry.get() , f"{product.discount} %" , row_import))
+                self.product_description.delete(1.0 , 'end')
+                self.product_description.insert('end' , product.description)
                 
-            self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , self.product_units_entry.get() , f"{product.discount} %" , row_import))
-            self.product_description.delete(1.0 , 'end')
-            self.product_description.insert('end' , product.description)
-            
-            OrderFunctions.calculate_import(self)
-            
+                OrderFunctions.calculate_import(self)
+            except Exception as e:
+                print(f"[add_product]: {e}")
+                
+                mb.showerror("Añadir Producto" , f"Error: {e}.")
+                
         else:
             mb.showwarning("Unidades" , "Las unidades deben ser un número entero.")
             
@@ -149,32 +152,41 @@ class OrderFunctions:
         
         order = self.order_tree.get_children()
         total = []
-        for item in order:
-            row_import = float(self.order_tree.item(item , 'values')[-1])
-
-            total.append(row_import)
-                                
-        self.order_import.set(round(sum(total) , 2))
         
-        if self.discount.get():
-            width_discount =  sum(total) - (sum(total) * int(self.discount.get()) / 100)
-            total_order_import = width_discount + width_discount * 8 / 100
+        try:
+            for item in order:
+                row_import = float(self.order_tree.item(item , 'values')[-1])
+
+                total.append(row_import)
+                                    
+            self.order_import.set(round(sum(total) , 2))
             
-        else:
-            total_order_import = sum(total) + (sum(total) * 8 / 100)
-            
-        self.total_order_import.set(round(total_order_import , 2))
-        #item = self.info.selection_set(item)
+            if self.discount.get():
+                with_discount =  sum(total) - (sum(total) * int(self.discount.get()) / 100)
+                total_order_import = with_discount + with_discount * 8 / 100
+                
+            else:
+                total_order_import = sum(total) + (sum(total) * 8 / 100)
+                
+            self.total_order_import.set(round(total_order_import , 2))
+        
+        except Exception as e:
+            print(f"[calculate_import]: {e}")
+        
         
         
     def eliminate_product(self):
         
-        item = self.order_tree.focus()
+        try:
+            item = self.order_tree.focus()
+            
+            self.order_tree.delete(item)
+            
+            
+            OrderFunctions.calculate_import(self , e = "")
         
-        self.order_tree.delete(item)
-        
-        
-        OrderFunctions.calculate_import(self , e = "")
+        except Exception as e:
+            print(f"[eliminate_product]: {e}")
         
         
     def send_order(self): 
@@ -183,24 +195,28 @@ class OrderFunctions:
         buyer = db.session.get(Client , self.company_id.get())
         buyer = buyer.contact_person
         
-        if id_order is not None:
-            id_order = id_order.id_order + 1
-                           
-        else:    
-            id_order = 1 
-               
-        order = self.order_tree.get_children()
+        try:
+            if id_order is not None:
+                id_order = id_order.id_order + 1
+                            
+            else:    
+                id_order = 1 
+                
+            order = self.order_tree.get_children()
+            
+            for x in order:#         id_order , product_reference ,                product_units ,                        order_client_id ,                 seller_id ,         buyer_id ,            order_date ,                total_import                         , order_notes):
+                
+                order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") , self.discount.get() )
+                
+                db.session.add(order_entry)
+                db.session.commit()
+                
+            db.session.close()
+            
+            OrderFunctions.clean_order(self)
         
-        for x in order:#         id_order , product_reference ,                product_units ,                        order_client_id ,                 seller_id ,         buyer_id ,            order_date ,                total_import                         , order_notes):
-            
-            order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") )
-            
-            db.session.add(order_entry)
-            db.session.commit()
-            
-        db.session.close()
-        
-        OrderFunctions.clean_order(self)
+        except Exception as e:
+            print(f"[send_order]: {e}")
     
     
     def clean_order(self):
@@ -252,7 +268,7 @@ class OrderFunctions:
         self.date_view_header = CTkLabel(self.historial_header , text = "Fecha" , text_color = 'gray')
         self.date_view_header.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W)
         
-        self.date_view_header = CTkLabel(self.historial_header , text = f"Hasta: {MyCalendar.format_date_to_show(str(datetime.now())[:16])}" , width = 100 , fg_color = 'Lightblue4' , corner_radius = 4)
+        self.date_view_header = CTkLabel(self.historial_header , text = f"Hasta: {MyCalendar.format_date_to_show(str(datetime.now())[:16])}" , width = 100 , fg_color = 'Lightblue4' , corner_radius = 4 , text_color = "white")
         self.date_view_header.grid(row = 0 , column = 4 , padx = 5 , pady = 5 , sticky = W+E)
         
         self.historial_content = CTkScrollableFrame(self.historial_frame , border_width = 1 , border_color = 'gray' , fg_color = 'transparent' , scrollbar_fg_color = 'transparent' )
@@ -295,8 +311,6 @@ class OrderFunctions:
             for order_view in single_order:   # Recorremos los productos y ...
                 products.append(order_view.product_units)
                 imports.append(order_view.total_import)
-                product = db.session.get(Products , order_view.product_reference)
-            
     
             self.reference_view = CTkLabel(self.orders_view , text = f"Pedido ID[{orders_id[i]}]" , text_color = 'gray')
             self.reference_view.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
@@ -304,7 +318,7 @@ class OrderFunctions:
             self.units_view = CTkLabel(self.orders_view , text = str(sum(products)) , text_color = 'gray')
             self.units_view.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
             
-            self.price_view = CTkLabel(self.orders_view , text ="{:.2f}".format((sum(imports))) , text_color = 'gray' , anchor = "e")
+            self.price_view = CTkLabel(self.orders_view , text ="{:.2f} €".format((sum(imports))) , text_color = 'gray' , anchor = "e")
             self.price_view.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
             
             self.date_view = CTkLabel(self.orders_view , text = MyCalendar.format_date_to_show(order_view.order_date) , text_color = 'gray')
@@ -321,7 +335,8 @@ class OrderFunctions:
         window.grid_columnconfigure(0 , weight = 1)
         
         order = db.session.query(Orders).filter(Orders.id_order == order_id).all()
-        
+        client = db.session.get(Client , order[0].order_client_id)
+        contact_person = db.session.get(ContactPerson , order[0].buyer_id)
         window.title(f"Pedido: ref.{order[0].id_order}")
         
         imports = []
@@ -331,15 +346,19 @@ class OrderFunctions:
         self.client_info_frame.grid_columnconfigure(0 , weight = 1)
         self.client_info_frame.grid_columnconfigure(1 , weight = 1)
         self.client_info_frame.grid_columnconfigure(2 , weight = 1)
+        self.client_info_frame.grid_columnconfigure(3 , weight = 1)
         
-        self.client_info= CTkLabel(self.client_info_frame, text = f'Referencia' , text_color = 'white' , fg_color = 'Lightblue4')
-        self.client_info.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+        self.client_info= CTkLabel(self.client_info_frame, text = f'   Referencia: {order[0].id_order}   ' , text_color = 'white' , fg_color = 'Lightblue4')
+        self.client_info.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W)
         
-        self.client_employee = CTkLabel(self.client_info_frame , text = f'Nombre' , text_color = 'white' , fg_color = 'Lightblue4')
-        self.client_employee.grid(row = 1 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
+        self.order_client_name = CTkLabel(self.client_info_frame , text = f'   Cliente:    {client.name}         ' , text_color = 'white' , fg_color = 'Lightblue4')
+        self.order_client_name.grid(row = 1 , column = 1 ,  pady = 5 , sticky = W+E)
         
-        self.order_date_top= CTkLabel(self.client_info_frame, text = f'Fecha del Pedido: {MyCalendar.format_date_to_show(order[0].order_date)}' , text_color = 'white' , fg_color = 'Lightblue4')
-        self.order_date_top.grid(row = 1 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
+        self.client_employee = CTkLabel(self.client_info_frame , text = f'Persona que realiza el pedido:    {contact_person.contact_name} {contact_person.contact_surname}   ' , text_color = 'white' , fg_color = 'Lightblue4')
+        self.client_employee.grid(row = 1 , column = 2 , pady = 5 , sticky = W+E)
+        
+        self.order_date_top= CTkLabel(self.client_info_frame, text = f'   Fecha del Pedido: {MyCalendar.format_date_to_show(order[0].order_date)}   ' , text_color = 'white' , fg_color = 'Lightblue4')
+        self.order_date_top.grid(row = 1 , column = 3 , padx = 5 , pady = 5 , sticky = E)
         
         
         self.window_header= CTkFrame(window , fg_color = 'Lightblue4')
@@ -351,25 +370,25 @@ class OrderFunctions:
         self.window_header.grid_columnconfigure(4 , weight = 1)
         self.window_header.grid_columnconfigure(5 , weight = 1)
         
-        self.reference_view_label= CTkLabel(self.window_header, text = 'Referencia' , text_color = 'white')
+        self.reference_view_label= CTkLabel(self.window_header, text = 'Referencia' , text_color = 'white' , font = ("", 12, "bold"))
         self.reference_view_label.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
         
-        self.product_name_view_label = CTkLabel(self.window_header , text = 'Nombre' , text_color = 'white')
+        self.product_name_view_label = CTkLabel(self.window_header , text = 'Nombre' , text_color = 'white' , font = ("", 12, "bold"))
         self.product_name_view_label.grid(row = 1 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
         
-        self.price_view_label= CTkLabel(self.window_header, text = 'Precio' , text_color = 'white')
+        self.price_view_label= CTkLabel(self.window_header, text = 'Precio' , text_color = 'white' , font = ("", 12, "bold"))
         self.price_view_label.grid(row = 1 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
         
-        self.units_view_label = CTkLabel(self.window_header , text = 'Unidades', text_color = 'white')
+        self.units_view_label = CTkLabel(self.window_header , text = 'Unidades', text_color = 'white' , font = ("", 12, "bold"))
         self.units_view_label.grid(row = 1 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
         
-        self.product_discount_label = CTkLabel(self.window_header , text = 'Descuento' , text_color = 'white')
+        self.product_discount_label = CTkLabel(self.window_header , text = 'Descuento' , text_color = 'white' , font = ("", 12, "bold"))
         self.product_discount_label.grid(row = 1 , column = 4 , padx = 5 , pady = 5 , sticky = W+E)
     
-        self.products_total_import_label = CTkLabel(self.window_header , text = 'Importe' , text_color = 'white')
+        self.products_total_import_label = CTkLabel(self.window_header , text = 'Importe' , text_color = 'white' , font = ("", 12, "bold"))
         self.products_total_import_label.grid(row = 1 , column = 5 , padx = 5 , pady = 5 , sticky = W+E)
 
-        self.margin = CTkLabel(self.window_header , text = '' , text_color = 'white' , width = 10)
+        self.margin = CTkLabel(self.window_header , text = '' , text_color = 'white' , width = 10 , font = ("", 12, "bold")) 
         self.margin.grid(row = 1 , column = 6 , padx = 5 , pady = 5 )
         
         self.order_view_frame = CTkScrollableFrame(window , fg_color = 'transparent')
@@ -407,8 +426,9 @@ class OrderFunctions:
         
             self.products_total_import = CTkLabel(self.product_view_frame , text = product.total_import , text_color = 'gray')
             self.products_total_import.grid(row = 0 , column = 5 , padx = 5 , pady = 5 , sticky = W+E)
-
-        self.order_total_import = CTkLabel(window , text = f'   Iporte Total: {round(sum(imports) , 2)}   ' , fg_color = 'Lightblue4', text_color = 'white')
+   
+        self.order_total_import = CTkLabel(window , text = f'   Iporte Total: {(sum(imports)):.2f} €    Descuento en pedido:   {0 if order[0].order_discount is None else order[0].order_discount } %   ' , fg_color = 'Lightblue4', text_color = 'white')
         self.order_total_import.grid(row = 3 , column = 0 , padx = 5 , pady = 5 , sticky = E)
-            
-            
+        
+        Pops.center_window(self, window)
+        window.lift()
