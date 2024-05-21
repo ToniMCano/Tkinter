@@ -276,7 +276,7 @@ class OrderFunctions:
             
             if order.id_order not in orders_id:
                 orders_id.append(order.id_order)
-            print(f"Lista de Ids: {orders_id}")
+
         for i, single_id in enumerate(orders_id):  # Obtenemos todos los productos del pedido con ese id
             single_order = db.session.query(Orders).filter(Orders.id_order == single_id).all()
             
@@ -310,40 +310,105 @@ class OrderFunctions:
             self.date_view = CTkLabel(self.orders_view , text = MyCalendar.format_date_to_show(order_view.order_date) , text_color = 'gray')
             self.date_view.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
             
-            self.date_view = CTkButton(self.orders_view , text = "Ver Pedido" , width = 80 , fg_color = 'Lightblue4' , corner_radius = 4 , command = lambda order_id_to = orders_id[i]: OrderFunctions.view_single_order(self , order_id_to))
+            self.date_view = CTkButton(self.orders_view , text = "Ver Pedido" , width = 80 , fg_color = 'Lightblue4' , corner_radius = 4 , command = lambda order_id_to_show = orders_id[i]: OrderFunctions.view_single_order(self , order_id_to_show))
             self.date_view.grid(row = 0 , column = 4 , padx = 5 , pady = 5 , sticky = E)
             
             
     def view_single_order(self , order_id):
-                
-        orders = db.session.query(Orders).filter(Orders.order_client_id == self.compnay_id.get()).all()
-        orders_id = []
         
-        for order in orders:          # Obtenemos un único id por pedido
-            if order.order_client_id not in orders_id:
-                orders_id.append(order.id_order)
+        window = Toplevel()  
+        window.configure(bg = "#f4f4f4")
+        window.grid_columnconfigure(0 , weight = 1)
+        
+        order = db.session.query(Orders).filter(Orders.id_order == order_id).all()
+        
+        window.title(f"Pedido: ref.{order[0].id_order}")
+        
+        imports = []
+        
+        self.client_info_frame= CTkFrame(window , fg_color = 'transparent')
+        self.client_info_frame.grid(row = 0 , column = 0 , padx = 5 , pady = 10 , sticky = W+E)
+        self.client_info_frame.grid_columnconfigure(0 , weight = 1)
+        self.client_info_frame.grid_columnconfigure(1 , weight = 1)
+        self.client_info_frame.grid_columnconfigure(2 , weight = 1)
+        
+        self.client_info= CTkLabel(self.client_info_frame, text = f'Referencia' , text_color = 'white' , fg_color = 'Lightblue4')
+        self.client_info.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        self.client_employee = CTkLabel(self.client_info_frame , text = f'Nombre' , text_color = 'white' , fg_color = 'Lightblue4')
+        self.client_employee.grid(row = 1 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        self.order_date_top= CTkLabel(self.client_info_frame, text = f'Fecha del Pedido: {MyCalendar.format_date_to_show(order[0].order_date)}' , text_color = 'white' , fg_color = 'Lightblue4')
+        self.order_date_top.grid(row = 1 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        
+        self.window_header= CTkFrame(window , fg_color = 'Lightblue4')
+        self.window_header.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+        self.window_header.grid_columnconfigure(0 , weight = 1)
+        self.window_header.grid_columnconfigure(1 , weight = 1)
+        self.window_header.grid_columnconfigure(2 , weight = 1)
+        self.window_header.grid_columnconfigure(3 , weight = 1)
+        self.window_header.grid_columnconfigure(4 , weight = 1)
+        self.window_header.grid_columnconfigure(5 , weight = 1)
+        
+        self.reference_view_label= CTkLabel(self.window_header, text = 'Referencia' , text_color = 'white')
+        self.reference_view_label.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        self.product_name_view_label = CTkLabel(self.window_header , text = 'Nombre' , text_color = 'white')
+        self.product_name_view_label.grid(row = 1 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        self.price_view_label= CTkLabel(self.window_header, text = 'Precio' , text_color = 'white')
+        self.price_view_label.grid(row = 1 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        self.units_view_label = CTkLabel(self.window_header , text = 'Unidades', text_color = 'white')
+        self.units_view_label.grid(row = 1 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
+        
+        self.product_discount_label = CTkLabel(self.window_header , text = 'Descuento' , text_color = 'white')
+        self.product_discount_label.grid(row = 1 , column = 4 , padx = 5 , pady = 5 , sticky = W+E)
+    
+        self.products_total_import_label = CTkLabel(self.window_header , text = 'Importe' , text_color = 'white')
+        self.products_total_import_label.grid(row = 1 , column = 5 , padx = 5 , pady = 5 , sticky = W+E)
 
-        for single_id in orders_id:  # Obtenemos todos los productos del pedido con ese id
-            single_order = db.session.query(Orders).filter(Orders.id_order == single_order).all()
+        self.margin = CTkLabel(self.window_header , text = '' , text_color = 'white' , width = 10)
+        self.margin.grid(row = 1 , column = 6 , padx = 5 , pady = 5 )
+        
+        self.order_view_frame = CTkScrollableFrame(window , fg_color = 'transparent')
+        self.order_view_frame.grid(row = 2 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+        self.order_view_frame.grid_columnconfigure(0 , weight = 1)
+        
+        for i, product in enumerate(order):          # Obtenemos los productos del pedido
+            imports.append(product.total_import)
             
-            self.orders_view = ttk.Frame(self.historial_content)
-            self.orders_view.grid(row = i , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+            self.product_view_frame = CTkFrame(self.order_view_frame , fg_color = 'transparent')
+            self.product_view_frame.grid(row = i , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+            self.product_view_frame.grid_columnconfigure(0 , weight = 1)
+            self.product_view_frame.grid_columnconfigure(1 , weight = 1)
+            self.product_view_frame.grid_columnconfigure(2 , weight = 1)
+            self.product_view_frame.grid_columnconfigure(3 , weight = 1)
+            self.product_view_frame.grid_columnconfigure(4 , weight = 1)
+            self.product_view_frame.grid_columnconfigure(5 , weight = 1)
+        
+            product_info = db.session.get(Products , product.product_reference)
             
-            for i, order_view in enumerate(single_order):   # Recorremos los productos y ...
+            self.reference_view = CTkLabel(self.product_view_frame , text = product_info.reference , text_color = 'gray')
+            self.reference_view.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            self.product_name_view = CTkLabel(self.product_view_frame , text = product_info.product_name , text_color = 'gray')
+            self.product_name_view.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            self.price_view = CTkLabel(self.product_view_frame , text = product_info.price , text_color = 'gray')
+            self.price_view.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            self.units_view = CTkLabel(self.product_view_frame , text = order[i].product_units , text_color = 'gray')
+            self.units_view.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
+            
+            self.product_discount = CTkLabel(self.product_view_frame , text = f'{product_info.discount} %' , text_color = 'gray')
+            self.product_discount.grid(row = 0 , column = 4 , padx = 5 , pady = 5 , sticky = W+E)
+        
+            self.products_total_import = CTkLabel(self.product_view_frame , text = product.total_import , text_color = 'gray')
+            self.products_total_import.grid(row = 0 , column = 5 , padx = 5 , pady = 5 , sticky = W+E)
 
-                product = db.session.get(Products , order_view.product_reference)
+        self.order_total_import = CTkLabel(window , text = f'   Iporte Total: {round(sum(imports) , 2)}   ' , fg_color = 'Lightblue4', text_color = 'white')
+        self.order_total_import.grid(row = 3 , column = 0 , padx = 5 , pady = 5 , sticky = E)
             
-                self.reference_view = CTkLabel(self.orders_view , text = order_view.product_reference)
-                self.reference_view.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
-                
-                self.product_name_view = CTkLabel(self.orders_view , text = product.product_name)
-                self.product_name_view.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
-                
-                self.units_view = CTkLabel(self.orders_view , text = order_view.product_units)
-                self.units_view.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
-                
-                self.price_view = CTkLabel(self.orders_view , text = product.price)
-                self.price_view.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
-                
-                self.date_view = CTkLabel(self.orders_view , text = order_view.order_date)
-                self.date_view.grid(row = 0 , column = 4 , padx = 5 , pady = 5 , sticky = W+E)
+            
