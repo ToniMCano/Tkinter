@@ -237,12 +237,17 @@ class SalesTab:
         
         self.delivery_date_frame = CTkFrame(self.sales_order_dashboard , fg_color = "lightgray", height = 30)
         self.delivery_date_frame.grid(row = 3 , column = 0 , columnspan = 4 ,  sticky = W+E , padx = 10 , pady = 10)
+        self.delivery_date_frame.grid_columnconfigure(3, weight = 1)
+
         
         self.delivery_date_label = CTkLabel(self.delivery_date_frame , text = "Fecha de Entrega: " , anchor = 'w' , text_color = 'gray')
-        self.delivery_date_label.grid(row = 0 , column = 0  ,  sticky = W+E , padx = 5 , pady = 5)
+        self.delivery_date_label.grid(row = 0 , column = 0  ,  sticky = W , padx = 5 , pady = 5)
                 
         self.delivery_date = CTkLabel(self.delivery_date_frame , textvariable = self.delivery_date_text , anchor = 'w' , text_color = 'gray')
-        self.delivery_date.grid(row = 0 , column = 1  ,  sticky = W+E , padx = 5 , pady = 5)
+        self.delivery_date.grid(row = 0 , column = 1  ,  sticky = W , padx = 5 , pady = 5)
+        
+        self.historical_button = CTkButton(self.delivery_date_frame , text = "Historial" , height = 2 , fg_color = "LightBlue4" , text_color = 'white' ,  hover_color = 'LightBlue4' , command = lambda: OrderFunctions.sales_historical(self) , corner_radius = 4)
+        self.historical_button.grid(row = 0 , column = 3 , sticky = "e" , pady = 5 , padx = 5)
         
         # HEADER
         

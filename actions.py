@@ -109,6 +109,7 @@ class Pops:
         self.admin_mode.place_forget()
         
         self.active_employee_id.set("")
+        self.company_id.set("")
         
         clean = self.info.get_children()
         
@@ -1186,7 +1187,7 @@ class CheckInfo:
 
      
     def check_phones(self , phone , which_phone , data):
-      
+        print(phone,which_phone)
         try: 
             if len(phone) == 9 and str(phone).isdigit():
                 return phone
@@ -1319,12 +1320,12 @@ Envíado: {complete_mail}    Formato Correcto: xxx@xxxx.xx...
             web = CheckInfo.check_web(self , data["Web: "] , data)  ####
             company_mail = CheckInfo.check_mail(self , data["Mail Empresa: "] , "Mail Empresa" , data) 
             company_phone = CheckInfo.check_phones(self , data["Teléfono Empresa: "] , "Teléfono Empresa: " , data)
-            company_phone2 = CheckInfo.check_phones(self , data["Teléfono2 Empresa: "] , "Teléfono2 Empresa: " , data)
+            company_phone2 = CheckInfo.check_phones(self , data["Teléfono2 Empresa: "] , "phone2" , data)
             
             contact_name = CheckInfo.check_name(self , data["Nombre Contacto: "] , 'Nombre Contacto' , data)
             contact_surname = CheckInfo.check_name(self , data["Apellidos Contacto: "] , 'Apellidos' ,  data) 
             contact_phone = CheckInfo.check_phones(self , data["Teléfono Contacto: "] , "Teléfono Contacto: " , data)
-            contact_mobile = CheckInfo.check_phones(self , data["Móvil Contacto: "] , "Móvil Contacto: " , data)
+            contact_mobile = CheckInfo.check_phones(self , data["Móvil Contacto: "] , "mobile" , data)
             contact_mail = CheckInfo.check_mail(self , data["Mail Contacto: "] , "Mail Contacto" , data) 
             #values_info = [company_name , nif , postal_code , web , company_mail , company_phone , company_phone2 , contact_name , contact_surname , contact_phone , contact_mobile , contact_mail]
 
@@ -1790,7 +1791,7 @@ class Update:
                         
                 elif place == "job":
                     if self.entry_contact_name.get() != "":
-                        contact_person.contact_job_title = self.entry_contact_job.get()
+                        contact_person.contact_job_title = self.entry_job_title.get()
 
             Update.save_close()
             
@@ -2128,14 +2129,14 @@ class ContactActions:
     
     def other_contact_widnow(self):
        
-        self.contacts_frame = CTkScrollableFrame(self.contact_header , height = 5)
-        self.contacts_frame.pack(fill = 'x' , expand = True)
+        self.contacts_frame = CTkScrollableFrame(self.contact_header , height = 5 , corner_radius = 4)
+        self.contacts_frame.pack(fill = 'x' , expand = True , padx  = 5 , pady = 5)
         self.contacts_frame.grid_columnconfigure(0 , weight = 1)
         
-        close_button = CTkButton(self.contacts_frame , text = 'xjjjjjj' , command = lambda: ContactActions.close_other_contact(self))
-        close_button.grid(row = 0 , column = 0)
+        close_button = CTkButton(self.contacts_frame , text = 'x' , command = lambda: ContactActions.close_other_contact(self) , width = 5 , height = 5 , fg_color = 'Lightblue4' , corner_radius = 4)
+        close_button.grid(row = 0 , column = 0 , sticky = W)
        
-        self.new_contact.pack_forget()
+        self.new_contact_button.pack_forget()
         self.other_contact.pack_forget()
         
         ContactActions.charge_contacts(self)
@@ -2144,8 +2145,8 @@ class ContactActions:
     def close_other_contact(self):
         
         self.other_contact.pack(side = "left" , fill = "y")
-        self.new_contact.pack(side = "right") 
-        self.contacts_frame.grid_forget()
+        self.new_contact_button.pack(side = "right") 
+        self.contacts_frame.pack_forget()
         
     
     def charge_contacts(self):
@@ -2154,12 +2155,13 @@ class ContactActions:
         
         for i, contact in enumerate(contacts):
             
-            self.new_contact = ttk.Frame(self.contacts_frame)
+            self.new_contact = CTkFrame(self.contacts_frame , border_width = 2 , border_color = 'red')
             self.new_contact.grid(row = i+1 , column = 0 , sticky = W+E ,  padx = 10 , pady = 5)
             
-            self.new_contact_label = ttk.Label(self.new_contact , text = f"{contact.contact_name} {contact.contact_surname} {contact.contact_job_title}")
+            self.new_contact_label = CTkLabel(self.new_contact , text = f"{contact.contact_name} | {contact.contact_surname} | ({contact.contact_job_title})" , fg_color = '#f4f4f4' , corner_radius = 4 , text_color = 'gray' , anchor = 'w')
             self.new_contact_label.pack(fill = 'x' , expand = True)
             self.new_contact_label.bind('<Button-1>' , lambda e , send_contact = contact: ContactActions.change_contact(self , e , send_contact))
+            self.new_contact_label.configure( cursor = 'arrow')
             
             print(f"{contact.contact_name} {contact.contact_surname} {contact.contact_job_title}")
     

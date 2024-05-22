@@ -279,10 +279,10 @@ class OrderFunctions:
         
         window.lift()
         
-        OrderFunctions.group_orders(self)
+        OrderFunctions.group_orders(self , window)
         
         
-    def group_orders(self):
+    def group_orders(self , historical_window):
         
         orders = db.session.query(Orders).filter(Orders.order_client_id == self.company_id.get()).all()
         
@@ -324,11 +324,11 @@ class OrderFunctions:
             self.date_view = CTkLabel(self.orders_view , text = MyCalendar.format_date_to_show(order_view.order_date) , text_color = 'gray')
             self.date_view.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
             
-            self.date_view = CTkButton(self.orders_view , text = "Ver Pedido" , width = 80 , fg_color = 'Lightblue4' , corner_radius = 4 , command = lambda order_id_to_show = orders_id[i]: OrderFunctions.view_single_order(self , order_id_to_show))
+            self.date_view = CTkButton(self.orders_view , text = "Ver Pedido" , width = 80 , fg_color = 'Lightblue4' , corner_radius = 4 , command = lambda order_id_to_show = orders_id[i]: OrderFunctions.view_single_order(self , order_id_to_show , historical_window))
             self.date_view.grid(row = 0 , column = 4 , padx = 5 , pady = 5 , sticky = E)
             
             
-    def view_single_order(self , order_id):
+    def view_single_order(self , order_id , historical_window):
         
         window = Toplevel()  
         window.configure(bg = "#f4f4f4")
@@ -348,21 +348,21 @@ class OrderFunctions:
         self.client_info_frame.grid_columnconfigure(2 , weight = 1)
         self.client_info_frame.grid_columnconfigure(3 , weight = 1)
         
-        self.client_info= CTkLabel(self.client_info_frame, text = f'   Referencia: {order[0].id_order}   ' , text_color = 'white' , fg_color = 'Lightblue4')
+        self.client_info= CTkLabel(self.client_info_frame, text = f'   Referencia: {order[0].id_order}   ' , text_color = 'white' , fg_color = 'Lightblue4' , corner_radius = 3)
         self.client_info.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W)
         
-        self.order_client_name = CTkLabel(self.client_info_frame , text = f'   Cliente:    {client.name}         ' , text_color = 'white' , fg_color = 'Lightblue4')
+        self.order_client_name = CTkLabel(self.client_info_frame , text = f'   Cliente:    {client.name}         ' , text_color = 'white' , fg_color = 'Lightblue4' , corner_radius = 3)
         self.order_client_name.grid(row = 1 , column = 1 ,  pady = 5 , sticky = W+E)
         
-        self.client_employee = CTkLabel(self.client_info_frame , text = f'Persona que realiza el pedido:    {contact_person.contact_name} {contact_person.contact_surname}   ' , text_color = 'white' , fg_color = 'Lightblue4')
+        self.client_employee = CTkLabel(self.client_info_frame , text = f'Persona que realiza el pedido:    {contact_person.contact_name} {contact_person.contact_surname}   ' , text_color = 'white' , fg_color = 'Lightblue4' , corner_radius = 3)
         self.client_employee.grid(row = 1 , column = 2 , pady = 5 , sticky = W+E)
         
-        self.order_date_top= CTkLabel(self.client_info_frame, text = f'   Fecha del Pedido: {MyCalendar.format_date_to_show(order[0].order_date)}   ' , text_color = 'white' , fg_color = 'Lightblue4')
+        self.order_date_top= CTkLabel(self.client_info_frame, text = f'   Fecha del Pedido: {MyCalendar.format_date_to_show(order[0].order_date)}   ' , text_color = 'white' , fg_color = 'Lightblue4' , corner_radius = 3)
         self.order_date_top.grid(row = 1 , column = 3 , padx = 5 , pady = 5 , sticky = E)
         
         
-        self.window_header= CTkFrame(window , fg_color = 'Lightblue4')
-        self.window_header.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+        self.window_header= CTkFrame(window , fg_color = 'Lightblue4' , corner_radius = 3)
+        self.window_header.grid(row = 1 , column = 0 , padx = 10 , pady = 5 , sticky = W+E)
         self.window_header.grid_columnconfigure(0 , weight = 1)
         self.window_header.grid_columnconfigure(1 , weight = 1)
         self.window_header.grid_columnconfigure(2 , weight = 1)
@@ -426,9 +426,46 @@ class OrderFunctions:
         
             self.products_total_import = CTkLabel(self.product_view_frame , text = product.total_import , text_color = 'gray')
             self.products_total_import.grid(row = 0 , column = 5 , padx = 5 , pady = 5 , sticky = W+E)
-   
-        self.order_total_import = CTkLabel(window , text = f'   Iporte Total: {(sum(imports)):.2f} €    Descuento en pedido:   {0 if order[0].order_discount is None else order[0].order_discount } %   ' , fg_color = 'Lightblue4', text_color = 'white')
-        self.order_total_import.grid(row = 3 , column = 0 , padx = 5 , pady = 5 , sticky = E)
+
+        self.order_footer = CTkFrame(window , fg_color = 'transparent')
+        self.order_footer .grid(row = 3 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
+        self.order_footer.grid_columnconfigure(2 , weight = 1)
+        
+        
+        self.modify_order_button = CTkButton(self.order_footer , text = "Modificar Pedido" , fg_color = 'Lightblue4', text_color = 'white' , corner_radius = 3, command = lambda: ModifyDeleteOrder.modify_order(self, order[0].id_order ,  window , historical_window))
+        self.modify_order_button.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W)
+        
+        self.delete_order_button = CTkButton(self.order_footer , text = "Eliminar Pedido" , fg_color = 'Lightblue4', text_color = 'white' , corner_radius = 3 , command = lambda: ModifyDeleteOrder.delete_order(self, order[0].id_order ,  window , historical_window))
+        self.delete_order_button.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W)
+        
+        self.order_total_import = CTkLabel(self.order_footer , text = f'   Iporte Total: {(sum(imports)):.2f} €    Descuento en pedido:   {0 if order[0].order_discount is None else order[0].order_discount } %   ' , fg_color = 'Lightblue4', text_color = 'white' , corner_radius = 3)
+        self.order_total_import.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = E)
+        
         
         Pops.center_window(self, window)
         window.lift()
+        
+        
+        
+class ModifyDeleteOrder:
+    
+    
+    def modify_order(self , order_id_to , single_order_window , historical_window):
+        
+        products = db.session.query(Orders).filter(Orders.id_order == order_id_to).all()
+    
+    
+    def delete_order(self , order_id_to , single_order_window , historical_window):
+        
+        products = db.session.query(Orders).filter(Orders.id_order == order_id_to).all()
+        
+        for product in products:
+            db.session.delete(product)
+        
+        Update.save_close()
+        
+        historical_window.destroy()
+        single_order_window.destroy()
+        
+        OrderFunctions.sales_historical(self)
+            

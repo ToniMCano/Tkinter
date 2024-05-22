@@ -324,8 +324,8 @@ class Main:
         #self.button_b = CTkButton(self.company_contact_buttons , text = "Mail" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Tabs.crm_view(self , 'view'))
         #self.button_b.grid(row = 0 , column = 1 , sticky = "we" , pady = 5 , padx = 5)
         
-        self.button_c = CTkButton(self.company_contact_buttons , text = "Historial" , height = 2 , fg_color = "#f4f4f4" , text_color = 'LightBlue4' , border_color = "LightBlue4" , border_width = 2 , hover_color = 'LightBlue4' , command = lambda: OrderFunctions.sales_historical(self))
-        self.button_c.grid(row = 0 , column = 2 , sticky = "we" , pady = 5 , padx = 5)
+        self.historical_button = CTkButton(self.company_contact_buttons , text = "Historial" , height = 2 , fg_color = "#f4f4f4" , text_color = 'LightBlue4' , border_color = "LightBlue4" , border_width = 2 , hover_color = 'LightBlue4' , command = lambda: OrderFunctions.sales_historical(self))
+        self.historical_button.grid(row = 0 , column = 2 , sticky = "we" , pady = 5 , padx = 5)
         
         #FRAME CONTACTO
         
@@ -338,8 +338,8 @@ class Main:
         self.contact_header = Label(self.contact_frame , text = "Contacto" ,bg = 'LightBlue4' , fg = 'white')
         self.contact_header.grid(row = 0 , column = 0 , columnspan = 2  ,sticky=W+E)
         
-        self.new_contact = CTkButton(self.contact_header , text = "+"  ,  command = lambda: Pops.create_contact(self) , width = 30 , corner_radius = 3 , fg_color = "#f4f4f4" , text_color = "gray")
-        self.new_contact.pack(side = "right") 
+        self.new_contact_button = CTkButton(self.contact_header , text = "+"  ,  command = lambda: Pops.create_contact(self) , width = 30 , corner_radius = 3 , fg_color = "#f4f4f4" , text_color = "gray")
+        self.new_contact_button.pack(side = "right") 
         
         self.other_contact = CTkButton(self.contact_header , image = self.triangle_icon  , text = "" , width = 10 , command = lambda: ContactActions.other_contact_widnow(self) , corner_radius = 3 , fg_color = "#f4f4f4")
         self.other_contact.pack(side = "left" , fill = "y")
