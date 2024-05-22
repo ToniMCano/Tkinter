@@ -438,7 +438,9 @@ class Main:
         
          webbrowser.open_new('https://chat.openai.com/c/2220aa72-de48-497a-b191-203933de98d3')
       
+
         
+           
 if __name__ == "__main__":
     
     

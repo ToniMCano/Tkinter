@@ -82,12 +82,12 @@ class SalesTab:
         self.products_tree.configure(yscroll=scrollbar.set)
                
         self.products_tree["columns"] = ( "#0" , "#1" , "#2" , "#3" ,  "#4")
-        self.products_tree.heading("#0" , text = "Referencia" , command = lambda: LoadInfo.on_heading_click(self , "state"))
-        self.products_tree.heading("#1" , text = "Nombre" , command = lambda: LoadInfo.on_heading_click(self , "days"))
-        self.products_tree.heading("#2" , text  ="Precio" , command = lambda: LoadInfo.on_heading_click(self , "client"))
-        self.products_tree.heading("#3" , text = "Stock" , command = lambda: LoadInfo.on_heading_click(self , "last"))
-        self.products_tree.heading("#4" , text = "Categoría" , command = lambda: LoadInfo.on_heading_click(self , "next"))
-        self.products_tree.heading("#5" , text = "Subcategoría" , command = lambda: LoadInfo.on_heading_click(self , "postal_code"))
+        self.products_tree.heading("#0" , text = "Referencia" , command = lambda: OrderFunctions.show_products(self , "reference"))
+        self.products_tree.heading("#1" , text = "Nombre" , command = lambda: OrderFunctions.show_products(self , "name"))
+        self.products_tree.heading("#2" , text  ="Precio" , command = lambda: OrderFunctions.show_products(self , "price"))
+        self.products_tree.heading("#3" , text = "Stock" , command = lambda: OrderFunctions.show_products(self , "stock"))
+        self.products_tree.heading("#4" , text = "Categoría" , command = lambda: OrderFunctions.show_products(self , "category"))
+        self.products_tree.heading("#5" , text = "Subcategoría" , command = lambda: OrderFunctions.show_products(self , "subcategory"))
         
         self.products_tree.column("#0" , width = 40 , anchor="center")  
         self.products_tree.column("#1" , width = 220 , anchor="center")

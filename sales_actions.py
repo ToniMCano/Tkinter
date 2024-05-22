@@ -1,4 +1,4 @@
-from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs
+from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs  
 import tkinter as tk
 from tkinter import ttk , filedialog
 from tkinter import *
@@ -16,9 +16,10 @@ import pandas as pd
 
 
 
+
 class OrderFunctions:
     
-    def show_products(self): 
+    def show_products(self , selected = 'reference'): 
         
         self.products_tree.tag_configure("odd", background="snow2" )
         self.products_tree.tag_configure("even", background="white")
@@ -34,7 +35,23 @@ class OrderFunctions:
         except Exception as e:
             print("[show_products]: (Clean): " , e)
 
-        products = db.session.query(Products).order_by(Products.category).all()
+        if selected == 'reference':
+            products = db.session.query(Products).order_by(Products.reference).all()
+            
+        elif selected =="name":
+            products = db.session.query(Products).order_by(Products.product_name).all()
+            
+        elif selected =="stock":
+            products = db.session.query(Products).order_by(Products.units).all()
+            
+        elif selected =="category":
+            products = db.session.query(Products).order_by(Products.category).all()
+            
+        elif selected =="subcategory":
+            products = db.session.query(Products).order_by(Products.subcategory).all()
+            
+        elif selected =="price":
+            products = db.session.query(Products).order_by(Products.price).all()
         
         for i , product in enumerate(products):
             font = ""
@@ -53,11 +70,8 @@ class OrderFunctions:
             else:
                 self.order_header.set('Pedido')
             
-            
-            
         except Exception as e:
             print(f'[sales_view]: {e}')
-            
             
         
     def row_colors(self, clients , ordenado , date , bgcolor , contacts , dot):
@@ -363,12 +377,12 @@ class OrderFunctions:
         
         self.window_header= CTkFrame(window , fg_color = 'Lightblue4' , corner_radius = 3)
         self.window_header.grid(row = 1 , column = 0 , padx = 10 , pady = 5 , sticky = W+E)
-        self.window_header.grid_columnconfigure(0 , weight = 1)
-        self.window_header.grid_columnconfigure(1 , weight = 1)
-        self.window_header.grid_columnconfigure(2 , weight = 1)
-        self.window_header.grid_columnconfigure(3 , weight = 1)
-        self.window_header.grid_columnconfigure(4 , weight = 1)
-        self.window_header.grid_columnconfigure(5 , weight = 1)
+        self.window_header.grid_columnconfigure(0 , weight = 2)
+        self.window_header.grid_columnconfigure(1 , weight = 5)
+        self.window_header.grid_columnconfigure(2 , weight = 2)
+        self.window_header.grid_columnconfigure(3 , weight = 2)
+        self.window_header.grid_columnconfigure(4 , weight = 2)
+        self.window_header.grid_columnconfigure(5 , weight = 2)
         
         self.reference_view_label= CTkLabel(self.window_header, text = 'Referencia' , text_color = 'white' , font = ("", 12, "bold"))
         self.reference_view_label.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
@@ -400,46 +414,51 @@ class OrderFunctions:
             
             self.product_view_frame = CTkFrame(self.order_view_frame , fg_color = 'transparent')
             self.product_view_frame.grid(row = i , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
-            self.product_view_frame.grid_columnconfigure(0 , weight = 1)
+            self.product_view_frame.grid_columnconfigure(0 , weight = 2)
             self.product_view_frame.grid_columnconfigure(1 , weight = 1)
-            self.product_view_frame.grid_columnconfigure(2 , weight = 1)
-            self.product_view_frame.grid_columnconfigure(3 , weight = 1)
-            self.product_view_frame.grid_columnconfigure(4 , weight = 1)
-            self.product_view_frame.grid_columnconfigure(5 , weight = 1)
+            self.product_view_frame.grid_columnconfigure(2 , weight = 2)
+            self.product_view_frame.grid_columnconfigure(3 , weight = 2)
+            self.product_view_frame.grid_columnconfigure(4 , weight = 2)
+            self.product_view_frame.grid_columnconfigure(5 , weight = 2)
         
             product_info = db.session.get(Products , product.product_reference)
             
-            self.reference_view = CTkLabel(self.product_view_frame , text = product_info.reference , text_color = 'gray')
+            self.reference_view = CTkLabel(self.product_view_frame  , text = f'{product_info.reference}' , text_color = 'gray')
             self.reference_view.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
             
-            self.product_name_view = CTkLabel(self.product_view_frame , text = product_info.product_name , text_color = 'gray')
+            self.product_name_view = CTkLabel(self.product_view_frame , text = f'{product_info.product_name}' , text_color = 'gray', width = 150)
             self.product_name_view.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
             
-            self.price_view = CTkLabel(self.product_view_frame , text = product_info.price , text_color = 'gray')
-            self.price_view.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
+            self.price_view = CTkLabel(self.product_view_frame , text = f'{product_info.price}' , text_color = 'gray')
+            self.price_view.grid(row = 0 , column = 2 , padx = 5 , pady = 5 )
             
-            self.units_view = CTkLabel(self.product_view_frame , text = order[i].product_units , text_color = 'gray')
-            self.units_view.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
+            self.units_view = CTkLabel(self.product_view_frame  , text = f'{product.product_units}' , text_color = 'gray')
+            self.units_view.grid(row = 0 , column = 3 , padx = 5 , pady = 5 )
             
-            self.product_discount = CTkLabel(self.product_view_frame , text = f'{product_info.discount} %' , text_color = 'gray')
-            self.product_discount.grid(row = 0 , column = 4 , padx = 5 , pady = 5 , sticky = W+E)
+            self.product_discount = CTkLabel(self.product_view_frame , text = f'{product_info.discount}' , text_color = 'gray')
+            self.product_discount.grid(row = 0 , column = 4 , padx = 5 , pady = 5 )
         
-            self.products_total_import = CTkLabel(self.product_view_frame , text = product.total_import , text_color = 'gray')
+            self.products_total_import = CTkLabel(self.product_view_frame  , text = f'{product.total_import}' , text_color = 'gray')
             self.products_total_import.grid(row = 0 , column = 5 , padx = 5 , pady = 5 , sticky = W+E)
-
+            
+            #self.delete_product_button = CTkButton(self.product_view_frame , width = 20 , text = 'x' , fg_color = 'red' , corner_radius = 4 , text_color = 'white' , command = lambda reference = self.reference_view.get() , row = i: ModifyDeleteOrder.delete_product(self , reference , window , historical_window , order[0].id_order))
+            #self.delete_product_button.grid(row = 0 , column = 6 , padx = 5 , pady = 5)
+            
+            
+            
         self.order_footer = CTkFrame(window , fg_color = 'transparent')
         self.order_footer .grid(row = 3 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
         self.order_footer.grid_columnconfigure(2 , weight = 1)
         
         
-        self.modify_order_button = CTkButton(self.order_footer , text = "Modificar Pedido" , fg_color = 'Lightblue4', text_color = 'white' , corner_radius = 3, command = lambda: ModifyDeleteOrder.modify_order(self, order[0].id_order ,  window , historical_window))
-        self.modify_order_button.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W)
-        
         self.delete_order_button = CTkButton(self.order_footer , text = "Eliminar Pedido" , fg_color = 'Lightblue4', text_color = 'white' , corner_radius = 3 , command = lambda: ModifyDeleteOrder.delete_order(self, order[0].id_order ,  window , historical_window))
         self.delete_order_button.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W)
         
+        self.modify_order_button = CTkButton(self.order_footer , text = "Modificar Pedido" , fg_color = 'Lightblue4', text_color = 'white' , corner_radius = 3, command = lambda: ModifyDeleteOrder.modify_order(self, order[0].id_order ,  window , historical_window))
+        self.modify_order_button.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = W)
+            
         self.order_total_import = CTkLabel(self.order_footer , text = f'   Iporte Total: {(sum(imports)):.2f} €    Descuento en pedido:   {0 if order[0].order_discount is None else order[0].order_discount } %   ' , fg_color = 'Lightblue4', text_color = 'white' , corner_radius = 3)
-        self.order_total_import.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = E)
+        self.order_total_import.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = E)
         
         
         Pops.center_window(self, window)
@@ -450,10 +469,23 @@ class OrderFunctions:
 class ModifyDeleteOrder:
     
     
-    def modify_order(self , order_id_to , single_order_window , historical_window):
+    def modify_order(self , order_id , single_order_window , historical_window): # order =[order[0].id_order , self.reference_view , self.units_view , self.product_discount]
         
-        products = db.session.query(Orders).filter(Orders.id_order == order_id_to).all()
-    
+        LoadInfo.combo_state_values(self , 'sales')
+        
+        order = db.session.query(Orders).filter(Orders.id_order == order_id).all()
+        
+        for row in order:
+            product = db.session.get(Products , row.product_reference)
+            
+            row_import = round(int(row.product_units) * product.price , 2)
+            
+            if int(product.discount) > 0:
+                row_import - ModifyDeleteOrder.percentage(row_import , product.discount)
+        
+            self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , row.product_units , f"{product.discount} %" , row_import))
+                
+    ver como lo puedes pasar  a traves de row_colors
     
     def delete_order(self , order_id_to , single_order_window , historical_window):
         
@@ -468,4 +500,25 @@ class ModifyDeleteOrder:
         single_order_window.destroy()
         
         OrderFunctions.sales_historical(self)
+        
+        
+    def delete_product(self , reference , window , historical_window , order_id_to_show):
+        
+        product = db.session.query(Orders).filter(and_(Orders.id_order == order_id_to_show , Orders.product_reference == reference)).first()
+                                                  
+        db.session.delete(product)
+        
+        Update.save_close()
+        
+        window.destroy()
+        
+        OrderFunctions.view_single_order(self , order_id_to_show , historical_window)
             
+            
+    def percentage(number , percentage):
+        
+        result = round((number * percentage) / 100 , 2)
+        
+        return result
+    
+    #def row_import():
