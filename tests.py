@@ -14,8 +14,8 @@ from actions import GetInfo,LoadInfo , MyCalendar
 import pandas as pd
 import threading
 import time
-
-
+from tkinter import *
+from customtkinter import *
 
 nif = ['0','1','2','3','4','5','6','7','8','9']
 
@@ -351,35 +351,37 @@ for x in refact:
     
    ''' 
    
-products = db.session.query(Products).all()
- 
-for product in products:
-    dates = MyCalendar.format_date_to_show(f'{product.expiration} 08:00')
-    product.description = f"Descripción del producto {product.reference} {product.product_name} elaborado en mi pueblo, con un peso de {random.randint(500 , 3000)} g... Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
-    
-    db.session.commit()
-db.session.close()    
 
 
-     for i, order_view in enumerate(single_order):   # Recorremos los productos y ...
-                products.append(order_view.product_units)
-                imports.append(order_view.total_import)
-            
-        
-                self.reference_view = ttk.Frame(self.orders_view)
-                self.reference_view.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
-                
-                self.product_name_view = ttk.Frame(self.orders_view)
-                self.product_name_view.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W+E)
-                
-                self.units_view = ttk.Frame(self.orders_view)
-                self.units_view.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = W+E)
-                
-                self.price_view = ttk.Frame(self.orders_view)
-                self.price_view.grid(row = 0 , column = 3 , padx = 5 , pady = 5 , sticky = W+E)
-                
-                self.date_view = ttk.Frame(self.orders_view)
-                self.date_view.grid(row = 0 , column = 4 , padx = 5 , pady = 5 , sticky = W+E)
-                
-                self.button_view = ttk.Frame(self.orders_view)
-                self.button_view.grid(row = 0 , column = 5 , padx = 5 , pady = 5 , sticky = W+E)
+# Configuración básica de la ventana
+root = CTk()
+root.geometry("400x300")
+root.title("Ejemplo de CTkOptionMenu")
+
+# Función para manejar la selección del menú
+def on_option_select(choice):
+    print(f"Opción seleccionada: {choice}")
+
+# Lista de opciones para el menú
+options = ["Opción 1", "Opción 2", "Opción 3"]
+
+# Crear un CTkOptionMenu
+option_menu = CTkOptionMenu(
+    master=root,           # Ventana principal
+    values=options,        # Opciones del menú
+    command=on_option_select,  # Función a llamar cuando se selecciona una opción
+    width=200,             # Ancho del menú
+    corner_radius=10,      # Radio de las esquinas
+    fg_color="#f4f4f4",    # Color de primer plano
+    button_color="#2b2b2b",# Color del botón
+    #dropdown_color="#3a3a3a"  # Color del menú desplegable
+)
+
+# Establecer la opción predeterminada
+option_menu.set("Opción 1")
+
+# Ubicar el menú en la ventana
+option_menu.pack(pady=20)
+
+# Ejecutar el bucle principal de la aplicación
+root.mainloop()

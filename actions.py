@@ -1154,8 +1154,7 @@ class GetInfo():
         
         return adress_to_show
         
-            
-   
+       
 class CheckInfo:
         
     def check_name(self , name , wich_name , data):
@@ -2125,4 +2124,57 @@ class Tabs:
             self.state_values_view.set('sales')'''
             
             
+class ContactActions:
+    
+    def other_contact_widnow(self):
+       
+        self.contacts_frame = CTkScrollableFrame(self.contact_header , height = 5)
+        self.contacts_frame.pack(fill = 'x' , expand = True)
+        self.contacts_frame.grid_columnconfigure(0 , weight = 1)
+        
+        close_button = CTkButton(self.contacts_frame , text = 'xjjjjjj' , command = lambda: ContactActions.close_other_contact(self))
+        close_button.grid(row = 0 , column = 0)
+       
+        self.new_contact.pack_forget()
+        self.other_contact.pack_forget()
+        
+        ContactActions.charge_contacts(self)
+        
+        
+    def close_other_contact(self):
+        
+        self.other_contact.pack(side = "left" , fill = "y")
+        self.new_contact.pack(side = "right") 
+        self.contacts_frame.grid_forget()
+        
+    
+    def charge_contacts(self):
+        
+        contacts = db.session.query(ContactPerson).filter(ContactPerson.client_id == self.company_id.get()).all()
+        
+        for i, contact in enumerate(contacts):
+            
+            self.new_contact = ttk.Frame(self.contacts_frame)
+            self.new_contact.grid(row = i+1 , column = 0 , sticky = W+E ,  padx = 10 , pady = 5)
+            
+            self.new_contact_label = ttk.Label(self.new_contact , text = f"{contact.contact_name} {contact.contact_surname} {contact.contact_job_title}")
+            self.new_contact_label.pack(fill = 'x' , expand = True)
+            self.new_contact_label.bind('<Button-1>' , lambda e , send_contact = contact: ContactActions.change_contact(self , e , send_contact))
+            
+            print(f"{contact.contact_name} {contact.contact_surname} {contact.contact_job_title}")
+    
+    
+    def change_contact(self , e , contact_sended):
+        print("CHANGE")
+        client = db.session.get(Client , self.company_id.get())
+        
+        client.contact_person = contact_sended.id_person
+        
+        Update.save_close()
+        ContactActions.close_other_contact(self)
+        LoadInfo.get_item(self , "crm" , self.info , e)
+            
+    
+    
+    
     

@@ -9,7 +9,7 @@ from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
 from sqlalchemy import and_ , or_  
-from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs , States
+from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs , States , ContactActions
 from datetime import datetime , timedelta
 #import locale
 from tkinter import messagebox as mb
@@ -73,7 +73,7 @@ class Main:
         self.main_window.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
         self.main_window.grid_columnconfigure(5, weight=3)
         self.main_window.grid_rowconfigure(2, weight=1)
-        self.main_window.grid_rowconfigure(3, weight=1)
+        #self.main_window.grid_rowconfigure(3, weight=1)
         self.info.bind("<ButtonRelease-1>" , lambda event: LoadInfo.get_item(self , "crm" , self.info , event))
         
         self.active_employee_id = StringVar()
@@ -341,7 +341,7 @@ class Main:
         self.new_contact = CTkButton(self.contact_header , text = "+"  ,  command = lambda: Pops.create_contact(self) , width = 30 , corner_radius = 3 , fg_color = "#f4f4f4" , text_color = "gray")
         self.new_contact.pack(side = "right") 
         
-        self.other_contact = CTkButton(self.contact_header , self.triangle_icon  ,  command = lambda: Pops.create_contact(self) , width = 30 , corner_radius = 3 , fg_color = "#f4f4f4")
+        self.other_contact = CTkButton(self.contact_header , image = self.triangle_icon  , text = "" , width = 10 , command = lambda: ContactActions.other_contact_widnow(self) , corner_radius = 3 , fg_color = "#f4f4f4")
         self.other_contact.pack(side = "left" , fill = "y")
         
         self.margin_frame_contact = tk.Frame(self.contact_frame) 
