@@ -23,7 +23,7 @@ class SalesTab:
     
     def sales_root(self):
         
-        LoadInfo.combo_state_values(self , 'sales')
+        LoadInfo.combo_state_values(self , 'sales')  Indagar desde aquí,  la forma en que carga "Venta"
         
         self.main_window.update()
         
@@ -257,9 +257,9 @@ class SalesTab:
         
         self.boton_fecha.grid_forget()
         
-        self.combo_state_and_subcategories.grid_forget()
+        self.combo_state.grid_forget()
         
-        self.employee_and_categories.grid_forget()
+        self.employee.grid_forget()
 
 
         

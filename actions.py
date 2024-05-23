@@ -89,7 +89,7 @@ class Pops:
         global admin
         
         if admin:
-            employee = db.session.query(Employee).filter(Employee.employee_alias == self.employee_and_categories.get()).first()
+            employee = db.session.query(Employee).filter(Employee.employee_alias == self.employee.get()).first()
             
             self.active_employee_id.set(employee.id_employee)
             
@@ -98,7 +98,7 @@ class Pops:
         else:
             alias = db.session.get(Employee , self.active_employee_id.get())
             mb.showinfo("Permisos" , "Se necesitan permisos de Administrador para realizar esta acción.")
-            self.employee_and_categories.set(alias.employee_alias)
+            self.employee.set(alias.employee_alias)
     
     
     def deactivate_admin(self):
@@ -571,7 +571,7 @@ class MyCalendar():
             else:
                 day = int(fecha_seleccionada[-2:])
                      
-            LoadInfo.load_contacts(self , self.employee_and_categories.get() , fecha_seleccionada , "last" , self.combo_state_and_subcategories.get())
+            LoadInfo.load_contacts(self , self.employee.get() , fecha_seleccionada , "last" , self.combo_state.get())
             
             self.fecha.set(datetime(year,month,day).strftime("%d %B")) 
             
@@ -646,8 +646,8 @@ class LoadInfo():
                 
                 alias = LoadInfo.employees_list().index(alias)
                     
-                root.employee_and_categories.current(newindex = alias)
-                root.combo_state_and_subcategories.current(newindex=2)
+                root.employee.current(newindex = alias)
+                root.combo_state.current(newindex=2)
                 
                 root.active_employee_id.set(employee.id_employee)
                                
@@ -664,7 +664,7 @@ class LoadInfo():
     
     def on_heading_click(self , query):
         
-        state_sended = self.combo_state_and_subcategories.get()
+        state_sended = self.combo_state.get()
         
         if query == 'state':
             query = "state"
@@ -912,7 +912,7 @@ class LoadInfo():
         
     def companies_state(self, employee , event):  # Recibir valor del Combobox
         
-        item = self.combo_state_and_subcategories.get()
+        item = self.combo_state.get()
 
         fecha_seleccionada = self.frame_calendar.calendar.get_date()
         
@@ -963,20 +963,17 @@ class LoadInfo():
             
             LoadInfo.sales_view(self)
             
-        elif view == 'modify':
-            
-            LoadInfo.sales_view(self)
             
             
     def crm_view(self):
         
-        self.employee_and_categories['values'] = LoadInfo.employees_list() 
-        self.combo_state_and_subcategories['values'] = ["Lead", "Candidate", "Contact" , "Pool" , 'All']
+        self.employee['values'] = LoadInfo.employees_list() 
+        self.combo_state['values'] = ["Lead", "Candidate", "Contact" , "Pool" , 'All']
         
         try:
             employee = db.session.get(Employee , self.active_employee_id.get())
             alias = LoadInfo.employees_list().index(employee.employee_alias)
-            self.employee_and_categories.current(newindex = alias) 
+            self.employee.current(newindex = alias) 
         
             alias = alias.employee_alias
             
@@ -994,17 +991,12 @@ class LoadInfo():
         self.contact_frame.grid_forget()
         self.company_contact_buttons.grid_forget()
         self.new_company.grid_forget() #self.header
-        
-        self.employee_and_categories['values'] = ["Category 1", "Category 2", "Category 3" , "Category 4" , 'Category 5']
-        self.employee_and_categories.current(newindex = 0)
-        
-        self.combo_state_and_subcategories['values'] = ["SubCategory 1", "SubCategory 2", "SubCategory 3" , "SubCategory 4" , 'SubCategory 5']
-        self.combo_state_and_subcategories.current(newindex = 0)           
-            
-            
+
+
+
 class GetInfo():
     
-    
+        
     def button_a_state(self , state):
         
         try:
@@ -2113,13 +2105,13 @@ class Tabs:
             self.new_company.grid(row = 0 , column = 0 , padx = 5)
             self.label_calendar_button.grid(row = 0, column = 6)
             self.boton_fecha.grid(row=0, column=1, sticky="ew")
-            self.combo_state_and_subcategories.grid(row = 0 , column = 4 , padx = 5)
-            self.employee_and_categories.grid(row = 0 , column = 3 , padx = 5)
+            self.combo_state.grid(row = 0 , column = 4 , padx = 5)
+            self.employee.grid(row = 0 , column = 3 , padx = 5)
             self.frame_calendar_button.grid(row = 0 , column = 5 , padx = 5)
             
             LoadInfo.combo_state_values(self , 'crm')
             
-            self.combo_state_and_subcategories.current(newindex = 2)
+            self.combo_state.current(newindex = 2)
             
         '''else:
             self.frame_tree.grid_forget()

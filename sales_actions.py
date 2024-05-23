@@ -474,7 +474,7 @@ class ModifyDeleteOrder:
     
     def modify_order(self , order_id , single_order_window , historical_window): # order =[order[0].id_order , self.reference_view , self.units_view , self.product_discount]
         
-        LoadInfo.combo_state_values(self , 'sales')
+        LoadInfo.sales_view(self)
         
         order = db.session.query(Orders).filter(Orders.id_order == order_id).all()
         
