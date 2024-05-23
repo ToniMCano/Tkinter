@@ -220,7 +220,7 @@ class OrderFunctions:
                 id_order = self.modify_order_id[1]
                 
             order = self.order_tree.get_children()
-            print(f"ORDER ID: {self.modify_order_id[1]}")
+            print(f"ORDER ID: {id_order}")  
             for x in order:#         id_order , product_reference ,                product_units ,                        order_client_id ,                 seller_id ,         buyer_id ,            order_date ,                total_import                         , order_notes):
                 
                 order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") , self.discount.get() )
