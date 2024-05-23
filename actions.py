@@ -963,6 +963,10 @@ class LoadInfo():
             
             LoadInfo.sales_view(self)
             
+        elif view == 'modify':
+            
+            LoadInfo.sales_view(self)
+            
             
     def crm_view(self):
         

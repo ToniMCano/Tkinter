@@ -210,14 +210,17 @@ class OrderFunctions:
         buyer = buyer.contact_person
         
         try:
-            if id_order is not None:
+            if id_order is not None and not self.modify_order_id[0]:
                 id_order = id_order.id_order + 1
                             
-            else:    
+            elif id_order and not self.modify_order_id[0]:    
                 id_order = 1 
                 
+            else:
+                id_order = self.modify_order_id[1]
+                
             order = self.order_tree.get_children()
-            
+            print(f"ORDER ID: {self.modify_order_id[1]}")
             for x in order:#         id_order , product_reference ,                product_units ,                        order_client_id ,                 seller_id ,         buyer_id ,            order_date ,                total_import                         , order_notes):
                 
                 order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") , self.discount.get() )
@@ -482,11 +485,17 @@ class ModifyDeleteOrder:
             
             if int(product.discount) > 0:
                 row_import - ModifyDeleteOrder.percentage(row_import , product.discount)
-        
+            # Cargamos los producto en el nuevo pedido que tendrá el mismo id.
             self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , row.product_units , f"{product.discount} %" , row_import))
-                
-    ver como lo puedes pasar  a traves de row_colors
-    
+           
+            db.session.delete(row) # Borramos los productos que ya habían y hemos cargado de nuevo para que no se dupliquen
+            
+        self.modify_order_id = [True , order_id]  # Pasamos el mismo id de pedido.
+            
+        single_order_window.destroy() # 
+        historical_window.destroy()
+        
+        
     def delete_order(self , order_id_to , single_order_window , historical_window):
         
         products = db.session.query(Orders).filter(Orders.id_order == order_id_to).all()
