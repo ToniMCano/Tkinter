@@ -352,36 +352,23 @@ for x in refact:
    ''' 
    
 
+def check_mail(complete_mail):
+          
+        try: 
+            print(complete_mail.split("@")[0].rsplit(".")[0])
+            print(complete_mail.split("@")[-1].split(".")[-1])
+            if '@' in complete_mail and '.' in complete_mail:
+                if len(complete_mail.split("@")[0].rsplit(".")[0]) >= 1 and len(complete_mail.split("@")[-1].split(".")[-1]) > 2:
 
-# Configuración básica de la ventana
-root = CTk()
-root.geometry("400x300")
-root.title("Ejemplo de CTkOptionMenu")
-
-# Función para manejar la selección del menú
-def on_option_select(choice):
-    print(f"Opción seleccionada: {choice}")
-
-# Lista de opciones para el menú
-options = ["Opción 1", "Opción 2", "Opción 3"]
-
-# Crear un CTkOptionMenu
-option_menu = CTkOptionMenu(
-    master=root,           # Ventana principal
-    values=options,        # Opciones del menú
-    command=on_option_select,  # Función a llamar cuando se selecciona una opción
-    width=200,             # Ancho del menú
-    corner_radius=10,      # Radio de las esquinas
-    fg_color="#f4f4f4",    # Color de primer plano
-    button_color="#2b2b2b",# Color del botón
-    #dropdown_color="#3a3a3a"  # Color del menú desplegable
-)
-
-# Establecer la opción predeterminada
-option_menu.set("Opción 1")
-
-# Ubicar el menú en la ventana
-option_menu.pack(pady=20)
-
-# Ejecutar el bucle principal de la aplicación
-root.mainloop()
+                   return complete_mail
+                   
+                else:
+                   raise Exception
+               
+        
+        except Exception as e:
+            mb.showwarning("Teléfonos" , f"{complete_mail}")
+                           
+                           
+                           
+check_mail('j.cortes@algo.com ')

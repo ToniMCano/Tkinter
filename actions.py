@@ -15,8 +15,8 @@ import os
 from sqlalchemy.exc import IntegrityError , SQLAlchemyError 
 from customtkinter import *
 import pandas as pd
-import time
 import threading
+import subprocess
 #locale.setlocale(locale.LC_ALL, '')   Si uso Locale customtkinter da problemas.  ----- "TO-DO"
  
 
@@ -747,7 +747,7 @@ class LoadInfo():
                 pass
                 
         self.contacts.set(f"Contactos: {contacts}")
-        print("*** Llamada desde load_contacts")
+
         Alerts.check_pop_ups(self , employee_id_sended )
     
     
@@ -778,8 +778,8 @@ class LoadInfo():
                     dataframe['next'].append(f'{contact.next_contact}')
                     
                 except Exception as e:
-                    dataframe['next'].append(f'{"0"}')
-                    
+                    dataframe['next'].append(f'{"0"}')  
+                        
                 dataframe["cp"].append(client.postal_code)  
                 
                 try:
@@ -847,6 +847,9 @@ class LoadInfo():
             
             if len(days) > 3:
                 days = '1'
+                
+            if len(days) == 1:
+                days = f"0{days}"
                 
             return days 
         
@@ -961,7 +964,11 @@ class LoadInfo():
             
         elif view == 'sales':
             
-            LoadInfo.sales_view(self)
+            self.frame_tree.grid_forget()
+            self.frame_company.grid_forget() 
+            self.contact_frame.grid_forget()
+            self.company_contact_buttons.grid_forget()
+            self.new_company.grid_forget() #self.header
             
             
             
@@ -975,22 +982,13 @@ class LoadInfo():
             alias = LoadInfo.employees_list().index(employee.employee_alias)
             self.employee.current(newindex = alias) 
         
-            alias = alias.employee_alias
+            #alias = alias.employee_alias
             
         except AttributeError:
             pass
         
         except Exception as e:
             print(e)
-            
-            
-    def sales_view(self):
-        
-        self.frame_tree.grid_forget()
-        self.frame_company.grid_forget() 
-        self.contact_frame.grid_forget()
-        self.company_contact_buttons.grid_forget()
-        self.new_company.grid_forget() #self.header
 
 
 
@@ -1214,7 +1212,7 @@ class CheckInfo:
           
         try: 
             if '@' in complete_mail and '.' in complete_mail:
-                if len(complete_mail.split("@")[0].split(".")[0]) > 1 and len(complete_mail.split("@")[-1].split(".")[-1]) > 2:
+                if len(complete_mail.split("@")[0].split(".")[0]) >= 1 and len(complete_mail.split("@")[-1].split(".")[-1]) > 2:
 
                    return complete_mail
                    
@@ -1459,6 +1457,8 @@ class Alerts():
             
             if new_alerts != old_alerts and log == False:
                 Alerts.pop_up_alert(self , employee_id , date , new_alerts)
+            
+            Actions.pop_ups_number(self)
             
         except Exception as e:
             print(f'[check_pop_ups]: {e}')
@@ -2094,7 +2094,7 @@ class States:
         
 class Tabs:
     
-    def crm_view(self , view):
+    def crm_tab(self , view):
         
         if view == 'CRM':
             self.sales_frame.grid_forget()
@@ -2112,16 +2112,11 @@ class Tabs:
             LoadInfo.combo_state_values(self , 'crm')
             
             self.combo_state.current(newindex = 2)
-            
-        '''else:
-            self.frame_tree.grid_forget()
-            self.frame_company.grid_forget() 
-            self.contact_frame.grid_forget()
-            self.company_contact_buttons.grid_forget()
-            self.state_values_view.set('sales')'''
-            
+
+
             
 class ContactActions:
+    
     
     def other_contact_widnow(self):
        
@@ -2163,16 +2158,87 @@ class ContactActions:
     
     
     def change_contact(self , e , contact_sended):
-        print("CHANGE")
+
         client = db.session.get(Client , self.company_id.get())
         
         client.contact_person = contact_sended.id_person
         
         Update.save_close()
+        
         ContactActions.close_other_contact(self)
+        
         LoadInfo.get_item(self , "crm" , self.info , e)
             
     
     
+class Actions:
     
-    
+    def send_mail(self , company_id):
+        
+        recipient = db.session.get(Client , company_id).mail
+        
+        try:
+            webbrowser.open(f"mailto: {recipient}")
+            
+        except Exception as e:
+            print(f' [send_mail]: {e}')
+            
+            
+    def abrir_enlace(self , company_id):
+        
+        web = db.session.get(Client , company_id).web
+        
+        webbrowser.open_new(f'https://{web}')
+        
+        
+    def call_phone(self , company_id , place):
+        
+        client = db.session.get(Client , company_id)
+        contact_person = db.session.get(ContactPerson , client.contact_person)
+        
+        os_name = os.name
+        
+        if place == 'company_phone':
+            number = client.phone
+            
+        elif place == 'company_phone2':
+            number = client.phone2 
+            
+        elif place == 'contact_phone':
+            number = contact_person.contact_phone 
+            
+        else:
+            number = contact_person.contact_mobile 
+        
+        try:    
+            if os_name == 'nt':  # Windows
+                webbrowser.open(f"tel:{number}")
+                
+            elif os_name == 'posix':
+                
+                if 'darwin' in os.uname().sysname.lower():  # macOS
+                    subprocess.run(["open", f"tel:{number}"])
+                    
+                else:  # Linux y otros sistemas Unix
+                    subprocess.run(["xdg-open", f"tel:{number}"])
+                    
+            else:
+                print(f"No se puede realizar una llamada en {os_name}")
+                
+        except Exception as e:
+            print(f"[call_phone]: {e}")
+            
+            
+    def pop_ups_number(self):
+        
+        pop_ups = db.session.query(Contact).filter(and_(Contact.pop_up == True , Contact.next_contact < str(datetime.now())[:16])).all()
+        
+        if len(pop_ups) > 0:
+            self.pop_up_advise.place(relx = 0.98 , rely = 0)
+            
+        else:
+            self.pop_up_advise.place_forget()
+            
+        self.advises.set(f'{len(pop_ups)}')
+            
+            

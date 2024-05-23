@@ -9,16 +9,16 @@ from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
 from sqlalchemy import and_ , or_  
-from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs , States , ContactActions
+from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs , States , ContactActions , Actions
 from datetime import datetime , timedelta
 #import locale
 from tkinter import messagebox as mb
 from ttkthemes import ThemedTk
 from customtkinter import *
+from sales_actions import SalesTab , OrderFunctions
 
-from sales_tab import SalesTab , OrderFunctions
-#locale.setlocale(locale.LC_ALL, '')
 
+#locale.setlocale(locale.LC_ALL, '')  # Si lo implemento cambian las medidas y da error.
 
 
 class Main:
@@ -30,9 +30,7 @@ class Main:
         self.main_window.geometry('1200x800')
         self.main_window.configure(bg="#f4f4f4") 
         Pops.center_window(self, self.main_window)
-        
-        
-        
+               
         # INFO LISTA
         
         style = ttk.Style()
@@ -46,11 +44,8 @@ class Main:
         self.frame_tree.grid_columnconfigure(0, weight=1)
         self.frame_tree.grid_rowconfigure(3, weight=1)
         
-        self.sales_frame = ttk.Frame(self.main_window)
-        #LoadInfo.combo_state_values(self , 'crm')
+        self.sales_frame = ttk.Frame(self.main_window)      
         
-        
-
         self.info = ttk.Treeview(self.frame_tree,height = 20 , style="mystyle.Treeview")
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
         
@@ -77,10 +72,19 @@ class Main:
         self.info.bind("<ButtonRelease-1>" , lambda event: LoadInfo.get_item(self , "crm" , self.info , event))
         
         self.active_employee_id = StringVar()
+        
         self.fecha = StringVar()
+        
         self.company_id = StringVar()
+        
         self.button_a_value = StringVar()
+        
         self.button_a_value.set("Terminate")
+ 
+        self.modify_order_id = [False , None]
+        
+        self.advises = StringVar()
+        
         Pops.login(self)
         
         
@@ -91,9 +95,8 @@ class Main:
         self.mobile_icon = ImageTk.PhotoImage(self.mobile_resize)
                 
         self.triangle_icon = Image.open("recursos/triangulo.png")
-        self.triangle_icon = self.triangle_icon.resize((10,10))
-        self.triangle_icon = ImageTk.PhotoImage(self.triangle_icon)
-        
+        self.triangle_icon = CTkImage(self.triangle_icon , size = (10,10))
+                
         self.icon_calendar= Image.open("recursos/calendar.png")
         self.calendar_icon = self.icon_calendar.resize((16,16))
         self.icon_calendar = ImageTk.PhotoImage(self.calendar_icon)
@@ -164,22 +167,24 @@ class Main:
         self.frame_views = ttk.Frame(self.header , height = 20 , width = 300)
         self.frame_views.place(relx=0.4 , y = 10) 
         
-        self.crm_view = CTkButton(self.frame_views , text = "CRM" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Tabs.crm_view(self , 'CRM'))
+        self.crm_view = CTkButton(self.frame_views , text = "CRM" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Tabs.crm_tab(self , 'CRM'))
         self.crm_view.place(relx=0.2, rely=0.5  , anchor=tk.CENTER)
         
         self.sales_view = CTkButton(self.frame_views , text = "Venta" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: SalesTab.sales_root(self))
         self.sales_view.place(relx=0.5, rely=0.5 , anchor=tk.CENTER)
         
-        self.bi_view = CTkButton(self.frame_views , text = "Estadísticas" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Pops.login(self))
-        self.bi_view.place(relx=0.8, rely=0.5 , anchor=tk.CENTER)
+        #self.bi_view = CTkButton(self.frame_views , text = "Estadísticas" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Pops.login(self))
+        #self.bi_view.place(relx=0.8, rely=0.5 , anchor=tk.CENTER)
         
         self.login_button = ttk.Button(self.header , text = "Login" , command = lambda: Pops.login(self))
         self.login_button.grid(row = 0 , column = 10 , sticky = E)
         
         self.pop_up = ttk.Button(self.header, text = "PopUp" , command = lambda: Alerts.pop_up_alert(self, self.active_employee_id.get() , str(datetime.now())))
         self.pop_up.config(cursor = 'arrow')
-        #self.pop_up.config(height = 2, width = 5)
         self.pop_up.grid(row = 0 , column = 11 , padx = 5 , sticky = E)
+        
+        self.pop_up_advise  = CTkLabel(self.header , textvariable = self.advises , text_color = 'white' , fg_color = 'red' , corner_radius = 50 , height = 15 , width = 15 , font = ("" , 10 , 'bold'))
+        
         
         # LOG
 
@@ -272,7 +277,7 @@ class Main:
         self.entry_web.grid(row = 8 , column= 0 , padx = 2  , pady = 2 , sticky = W+E)
         self.entry_web.bind("<Return>" , lambda e: Update.update_web(self , e))
         
-        self.web_button = ttk.Button(self.entry_web ,  image = self.web_icon , command = self.abrir_enlace)
+        self.web_button = ttk.Button(self.entry_web ,  image = self.web_icon , command = lambda: Actions.abrir_enlace(self, self.company_id.get()))
         self.web_button.config(cursor = 'arrow')
         self.web_button.pack(side = "right")
         
@@ -283,7 +288,7 @@ class Main:
         self.entry_company_mail.grid(row = 8 , column = 1,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
         self.entry_company_mail.bind("<Return>" , lambda e: Update.update_mail(self , 'company_mail' , e))
         
-        self.mail_button = ttk.Button(self.entry_company_mail, image = self.mail_icon)
+        self.mail_button = ttk.Button(self.entry_company_mail, image = self.mail_icon , command = lambda: Actions.send_mail(self , self.company_id.get()))
         self.mail_button.config(cursor = 'arrow')
         self.mail_button.pack(side = "right")
         
@@ -295,7 +300,7 @@ class Main:
         self.entry_company_phone.bind("<Return>" , lambda e: Update.update_phone(self , 'phone' , e))
 
         
-        self.phone_button = ttk.Button(self.entry_company_phone , image = self.phone_icon)
+        self.phone_button = ttk.Button(self.entry_company_phone , image = self.phone_icon , command = lambda: Actions.call_phone(self , self.company_id.get() , 'company_phone'))
         self.phone_button.config(cursor = 'arrow')
         self.phone_button.pack(side = "right")
         
@@ -307,7 +312,7 @@ class Main:
         self.entry_company_phone2.bind("<Return>" , lambda e: Update.update_phone(self , 'phone2' , e))
 
         
-        self.phone2_button = ttk.Button(self.entry_company_phone2 , image = self.mobile_icon)
+        self.phone2_button = ttk.Button(self.entry_company_phone2 , image = self.mobile_icon, command = lambda: Actions.call_phone(self , self.company_id.get() , 'company_phone2'))
         self.phone2_button.config(cursor = 'arrow')
         self.phone2_button.pack(side = "right")      
         
@@ -320,10 +325,7 @@ class Main:
         
         self.button_a = CTkButton(self.company_contact_buttons , textvariable = self.button_a_value , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: States.change_state(self))
         self.button_a.grid(row = 0 , column = 0 , sticky = "we" , pady = 5 , padx = 5)
-        
-        #self.button_b = CTkButton(self.company_contact_buttons , text = "Mail" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: Tabs.crm_view(self , 'view'))
-        #self.button_b.grid(row = 0 , column = 1 , sticky = "we" , pady = 5 , padx = 5)
-        
+
         self.historical_button = CTkButton(self.company_contact_buttons , text = "Historial" , height = 2 , fg_color = "#f4f4f4" , text_color = 'LightBlue4' , border_color = "LightBlue4" , border_width = 2 , hover_color = 'LightBlue4' , command = lambda: OrderFunctions.sales_historical(self))
         self.historical_button.grid(row = 0 , column = 2 , sticky = "we" , pady = 5 , padx = 5)
         
@@ -379,7 +381,7 @@ class Main:
         self.entry_contact_mail.grid(row = 4, column = 1 , padx = 2 , pady = 2 , sticky = W+E)
         self.entry_contact_mail.bind("<Return>" , lambda e: Update.update_mail(self , 'contact_mail' , e))
 
-        self.contact_mail_button = ttk.Button(self.entry_contact_mail , image = self.mail_icon) 
+        self.contact_mail_button = ttk.Button(self.entry_contact_mail , image = self.mail_icon , command = lambda: Actions.send_mail(self , self.entry_contact_mail.get())) 
         self.mail_button.config(cursor = 'arrow')
         self.contact_mail_button.pack(side = "right")
         
@@ -391,7 +393,7 @@ class Main:
         self.entry_contact_phone.bind("<Return>" , lambda e: Update.update_phone(self , 'contact_phone' , e))
 
         
-        self.contact_phone_button = ttk.Button(self.entry_contact_phone , image = self.phone_icon)
+        self.contact_phone_button = ttk.Button(self.entry_contact_phone , image = self.phone_icon , command = lambda: Actions.call_phone(self , self.company_id.get() , 'contact_phone'))
         self.contact_phone_button.config(cursor = 'arrow')
         self.contact_phone_button.pack(side = "right")
         
@@ -402,7 +404,7 @@ class Main:
         self.entry_mobile.grid(row = 6 , column = 1 , pady = 2 , padx = 2 , sticky = W+E)
         self.entry_mobile.bind("<Return>" , lambda e: Update.update_phone(self , 'mobile' , e))
         
-        self.mobile_button = ttk.Button(self.entry_mobile , image = self.mobile_icon , width = 2)
+        self.mobile_button = ttk.Button(self.entry_mobile , image = self.mobile_icon , width = 2 , command = lambda: Actions.call_phone(self , self.company_id.get() , 'mobile'))
         self.mobile_button.config(cursor = 'arrow')
         self.mobile_button.pack(side = "right")
         
@@ -430,17 +432,10 @@ class Main:
         self.rcontact_label_responsable_id = Label(self.ids_frame , textvariable = self.active_employee_id , bg = 'LightBlue4' , fg = 'white' , anchor = "w")
         self.rcontact_label_responsable_id.grid(row = 0 , column = 3 , sticky = W+E)
 
-        Tabs.crm_view(self , 'CRM')
+        Tabs.crm_tab(self , 'CRM')
 
-        
-    
-    def abrir_enlace(self):
-        
-         webbrowser.open_new('https://chat.openai.com/c/2220aa72-de48-497a-b191-203933de98d3')
-      
-
-        
-           
+  
+  
 if __name__ == "__main__":
     
     
