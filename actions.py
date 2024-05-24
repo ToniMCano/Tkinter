@@ -902,7 +902,7 @@ class LoadInfo():
         return lista_nace
         
         
-    def employees_list():
+    def employees_list(statistics = False):
         
         employees_list = []
         employees = db.session.query(Employee).all()
@@ -910,6 +910,9 @@ class LoadInfo():
         for alias in employees:
             employees_list.append(alias.employee_alias)
         
+        if statistics:
+            employees_list.append('Company')
+            
         return employees_list
         
         
@@ -936,25 +939,11 @@ class LoadInfo():
         
         if item == "All":
             state_sended = "All"
-        
-        #if item != "Pool":
-             
-        
-            
+
         LoadInfo.load_contacts(self , employee , fecha_seleccionada , 'last' , state_sended) 
-        
     
     
-    def combo_state_values(self , view):
-        
-        try:
-            view = view.get()
-            
-        except AttributeError:
-            pass
-        
-        except Exception as e:
-            print(e)
+    def toggle_tabs(self , view):
             
         print(f'********{view}********')
         
@@ -962,28 +951,31 @@ class LoadInfo():
            
            LoadInfo.crm_view(self)
             
-        elif view == 'sales':
-            
+        else:
             self.frame_tree.grid_forget()
             self.frame_company.grid_forget() 
             self.contact_frame.grid_forget()
             self.company_contact_buttons.grid_forget()
-            self.new_company.grid_forget() #self.header
-            
-            
+            self.new_company.grid_forget() 
+            self.frame_calendar_button.grid_forget() 
+            self.label_calendar_button.grid_forget()
+            self.boton_fecha.grid_forget()
+            self.combo_state.grid_forget()
+            self.employee.grid_forget()
+                   
             
     def crm_view(self):
         
         self.employee['values'] = LoadInfo.employees_list() 
+        self.employee.grid(row = 0 , column = 3 , padx = 5)
+        
         self.combo_state['values'] = ["Lead", "Candidate", "Contact" , "Pool" , 'All']
         
         try:
             employee = db.session.get(Employee , self.active_employee_id.get())
             alias = LoadInfo.employees_list().index(employee.employee_alias)
             self.employee.current(newindex = alias) 
-        
-            #alias = alias.employee_alias
-            
+
         except AttributeError:
             pass
         
@@ -2112,7 +2104,6 @@ class Tabs:
     def crm_tab(self , view):
         
         if view == 'CRM':
-            self.sales_frame.grid_forget()
             self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan=3)
             self.frame_company.grid(row = 1 , column = 5 , sticky = "nswe" , columnspan = 4, padx = 5) 
             self.contact_frame.grid(row = 3 , column = 5 , columnspan=2 , rowspan = 2 ,  padx = 5 , sticky='nsew')
@@ -2121,10 +2112,9 @@ class Tabs:
             self.label_calendar_button.grid(row = 0, column = 6)
             self.boton_fecha.grid(row=0, column=1, sticky="ew")
             self.combo_state.grid(row = 0 , column = 4 , padx = 5)
-            self.employee.grid(row = 0 , column = 3 , padx = 5)
             self.frame_calendar_button.grid(row = 0 , column = 5 , padx = 5)
             
-            LoadInfo.combo_state_values(self , 'crm')
+            LoadInfo.toggle_tabs(self , 'crm')
             
             self.combo_state.current(newindex = 2)
 

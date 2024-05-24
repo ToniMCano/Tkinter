@@ -16,6 +16,7 @@ from tkinter import messagebox as mb
 from ttkthemes import ThemedTk
 from customtkinter import *
 from sales_actions import SalesTab , OrderFunctions
+from statistics_tab import StatisticsTab
 
 
 #locale.setlocale(locale.LC_ALL, '')  # Si lo implemento cambian las medidas y da error.
@@ -43,8 +44,6 @@ class Main:
         self.frame_tree = ttk.Frame(self.main_window)
         self.frame_tree.grid_columnconfigure(0, weight=1)
         self.frame_tree.grid_rowconfigure(3, weight=1)
-        
-        self.sales_frame = ttk.Frame(self.main_window)      
         
         self.info = ttk.Treeview(self.frame_tree,height = 20 , style="mystyle.Treeview")
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
@@ -168,13 +167,13 @@ class Main:
         self.frame_views.place(relx=0.4 , y = 10) 
         
         self.crm_view = CTkButton(self.frame_views , text = "CRM" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Tabs.crm_tab(self , 'CRM'))
-        self.crm_view.place(relx=0.2, rely=0.5  , anchor=tk.CENTER)
+        self.crm_view.place(relx=0.2, rely=0.5  , anchor = 'center')
         
         self.sales_view = CTkButton(self.frame_views , text = "Venta" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: SalesTab.sales_root(self))
-        self.sales_view.place(relx=0.5, rely=0.5 , anchor=tk.CENTER)
+        self.sales_view.place(relx=0.5, rely=0.5 , anchor = 'center')
         
-        #self.bi_view = CTkButton(self.frame_views , text = "Estadísticas" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: Pops.login(self))
-        #self.bi_view.place(relx=0.8, rely=0.5 , anchor=tk.CENTER)
+        self.bi_view = CTkButton(self.frame_views , text = "Estadísticas" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: StatisticsTab.statistics_root(self))
+        self.bi_view.place(relx=0.8, rely=0.5 , anchor = 'center')
         
         self.login_button = ttk.Button(self.header , text = "Login" , command = lambda: Pops.login(self))
         self.login_button.grid(row = 0 , column = 10 , sticky = E)

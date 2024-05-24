@@ -20,13 +20,13 @@ class SalesTab:
     
     def sales_root(self):
         
-        LoadInfo.combo_state_values(self , 'sales')  #Indagar desde aquí,  la forma en que carga "Venta"
+        LoadInfo.toggle_tabs(self , 'sales') 
         
         self.main_window.update()
         
+        self.sales_frame = ttk.Frame(self.main_window)  
         self.sales_frame.grid(row = 2, column = 0, columnspan = 6 , rowspan = 2 , sticky = 'nswe')
         self.sales_frame.grid_columnconfigure(0 , weight = 6)
-        #self.sales_frame.grid_columnconfigure(1 , weight = 2)
         self.sales_frame.grid_rowconfigure(1 , weight = 1)
         
         self.order_header = StringVar()
@@ -246,19 +246,6 @@ class SalesTab:
         self.historical_button = CTkButton(self.delivery_date_frame , text = "Historial" , height = 2 , fg_color = "LightBlue4" , text_color = 'white' ,  hover_color = 'LightBlue4' , command = lambda: OrderFunctions.sales_historical(self) , corner_radius = 4)
         self.historical_button.grid(row = 0 , column = 3 , sticky = "e" , pady = 5 , padx = 5)
         
-        # HEADER
-        
-        self.frame_calendar_button.grid_forget() 
-        
-        self.label_calendar_button.grid_forget()
-        
-        self.boton_fecha.grid_forget()
-        
-        self.combo_state.grid_forget()
-        
-        self.employee.grid_forget()
-
-
 
 class OrderFunctions:
     
