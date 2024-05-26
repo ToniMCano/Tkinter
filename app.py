@@ -30,18 +30,22 @@ class Main:
         self.main_window.resizable(1,1)
         self.main_window.geometry('1200x800')
         self.main_window.configure(bg="#f4f4f4") 
+        self.main_window.grid_columnconfigure(0 , weight = 1)
         Pops.center_window(self, self.main_window)
-               
+                       
         # INFO LISTA
         
         style = ttk.Style()
-        #style.configure("
-         # style.configure("mystyle.Treeview" ,font = ("" , 9), bg = "lightgrey" )Modificar la fuente de la tabla
-        #style.configure("mystyle.Treeview.Heading" , font = ("" , 11 , ) , foreground = 'white')   # Modificar la fuente de las cabeceras
         style.configure("Treeview.Heading", background='LightBlue4')  
         style.layout("mystyle.Treeview" , [("mystyle.Treeview.treearea", {'sticky' : 'nswe'})]) # Eliminar los bordes??
-       
-        self.frame_tree = ttk.Frame(self.main_window)
+        
+        self.crm_root = ttk.Frame(self.main_window)
+        self.crm_root.grid(row = 1 , column = 0 , sticky = 'nswe')
+        self.crm_root.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
+        self.crm_root.grid_columnconfigure(5, weight=3)
+        self.crm_root.grid_rowconfigure(2, weight=1)
+        
+        self.frame_tree = ttk.Frame(self.crm_root)
         self.frame_tree.grid_columnconfigure(0, weight=1)
         self.frame_tree.grid_rowconfigure(3, weight=1)
         
@@ -62,12 +66,7 @@ class Main:
         self.info.column("#3" , width = 70 , anchor="center")
         self.info.column("#4" , width = 70 , anchor="w")
         self.info.column("#5" , width = 10 , anchor="w")
-        
-        
-        self.main_window.grid_columnconfigure(0, weight=1) # Configuramos el redimensionamiento del frame principal
-        self.main_window.grid_columnconfigure(5, weight=3)
-        self.main_window.grid_rowconfigure(2, weight=1)
-        #self.main_window.grid_rowconfigure(3, weight=1)
+
         self.info.bind("<ButtonRelease-1>" , lambda event: LoadInfo.get_item(self , "crm" , self.info , event))
         
         self.active_employee_id = StringVar()
@@ -116,7 +115,7 @@ class Main:
         # HEADER
         
         self.header = ttk.Frame(self.main_window)
-        self.header.grid(row = 0 , column = 0 , columnspan = 6, pady = 5 , padx = 5 , sticky = W+E)
+        self.header.grid(row = 0 , column = 0 , pady = 5 , padx = 5 , sticky = W+E)
         self.header.columnconfigure(10, weight = 1)
         self.header.columnconfigure(6, weight = 1)
         
@@ -140,11 +139,11 @@ class Main:
         # CALENDAR
         
         # Crear un Frame que se mostrará/ocultará self.frame_button
-        self.frame_calendar = tk.Frame(self.main_window , highlightbackground = 'LightBlue4' , highlightthickness = 1)
+        self.frame_calendar = tk.Frame(self.crm_root , highlightbackground = 'LightBlue4' , highlightthickness = 1)
         MyCalendar.calendar(self , "general")
-        self.frame_calendar_next = tk.Frame(self.main_window , highlightbackground = 'LightBlue4' , highlightthickness = 1)
+        self.frame_calendar_next = tk.Frame(self.crm_root , highlightbackground = 'LightBlue4' , highlightthickness = 1)
         MyCalendar.calendar(self  , "next")
-        self.frame_calendar_pop = tk.Frame(self.main_window , highlightbackground = 'LightBlue4' , highlightthickness = 1)
+        self.frame_calendar_pop = tk.Frame(self.crm_root , highlightbackground = 'LightBlue4' , highlightthickness = 1)
         MyCalendar.calendar(self  , "pop")
 
         # HEADER
@@ -220,7 +219,7 @@ class Main:
         
         # FRAME EMPRESA
         
-        self.frame_company = CTkFrame(self.main_window , fg_color = "transparent" , border_width = 1 , border_color = "lightgray")         
+        self.frame_company = CTkFrame(self.crm_root , fg_color = "transparent" , border_width = 1 , border_color = "lightgray")         
         self.frame_company.grid_columnconfigure(1, weight=1)
         self.frame_company.grid_columnconfigure(0, weight=1)
         
@@ -315,7 +314,7 @@ class Main:
         self.phone2_button.config(cursor = 'arrow')
         self.phone2_button.pack(side = "right")      
         
-        self.company_contact_buttons = CTkFrame(self.main_window , fg_color = 'transparent')        
+        self.company_contact_buttons = CTkFrame(self.crm_root , fg_color = 'transparent')        
         self.company_contact_buttons.grid_columnconfigure(0, weight = 1)
         self.company_contact_buttons.grid_columnconfigure(1, weight = 1)
         #self.company_contact_buttons.grid_columnconfigure(2, weight = 1)
@@ -330,7 +329,7 @@ class Main:
         
         #FRAME CONTACTO
         
-        self.contact_frame = CTkFrame(self.main_window , fg_color = "transparent" , border_width = 1 , border_color = "lightgray" ) 
+        self.contact_frame = CTkFrame(self.crm_root , fg_color = "transparent" , border_width = 1 , border_color = "lightgray" ) 
         self.contact_frame.grid_rowconfigure(7,weight=1)
         self.contact_frame.grid_columnconfigure(1, weight=1)
         self.contact_frame.grid_columnconfigure(0, weight=1)

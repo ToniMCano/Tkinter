@@ -20,14 +20,14 @@ class SalesTab:
     
     def sales_root(self):
         
-        LoadInfo.toggle_tabs(self , 'sales') 
+        LoadInfo.select_tab(self , 'sales') 
         
         self.main_window.update()
         
-        self.sales_frame = ttk.Frame(self.main_window)  
-        self.sales_frame.grid(row = 2, column = 0, columnspan = 6 , rowspan = 2 , sticky = 'nswe')
-        self.sales_frame.grid_columnconfigure(0 , weight = 6)
-        self.sales_frame.grid_rowconfigure(1 , weight = 1)
+        self.sales_root = ttk.Frame(self.main_window)  
+        self.sales_root.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
+        self.sales_root.grid_columnconfigure(0 , weight = 1)
+        self.sales_root.grid_rowconfigure(1 , weight = 1)
         
         self.order_header = StringVar()
         self.order_header.set('Pedido')
@@ -56,12 +56,12 @@ class SalesTab:
         
         # HEADER 
         
-        self.sales_header = CTkFrame(self.sales_frame , fg_color = 'transparent' , height = 50 , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')
+        self.sales_header = CTkFrame(self.sales_root , fg_color = 'transparent' , height = 50 , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')
         self.sales_header.grid(row = 0 , column = 0 , columnspan = 2 , sticky = W+E, padx = 3 , pady = 3)
         
         # CONTENT
         
-        self.sales_content_frame = CTkFrame(self.sales_frame , corner_radius = 3 , border_width = 1 , border_color = 'lightgray' , fg_color = 'transparent' )
+        self.sales_content_frame = CTkFrame(self.sales_root , corner_radius = 3 , border_width = 1 , border_color = 'lightgray' , fg_color = 'transparent' )
         self.sales_content_frame.grid(row = 1 , column = 0 , sticky = 'nswe')
         self.sales_content_frame.grid_columnconfigure(0 , weight = 1)
         self.sales_content_frame.grid_rowconfigure(0 , weight = 1)
@@ -111,7 +111,7 @@ class SalesTab:
         
         #ORDER
         
-        self.sales_order_frame = CTkFrame(self.sales_frame , fg_color = 'transparent' , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')
+        self.sales_order_frame = CTkFrame(self.sales_root , fg_color = 'transparent' , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')
         self.sales_order_frame.grid(row = 1 , column = 1 , sticky = 'nswe', rowspan = 3 , padx = 3 , pady = 3)
         #   self.sales_order_frame.grid_columnconfigure(0 , weight = 1)
         self.sales_order_frame.grid_rowconfigure(1 , weight = 1)

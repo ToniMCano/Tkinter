@@ -872,6 +872,11 @@ class LoadInfo():
                 
             else:
                 return item['text']
+
+            ContactActions.close_other_contact(self)
+            
+        except AttributeError:
+            pass
         
         except IndexError:
             pass
@@ -943,25 +948,25 @@ class LoadInfo():
         LoadInfo.load_contacts(self , employee , fecha_seleccionada , 'last' , state_sended) 
     
     
-    def toggle_tabs(self , view):
+    def select_tab(self , view):
             
         print(f'********{view}********')
         
         if view == 'crm':
            
-           LoadInfo.crm_view(self)
+            LoadInfo.crm_view(self)
+            self.crm_root.grid(row = 1 , column = 0 , sticky = 'nswe')
+            try:
+                self.sales_root.grid_forget()
+                
+            except AttributeError:
+                pass
             
+            except Exception as e:
+                print(f"[select_tab] (crm): {e}")
+                
         else:
-            self.frame_tree.grid_forget()
-            self.frame_company.grid_forget() 
-            self.contact_frame.grid_forget()
-            self.company_contact_buttons.grid_forget()
-            self.new_company.grid_forget() 
-            self.frame_calendar_button.grid_forget() 
-            self.label_calendar_button.grid_forget()
-            self.boton_fecha.grid_forget()
-            self.combo_state.grid_forget()
-            self.employee.grid_forget()
+            self.crm_root.grid_forget()
                    
             
     def crm_view(self):
@@ -2114,7 +2119,7 @@ class Tabs:
             self.combo_state.grid(row = 0 , column = 4 , padx = 5)
             self.frame_calendar_button.grid(row = 0 , column = 5 , padx = 5)
             
-            LoadInfo.toggle_tabs(self , 'crm')
+            LoadInfo.select_tab(self , 'crm')
             
             self.combo_state.current(newindex = 2)
 

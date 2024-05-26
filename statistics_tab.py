@@ -22,7 +22,7 @@ class StatisticsTab:
     def statistics_root(self):
         
         try:
-            self.sales_frame.grid_forget()
+            self.sales_root.grid_forget()
             
         except AttributeError as e:
             pass
@@ -31,7 +31,7 @@ class StatisticsTab:
             print(f"[statistics_root]: {e}")
             
         
-        LoadInfo.toggle_tabs(self , 'statistics') 
+        LoadInfo.select_tab(self , 'statistics') 
         
         self.statistics_frame = CTkFrame(self.main_window , fg_color = 'transparent')
         self.statistics_frame.grid(row = 2, column = 0, columnspan = 6 , rowspan = 2 , sticky = 'nswe' , padx = 5 , pady = 5)
