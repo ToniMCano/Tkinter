@@ -13,7 +13,7 @@ class Employee(Base):
     employee_alias = Column(String , nullable = False )
     employee_name = Column(String , unique = True , nullable = False)
     employee_surname = Column(String , nullable = False)
-    employee_mail = Column(Integer , nullable = False)
+    employee_mail = Column(String , nullable = False)
     employee_phone = Column(Integer)
     employee_job_title = Column(String , nullable = False)
     password = Column(String , nullable = False)

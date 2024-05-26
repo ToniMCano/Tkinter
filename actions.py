@@ -244,7 +244,7 @@ class Pops:
         files_top = ttk.Label(files_frame , text = "")
         files_top.grid(row = 0 , column = 0, sticky = W+E ) 
         
-        files_button = ttk.Button(files_frame , text = "Subir desde archivo (Varias Empresas)" , command = AddInfo.add_companies_from_file)
+        files_button = ttk.Button(files_frame , text = "Cargar desde archivo (Varias Empresas)" , command = AddInfo.add_companies_from_file)
         files_button.grid(row = 1 , column = 0 , columnspan = 2 , sticky = W+E , padx = 20)        
         
         company_frame = ttk.Labelframe(add_company_frame , text = 'Empresa')
@@ -1112,6 +1112,8 @@ class GetInfo():
             
             tree.entry_mobile.delete(0 , END)
             
+            tree.notes.delete(1.0 , "end")
+            
             GetInfo.load_comments(tree , client.nif)
         
         except Exception as e:
@@ -1135,11 +1137,13 @@ class GetInfo():
             tree.entry_contact_phone.insert(0, contact_person.contact_phone)
             tree.entry_mobile.insert(0 , contact_person.contact_mobile)
             tree.company_id.set(client.id_client)
+            tree.notes.insert(1.0 , contact_person.notes)
+            
         except Exception as e:
             print(f'Error al cargar los datos: {e}')
         
-        #tree.notes.delete(0 , END)
-        #tree.notes.insert(0 , "686289365")
+        
+        #
     
     def format_adress_to_Show(adress , cp):
         
@@ -1490,7 +1494,7 @@ class Alerts():
             label_alert_name.configure(background = "lightgray")
             label_alert_name.grid(row = 0 , column = 0 , sticky = 'we' , padx = 10 , pady = 5)
             
-            label_alert_log = ttk.Label(show_alert_frame , text = alert_content[2] , wraplength = 250)
+            label_alert_log = ttk.Label(show_alert_frame , text = alert_content[2].replace("\n" , "") , wraplength = 250)
             label_alert_log.configure(background = "lightgray")
             label_alert_log.grid(row = 0 , column = 1 , sticky = 'we' , padx = 10 , pady = 5)
             
@@ -1991,10 +1995,21 @@ class Update:
             print(f"[update_phone]({place}): {e}") 
     
     
-    def update_notes(self, company):
-  
-        company = Update.get_client_info(self) 
-        contact_person = db.session.get(ContactPerson , company.contact_person)
+    def update_client_notes(self , e):
+        
+        try:
+            company = Update.get_client_info(self) 
+            
+            contact_person = db.session.get(ContactPerson , company.contact_person)
+            
+            contact_person.notes = self.notes.get(1.0 , 'end')
+            
+            Update.save_close()
+            
+        except Exception as e:
+            print(f"[update_client_notes]: {e}")
+            
+        
 
 
 class States:       
@@ -2146,15 +2161,20 @@ class ContactActions:
         
         for i, contact in enumerate(contacts):
             
-            self.new_contact = CTkFrame(self.contacts_frame , border_width = 2 , border_color = 'red')
-            self.new_contact.grid(row = i+1 , column = 0 , sticky = W+E ,  padx = 10 , pady = 5)
-            
-            self.new_contact_label = CTkLabel(self.new_contact , text = f"{contact.contact_name} | {contact.contact_surname} | ({contact.contact_job_title})" , fg_color = '#f4f4f4' , corner_radius = 4 , text_color = 'gray' , anchor = 'w')
-            self.new_contact_label.pack(fill = 'x' , expand = True)
-            self.new_contact_label.bind('<Button-1>' , lambda e , send_contact = contact: ContactActions.change_contact(self , e , send_contact))
-            self.new_contact_label.configure( cursor = 'arrow')
-            
-            print(f"{contact.contact_name} {contact.contact_surname} {contact.contact_job_title}")
+            if contact.contact_name != self.entry_contact_name.get():
+
+                self.new_contact = CTkFrame(self.contacts_frame , border_width = 2 , border_color = 'red')
+                self.new_contact.grid(row = i+1 , column = 0 , sticky = W+E ,  padx = 10 , pady = 5)
+                
+                self.new_contact_label = CTkLabel(self.new_contact , text = f"{contact.contact_name} | {contact.contact_surname} | ({contact.contact_job_title})" , fg_color = '#f4f4f4' , corner_radius = 4 , text_color = 'gray' , anchor = 'w')
+                self.new_contact_label.pack(fill = 'x' , expand = True , side = 'left')
+                self.new_contact_label.bind('<Button-1>' , lambda e , send_contact = contact: ContactActions.change_contact(self , e , send_contact))
+                self.new_contact_label.configure( cursor = 'arrow')
+                
+                delete_button = CTkButton(self.new_contact , text = 'x' , command = lambda contact_id = contact.id_person: ContactActions.delete_contact(self , contact_id) , width = 5 , height = 5 , fg_color = 'red' , corner_radius = 4 , text_color = 'white')
+                delete_button.pack(fill = 'y' , side = 'right')
+                
+                print(f"{contact.contact_name} {contact.contact_surname} {contact.contact_job_title}")
     
     
     def change_contact(self , e , contact_sended):
@@ -2170,6 +2190,20 @@ class ContactActions:
         LoadInfo.get_item(self , "crm" , self.info , e)
             
     
+    def delete_contact(self , contact_id):
+        
+        try:
+            contact = db.session.get(ContactPerson , contact_id)
+            
+            db.session.delete(contact)
+            
+            Update.save_close
+            
+            ContactActions.close_other_contact(self)
+            
+        except Exception as e:
+            print(f"[delete_contact]: {e}")
+        
     
 class Actions:
     

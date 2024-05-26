@@ -411,7 +411,7 @@ class Main:
         self.notes = Text(self.contact_frame)
         self.notes.config(height = 3)
         self.notes.grid(row = 8, column = 0  , columnspan = 2 , sticky = 'we' , padx = 5 , pady = 2)
-        self.notes.bind("<Return>" , lambda e: Update.update_info_entries(self , 'notes' , e))
+        self.notes.bind("<Return>" , lambda e: Update.update_client_notes(self , e))
         
         self.ids_frame = ttk.Frame(self.contact_frame)
         self.ids_frame.grid(row = 9 , column = 0 , columnspan = 2 , sticky = W+E)
