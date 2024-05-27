@@ -947,47 +947,6 @@ class LoadInfo():
 
         LoadInfo.load_contacts(self , employee , fecha_seleccionada , 'last' , state_sended) 
     
-    
-    def select_tab(self , view):
-            
-        print(f'********{view}********')
-        
-        if view == 'crm':
-           
-            LoadInfo.crm_view(self)
-            self.crm_root.grid(row = 1 , column = 0 , sticky = 'nswe')
-            try:
-                self.sales_root.grid_forget()
-                
-            except AttributeError:
-                pass
-            
-            except Exception as e:
-                print(f"[select_tab] (crm): {e}")
-                
-        else:
-            self.crm_root.grid_forget()
-                   
-            
-    def crm_view(self):
-        
-        self.employee['values'] = LoadInfo.employees_list() 
-        self.employee.grid(row = 0 , column = 3 , padx = 5)
-        
-        self.combo_state['values'] = ["Lead", "Candidate", "Contact" , "Pool" , 'All']
-        
-        try:
-            employee = db.session.get(Employee , self.active_employee_id.get())
-            alias = LoadInfo.employees_list().index(employee.employee_alias)
-            self.employee.current(newindex = alias) 
-
-        except AttributeError:
-            pass
-        
-        except Exception as e:
-            print(e)
-
-
 
 class GetInfo():
     
@@ -2035,96 +1994,254 @@ class States:
     
     def change_contact_state(self , client ,employee):
         
-        client.state = "Pool"
-        client.employee_id = 0
+        try:
+            terminate = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Terminated by: [{employee.id_employee}] {employee.employee_alias}' , client.id_client , employee.id_employee , client.contact_person  ,'Termninated'  , client.counter , False )
+            db.session.add(terminate)
+            
+            client.state = "Pool"
+            client.employee_id = 0
+            
+            row = States.update_row(self, client)
+            
+            Logs.confirm_unique_pop(terminate)
+            
+            row[1][3] = row[1][3].replace( '◉' , "")
+            
+            self.info.item( row[2] , text = "(Terminated)" , values = row[1] , tags=("font_red"))
         
-        terminate = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Terminated by: [{employee.id_employee}] {employee.employee_alias}' , client.id_client , employee.id_employee , client.contact_person  ,'Termninated'  , client.counter , False )
-        db.session.add(terminate)
-        
-        row = Logs.row_to_change(self , client.name) # return [text , values , item]
-        db.session.commit()
-        
-        Logs.confirm_unique_pop(terminate)
-        
-        row[1][3] = row[1][3].replace( '◉' , "")
-        
-        self.info.item( row[2] , text = "(Terminated)" , values = row[1] , tags=("font_red"))
+        except Exception as e:
+            print(f"[change_contact_state]: {e}")
 
         
     def change_candidate_state(self , client ,employee):  
-                                                                                                                
-        contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Started by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Candidate'  , client.counter , False )
-        db.session.add(contact)
         
-        client.state = "Contact"
+        try:                                                                                                    
+            contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Started by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Candidate'  , client.counter , False )
+            db.session.add(contact)
+            
+            client.state = "Contact"
+            
+            row = States.update_row(self, client)
+            
+            self.info.item( row[2] , text = "Contact" , values = row[1] , tags=("font_green"))
         
-        client.start_contact_date = str(datetime.now())[0:16]
-        
-        row = States.update_row(self, client)
-        
-        self.info.item( row[2] , text = "Contact" , values = row[1] , tags=("font_green"))
+        except Exception as e:
+            print(f"[change_candidate_state]: {e}")
         
     
     def change_pool_state(self , client ,employee):
-  
-        client.counter = client.counter + 1  
-        client.employee_id = employee.id_employee
-                                                                                                                
-        contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Add by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Pool'  , client.counter , False )
-        db.session.add(contact)
         
-        client.state = "Lead"
+        try:
+            client.counter = client.counter + 1  
+            client.employee_id = employee.id_employee
+                                                                                                                    
+            contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Add by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Pool'  , client.counter , False )
+            db.session.add(contact)
+            
+            client.state = "Lead"
+            
+            row = States.update_row(self, client)
+            
+            self.info.item( row[2] , text = "Lead" , values = row[1] , tags=("font_green"))
         
-        row = States.update_row(self, client)
-        
-        self.info.item( row[2] , text = "Lead" , values = row[1] , tags=("font_green"))
-    
+        except Exception as e:
+            print(f"[change_pool_state]: {e}")
+            
     
     def change_lead_state(self , client ,employee):
         
-        contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Checked by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Pool'  , client.counter , False )
-        db.session.add(contact)
+        try:
+            contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Checked by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Pool'  , client.counter , False )
+            db.session.add(contact)
+            
+            client.state = "Candidate"
+            
+            row = States.update_row(self, client)
+            
+            self.info.item( row[2] , text = "Candidate" , values = row[1] , tags=("font_green"))
         
-        client.state = "Candidate"
-        
-        row = States.update_row(self, client)
-        
-        self.info.item( row[2] , text = "Candidate" , values = row[1] , tags=("font_green"))
+        except Exception as e:
+            print(f"[change_lead_state]: {e}")
 
 
     def update_row(self, client):
         
-        client.start_contact_date = str(datetime.now())[0:16]
+        try:
+            client.start_contact_date = str(datetime.now())[0:16]
+            
+            row = Logs.row_to_change(self , client.name) # return [text , values , item]
+            row[1][2] = MyCalendar.format_date_to_show(str(datetime.now())[0:16])
+            row[1][3] = MyCalendar.format_date_to_show(str(datetime.now())[0:16])
+            
+            return row    
         
-        row = Logs.row_to_change(self , client.name) # return [text , values , item]
-        row[1][2] = MyCalendar.format_date_to_show(str(datetime.now())[0:16])
-        row[1][3] = MyCalendar.format_date_to_show(str(datetime.now())[0:16])
-        
-        return row    
+        except Exception as e:
+            print(f"[update_row]: {e}")
         
         
         
 class Tabs:
-    
-    def crm_tab(self , view):
+
+
+    def select_tab(self , view):
+            
+        print(f'********{view}********')
         
-        if view == 'CRM':
-            self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan=3)
-            self.frame_company.grid(row = 1 , column = 5 , sticky = "nswe" , columnspan = 4, padx = 5) 
-            self.contact_frame.grid(row = 3 , column = 5 , columnspan=2 , rowspan = 2 ,  padx = 5 , sticky='nsew')
-            self.company_contact_buttons.grid(row = 2 , column = 5 , columnspan = 2 ,sticky = 'nswe' , padx   = 5 )
+        if view == 'crm':
+            Tabs.hide_tabs(self)
+            
+            Tabs.crm_view(self)
+            self.crm_view_button.configure(state = 'disabled')
+            self.statistics_view_button.configure(state = 'normal')
+            self.sales_view_button.configure(state = 'normal')
+            
+            
+        elif view == 'sales':
+            Tabs.hide_tabs(self)
+
+            Tabs.sales_view(self)
+            
+
+        else:
+            Tabs.hide_tabs(self)
+            
+            Tabs.statistics_view(self)
+            
+    
+    def hide_tabs(self):
+
+        try:
+            self.statistics_frame.grid_forget()
+            
+        except AttributeError:
+            pass
+        
+        except Exception as e:
+            print(f"[hide_tabs] (statistics): {e}")
+            
+        try:
+            self.sales_frame.grid_forget()
+            
+        except AttributeError:
+            pass
+        
+        except Exception as e:
+            print(f"[hide_tabs] (sales): {e}")
+            
+        try:
+            self.crm_frame.grid_forget()
+            
+        except AttributeError:
+            pass
+        
+        except Exception as e:
+            print(f"[hide_tabs] (crm): {e}")
+            
+        
+            
+    def crm_view(self):
+        
+        try:
+            self.crm_frame.grid(row = 2 , column = 0 , rowspan = 2 , sticky = 'nswe')
+            self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan = 3)
+            self.frame_company.grid(row = 1 , column = 1 , sticky = "nswe" , columnspan = 4, padx = 5) 
+            self.contact_frame.grid(row = 3 , column = 1 , columnspan=2 , rowspan = 2 ,  padx = 5 , sticky='nsew')
+            self.company_contact_buttons.grid(row = 2 , column = 1 , columnspan = 2 ,sticky = 'we' , padx   = 5 )
             self.new_company.grid(row = 0 , column = 0 , padx = 5)
             self.label_calendar_button.grid(row = 0, column = 6)
             self.boton_fecha.grid(row=0, column=1, sticky="ew")
             self.combo_state.grid(row = 0 , column = 4 , padx = 5)
             self.frame_calendar_button.grid(row = 0 , column = 5 , padx = 5)
+            self.employee.grid(row = 0 , column = 3 , padx = 5)
             
-            LoadInfo.select_tab(self , 'crm')
+            self.combo_state['values'] = ["Lead", "Candidate", "Contact" , "Pool" , 'All']
+            self.combo_state.current(newindex = 2)       
             
-            self.combo_state.current(newindex = 2)
+            self.employee['values'] = LoadInfo.employees_list() 
+        
+        except Exception as e:
+            print(f"[crm_view] (grids): {e}")
+  
+        try:
+            employee = db.session.get(Employee , self.active_employee_id.get())
+            alias = LoadInfo.employees_list().index(employee.employee_alias)
+            self.employee.current(newindex = alias) 
 
+        except AttributeError:
+            pass
+        
+        except Exception as e:
+            print(f"[crm_view] (employee): {e}")
+    
+    
+    def sales_view(self):
+        
+        Tabs.forget_crm_header(self)
+        
+        try:
+            self.statistics_frame.grid_forget()
 
+        except AttributeError:
+            pass
+
+        except Exception as e:
+            print(f"[sales_view]: {e}")
+        
+        try:
+            self.sales_frame.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
+            self.sales_view_button.configure(state = 'disabled')
+            self.statistics_view_button.configure(state = 'normal')
+            self.crm_view_button.configure(state = 'normal')
+        
+        except AttributeError:
+            print('AttributeError: sales')
             
+            
+            
+    def statistics_view(self):
+        
+        Tabs.forget_crm_header(self)
+        
+        try:
+            self.sales_frame.grid_forget()
+
+        except AttributeError:
+            pass
+
+        except Exception as e:
+            print(f"[statistics_view]: {e}")
+        
+        try:
+            self.statistics_frame.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
+            self.sales_view_button.configure(state = 'normal')
+            self.statistics_view_button.configure(state = 'disabled')
+            self.crm_view_button.configure(state = 'normal')
+
+        except AttributeError:
+            print('AttributeError: statistics')
+    
+        
+        
+    def forget_crm_header(self):
+        
+        try:
+            self.crm_frame.grid_forget()
+            self.frame_tree.grid_forget()
+            self.frame_company.grid_forget()
+            self.contact_frame.grid_forget()
+            self.company_contact_buttons.grid_forget()
+            self.new_company.grid_forget()
+            self.label_calendar_button.grid_forget()
+            self.boton_fecha.grid_forget()
+            self.combo_state.grid_forget()
+            self.frame_calendar_button.grid_forget()
+            self.employee.grid_forget()
+            
+        except AttributeError:
+            pass
+        
+                
+
 class ContactActions:
     
     
@@ -2148,6 +2265,7 @@ class ContactActions:
         self.other_contact.pack(side = "left" , fill = "y")
         self.new_contact_button.pack(side = "right") 
         self.contacts_frame.pack_forget()
+        self.frame_update_adress.grid_forget()
         
     
     def charge_contacts(self):
