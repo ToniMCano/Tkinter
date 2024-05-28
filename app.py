@@ -9,7 +9,7 @@ from models import Employee , Client , Contact , ContactPerson
 import db
 import openpyxl
 from sqlalchemy import and_ , or_  
-from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs , States , ContactActions , Actions
+from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs , States , ContactActions , Actions , NewCompany
 from sales_tab import SalesTab
 from sales_actions import OrderFunctions
 from statistics_tab import StatisticsTab
@@ -45,14 +45,17 @@ class Main:
         style.configure("Treeview.Heading", background='LightBlue4')  
         style.layout("mystyle.Treeview" , [("mystyle.Treeview.treearea", {'sticky' : 'nswe'})]) # Eliminar los bordes??
         
-        self.crm_frame = CTkFrame(self.main_window , fg_color='red')
+        self.crm_frame = CTkFrame(self.main_window , fg_color='transparent')
         self.crm_frame.grid_columnconfigure(0, weight=3) # Configuramos el redimensionamiento del frame principal
         self.crm_frame.grid_columnconfigure(1, weight=1)
+        self.crm_frame.grid_rowconfigure(1, weight=1)
 
         #self.crm_frame.grid_rowconfigure(1, weight=1)
         
         self.frame_tree = CTkFrame(self.crm_frame, fg_color='transparent')
+        self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan = 3)
         self.frame_tree.grid_columnconfigure(0, weight=1)
+        self.frame_tree.grid_rowconfigure(3, weight=1)
 
         self.info = ttk.Treeview(self.frame_tree, height = 20 , style="mystyle.Treeview")
         self.info.grid(row = 0 , column = 0 , sticky = 'nsew')     
@@ -127,7 +130,7 @@ class Main:
         
                 # AÑADIR CONTACTOS DESDE POOL
         
-        self.new_company = ttk.Button(self.header , text = 'Add Company' , command = lambda: Pops.new_company(self)) 
+        self.new_company = ttk.Button(self.header , text = 'Add Company' , command = lambda: NewCompany.new_company(self)) 
          
      
         # LEAD, CANDIDATE , CONTACT
@@ -222,19 +225,21 @@ class Main:
         self.contacts_var = CTkLabel(self.contacts_number , textvariable = self.contacts , anchor = 'center' , text_color = 'gray' , font = ("" , 12 , 'bold'))
         self.contacts_var.pack(fill = "both" , expand = True, side = "top" , pady = 3)
         
-        self.side_frame = CTkFrame(self.crm_frame , fg_color = 'green')
-        self.side_frame.grid(row = 1 , column = 1 , sticky = "nswe" , columnspan = 4, padx = 5)
+        self.side_frame = CTkFrame(self.crm_frame , fg_color = 'transparent')
+        self.side_frame.grid(row = 1 , column = 1 , sticky = "nswe" , columnspan = 4 , rowspan = 2) 
         self.side_frame.grid_columnconfigure(0 , weight = 1)
+        self.side_frame.grid_rowconfigure(3, weight=1)
         
         # FRAME EMPRESA
         
-        self.frame_company = CTkFrame(self.side_frame, fg_color = "orange" , border_width = 1 , border_color = "lightgray")         
+        self.frame_company = CTkFrame(self.side_frame, fg_color = "transparent" , border_width = 1 , border_color = "lightgray") 
+        self.frame_company.grid(row = 0 , column = 0 , sticky = "nswe" ,  padx = 5)        
         self.frame_company.grid_columnconfigure(0 , weight = 1)
         
         self.header_company = CTkLabel(self.frame_company , text="Empresa", bg_color='LightBlue4' , text_color = "white")
         self.header_company.grid(row = 0 , column = 0 , columnspan = 3  , sticky=W+E)
         
-        self.margin_frame_company = CTkFrame(self.frame_company , fg_color = "pink") 
+        self.margin_frame_company = CTkFrame(self.frame_company , fg_color = "transparent") 
         self.margin_frame_company.grid(row = 1 , column = 0 , sticky = "nswe" , columnspan = 4, rowspan = 2 ,padx = 5 , pady = 5) 
         self.margin_frame_company.grid_columnconfigure(0 , weight = 1)
         self.margin_frame_company.grid_columnconfigure(1 , weight = 1)
@@ -320,28 +325,28 @@ class Main:
         
         self.phone2_button = ttk.Button(self.entry_company_phone2 , image = self.mobile_icon, command = lambda: Actions.call_phone(self , self.company_id.get() , 'company_phone2'))
         self.phone2_button.config(cursor = 'arrow')
-        self.phone2_button.pack(side = "right")      
+        self.phone2_button.pack(side = "right")     
         
-        self.company_contact_buttons = CTkFrame(self.side_frame, fg_color = 'transparent')        
+         #FRAME BUTTONS 
+        
+        self.company_contact_buttons = CTkFrame(self.margin_frame_company, fg_color = 'transparent')        
+        self.company_contact_buttons.grid(row = 11 , column = 0 , columnspan = 2 , sticky = 'nswe' , pady = 5 )
         self.company_contact_buttons.grid_columnconfigure(0, weight = 1)
-        self.company_contact_buttons.grid_columnconfigure(1, weight = 1)
-        #self.company_contact_buttons.grid_columnconfigure(2, weight = 1)
-        
-        #FRAME BUTTONS
+        self.company_contact_buttons.grid_columnconfigure(1, weight = 1) 
+        #self.company_contact_buttons.grid_rowconfigure(0, weight = 1)    
         
         self.button_a = CTkButton(self.company_contact_buttons , textvariable = self.button_a_value , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: States.change_state(self))
         self.button_a.grid(row = 0 , column = 0 , sticky = "we" , pady = 5 , padx = 5)
 
         self.historical_button = CTkButton(self.company_contact_buttons , text = "Historial" , height = 2 , fg_color = "#f4f4f4" , text_color = 'LightBlue4' , border_color = "LightBlue4" , border_width = 2 , hover_color = 'LightBlue4' , command = lambda: OrderFunctions.sales_historical(self))
-        self.historical_button.grid(row = 0 , column = 2 , sticky = "we" , pady = 5 , padx = 5)
+        self.historical_button.grid(row = 0 , column = 1 , sticky = "we" , pady = 5 , padx = 5)
         
         #FRAME CONTACTO
         
         self.contact_frame = CTkFrame(self.side_frame , fg_color = "transparent" , border_width = 1 , border_color = "lightgray" ) 
-        #self.contact_frame.grid_rowconfigure(7,weight=1)
+        self.contact_frame.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky='swe')
         self.contact_frame.grid_columnconfigure(1, weight=1)
-        self.contact_frame.grid_columnconfigure(0, weight=1)
-        #self.side_frame.grid_columnconfigure(3, weight=1)    
+        self.contact_frame.grid_columnconfigure(0, weight=1)   
         
         self.contact_header = Label(self.contact_frame , text = "Contacto" ,bg = 'LightBlue4' , fg = 'white')
         self.contact_header.grid(row = 0 , column = 0 , columnspan = 2  ,sticky=W+E)
@@ -416,11 +421,12 @@ class Main:
         
         self.notes = Text(self.contact_frame)
         self.notes.config(height = 3)
-        self.notes.grid(row = 7, column = 0  , columnspan = 2 , sticky = 'we' , padx = 5 , pady = 2)
+        self.notes.grid(row = 7, column = 0  , columnspan = 2 , sticky = 'we' , padx = 5 , pady = 10)
         self.notes.bind("<Return>" , lambda e: Update.update_client_notes(self , e))
         
-        self.ids_frame = ttk.Frame(self.contact_frame)
-        self.ids_frame.grid(row = 9 , column = 0 , columnspan = 2 , sticky = W+E)
+        
+        self.ids_frame = ttk.Frame(self.side_frame)
+        self.ids_frame.grid(row = 3 , column = 0 , columnspan = 2 , sticky = 'swe')
         self.ids_frame .grid_columnconfigure(0,weight=1)
         self.ids_frame .grid_columnconfigure(1,weight=1)
         self.ids_frame .grid_columnconfigure(2,weight=1)

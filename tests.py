@@ -371,4 +371,15 @@ def check_mail(complete_mail):
                            
                            
                            
-check_mail('j.cortes@algo.com ')
+def delete_peson_by_error(self):
+        
+        query = db.session.query(ContactPerson).filter(ContactPerson.client_id == 'Id de la Empresa')
+        
+        for contact in query:
+            print(contact)
+            db.session.delete(contact)
+        
+        db.session.commit()
+        db.session.close()
+
+delete_peson_by_error("self")

@@ -18,8 +18,6 @@ import pandas as pd
 class SalesTab:
     
     def sales_root(self):
-        
-        
 
         self.main_window.update()
         
