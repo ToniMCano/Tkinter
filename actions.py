@@ -977,7 +977,7 @@ class GetInfo():
     def load_comments(self , nif):
         
         frame_log = CTkScrollableFrame(self.frame_tree, fg_color = "lightgray")
-        frame_log.grid(row = 3 , pady = 5 , padx = 3 , sticky = 'nsew')
+        frame_log.grid(row = 3 , pady = 5 , padx = 3 , columnspan = 2 , sticky = 'nsew')
         
         try:
             for log in frame_log.winfo_children():
@@ -993,7 +993,7 @@ class GetInfo():
         comments = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.id_contact.desc()).all()
         comments_counter = 0
         
-        for comment in comments:
+        for i, comment in enumerate(comments):
             
             log_frame = ttk.Frame(frame_log )
             log_frame.pack(fill = "x" , expand = True , pady = 2)
@@ -2144,9 +2144,9 @@ class Tabs:
         try:
             self.crm_frame.grid(row = 2 , column = 0 , rowspan = 2 , sticky = 'nswe')
             self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan = 3)
-            self.frame_company.grid(row = 1 , column = 1 , sticky = "nswe" , columnspan = 4, padx = 5) 
-            self.contact_frame.grid(row = 3 , column = 1 , columnspan=2 , rowspan = 2 ,  padx = 5 , sticky='nsew')
-            self.company_contact_buttons.grid(row = 2 , column = 1 , columnspan = 2 ,sticky = 'we' , padx   = 5 )
+            self.frame_company.grid(row = 0 , column = 0 , sticky = "nswe" ,  padx = 5) 
+            self.contact_frame.grid(row = 2 , column = 0 , rowspan = 2 ,  padx = 5 , sticky='nsew')
+            self.company_contact_buttons.grid(row = 1 , column = 0 , sticky = 'we' , padx   = 5 )
             self.new_company.grid(row = 0 , column = 0 , padx = 5)
             self.label_calendar_button.grid(row = 0, column = 6)
             self.boton_fecha.grid(row=0, column=1, sticky="ew")

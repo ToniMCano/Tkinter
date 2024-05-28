@@ -51,7 +51,7 @@ class Main:
 
         #self.crm_frame.grid_rowconfigure(1, weight=1)
         
-        self.frame_tree = CTkFrame(self.crm_frame, fg_color='green')
+        self.frame_tree = CTkFrame(self.crm_frame, fg_color='transparent')
         self.frame_tree.grid_columnconfigure(0, weight=1)
 
         self.info = ttk.Treeview(self.frame_tree, height = 20 , style="mystyle.Treeview")
@@ -193,12 +193,12 @@ class Main:
         # LOG
 
         self.frame_log = ttk.Frame(self.frame_tree )
-        self.frame_log.grid(row = 2, column = 0  , sticky = W+E)
+        self.frame_log.grid(row = 2, column = 0  , columnspan = 2 , sticky = W+E)
         self.frame_log.grid_columnconfigure(1, weight=1)
         
         self.text_log =Text(self.frame_log)
         self.text_log.config(height = 3 , width = 80)
-        self.text_log.grid(row = 1 , column = 1, rowspan = 2 , sticky = 'nswe', padx = 5 , pady = 2)
+        self.text_log.grid(row = 1 , column = 1, rowspan = 2 , columnspan = 2 , sticky = 'nswe', padx = 5 , pady = 2)
         
         self.next_contact = ttk.Button(self.frame_log , text = "Next Contact" , command = lambda: MyCalendar.calendar_toggle_frame(self , "next"))
         self.next_contact.config(cursor = 'arrow')
@@ -217,24 +217,27 @@ class Main:
         self.contacts = StringVar()
         
         self.contacts_number = ttk.Frame(self.frame_tree)
-        self.contacts_number.grid(row = 1 , column = 0 , sticky = "nswe")
+        self.contacts_number.grid(row = 1 , column = 0 , columnspan = 2 , sticky = "nswe")
         
         self.contacts_var = CTkLabel(self.contacts_number , textvariable = self.contacts , anchor = 'center' , text_color = 'gray' , font = ("" , 12 , 'bold'))
         self.contacts_var.pack(fill = "both" , expand = True, side = "top" , pady = 3)
         
+        self.side_frame = CTkFrame(self.crm_frame , fg_color = 'green')
+        self.side_frame.grid(row = 1 , column = 1 , sticky = "nswe" , columnspan = 4, padx = 5)
+        self.side_frame.grid_columnconfigure(0 , weight = 1)
+        
         # FRAME EMPRESA
         
-        self.frame_company = CTkFrame(self.crm_frame , fg_color = "transparent" , border_width = 1 , border_color = "lightgray")         
-        self.frame_company.grid_columnconfigure(1, weight=1)
-        self.frame_company.grid_columnconfigure(0, weight=1)
+        self.frame_company = CTkFrame(self.side_frame, fg_color = "orange" , border_width = 1 , border_color = "lightgray")         
+        self.frame_company.grid_columnconfigure(0 , weight = 1)
         
-        self.header_company = CTkLabel(self.frame_company, text="Empresa", bg_color='LightBlue4' , text_color = "white")
+        self.header_company = CTkLabel(self.frame_company , text="Empresa", bg_color='LightBlue4' , text_color = "white")
         self.header_company.grid(row = 0 , column = 0 , columnspan = 3  , sticky=W+E)
         
-        self.margin_frame_company = ttk.Frame(self.frame_company) 
+        self.margin_frame_company = CTkFrame(self.frame_company , fg_color = "pink") 
         self.margin_frame_company.grid(row = 1 , column = 0 , sticky = "nswe" , columnspan = 4, rowspan = 2 ,padx = 5 , pady = 5) 
-        self.margin_frame_company.grid_columnconfigure(1, weight=1)
-        self.margin_frame_company.grid_columnconfigure(0, weight=1)
+        self.margin_frame_company.grid_columnconfigure(0 , weight = 1)
+        self.margin_frame_company.grid_columnconfigure(1 , weight = 1)
         
         self.label_company_name = ttk.Label(self.margin_frame_company, text = "Empresa" , font = ("" , 9 , 'bold'), foreground='LightBlue4')
         self.label_company_name.grid(row = 1 , column = 0,  columnspan=2, padx = 2 , pady = 2 , sticky = W+E)
@@ -319,7 +322,7 @@ class Main:
         self.phone2_button.config(cursor = 'arrow')
         self.phone2_button.pack(side = "right")      
         
-        self.company_contact_buttons = CTkFrame(self.crm_frame , fg_color = 'transparent')        
+        self.company_contact_buttons = CTkFrame(self.side_frame, fg_color = 'transparent')        
         self.company_contact_buttons.grid_columnconfigure(0, weight = 1)
         self.company_contact_buttons.grid_columnconfigure(1, weight = 1)
         #self.company_contact_buttons.grid_columnconfigure(2, weight = 1)
@@ -334,12 +337,11 @@ class Main:
         
         #FRAME CONTACTO
         
-        self.contact_frame = CTkFrame(self.crm_frame , fg_color = "transparent" , border_width = 1 , border_color = "lightgray" ) 
+        self.contact_frame = CTkFrame(self.side_frame , fg_color = "transparent" , border_width = 1 , border_color = "lightgray" ) 
         #self.contact_frame.grid_rowconfigure(7,weight=1)
         self.contact_frame.grid_columnconfigure(1, weight=1)
         self.contact_frame.grid_columnconfigure(0, weight=1)
-        self.contact_frame.grid_columnconfigure(0, weight=1) 
-        #self.crm_frame.grid_columnconfigure(3, weight=1)    
+        #self.side_frame.grid_columnconfigure(3, weight=1)    
         
         self.contact_header = Label(self.contact_frame , text = "Contacto" ,bg = 'LightBlue4' , fg = 'white')
         self.contact_header.grid(row = 0 , column = 0 , columnspan = 2  ,sticky=W+E)
