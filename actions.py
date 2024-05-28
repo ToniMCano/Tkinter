@@ -2189,7 +2189,7 @@ class Tabs:
         
         try:
             self.sales_frame.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
-            self.sales_view_button.configure(state = 'disabled')
+            Tabs.enabled_view_button(self.sales_view_button)
             self.statistics_view_button.configure(state = 'normal')
             self.crm_view_button.configure(state = 'normal')
         
@@ -2197,6 +2197,22 @@ class Tabs:
             print('AttributeError: sales')
             
             
+    def enabled_view_button(button):
+        
+        button.configure(state = 'disabled')
+        button.configure(fg_color = 'white')
+        button.configure(border_width = 2)
+        button.configure(border_color = 'Lightblue4')
+        button.configure(text_color = 'Lightblue4') 
+        
+        
+    def disabled_view_button(button):
+        
+        button.configure(state = 'normal')
+        button.configure(border_width = 0)
+        button.configure(fg_color = 'Lightblue4')
+        button.configure(text_color = 'white') 
+              
             
     def statistics_view(self):
         

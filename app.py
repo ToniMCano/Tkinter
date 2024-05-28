@@ -168,8 +168,8 @@ class Main:
         self.boton_fecha.config(cursor = 'arrow')
         self.boton_fecha.grid(row=0, column=1, sticky="ew")
         
-        self.frame_views = ttk.Frame(self.header , height = 20 , width = 300)
-        self.frame_views.place(relx=0.4 , y = 10) 
+        self.frame_views = ttk.Frame(self.header , height = 30 , width = 300)
+        self.frame_views.place(relx=0.4 , y = 2) 
         
         self.crm_view_button = CTkButton(self.frame_views , text = "CRM" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10  , command = lambda: Tabs.select_tab(self , 'crm'))
         self.crm_view_button.place(relx=0.2, rely=0.5  , anchor = 'center')
