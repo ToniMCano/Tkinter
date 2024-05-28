@@ -23,6 +23,41 @@ import subprocess
 alerts = []
 active_timer = [False]
 
+
+class Admin:
+
+    def admin_activate(self , e):
+            
+            global admin 
+            
+            employee = db.session.get(Employee , self.active_employee_id.get()) 
+            
+            if employee.permissions == 0 or admin == True:
+                
+                admin = True
+                
+                self.admin_mode = CTkButton(self.header , text = 'Admin Logout' ,command = lambda: Pops.deactivate_admin(self) , width = 80)
+                self.admin_mode.place(relx = 0.7 , rely = 0.1)
+                
+        
+    def deactivate_admin(self):
+        
+        global admin
+        admin = False
+        
+        self.admin_mode.place_forget()
+        
+        self.active_employee_id.set("")
+        self.company_id.set("")
+        
+        clean = self.info.get_children()
+        
+        for x in clean:
+            self.info.delete(x)
+        
+        Pops.login(self)
+
+
 class Pops:
     
     def center_window(self, window):
@@ -69,20 +104,6 @@ class Pops:
         login_window.lift()
         Pops.center_window(Pops , login_window)
     
-              
-    def admin_activate(self , e):
-        
-        global admin 
-        
-        employee = db.session.get(Employee , self.active_employee_id.get()) 
-        
-        if employee.permissions == 0 or admin == True:
-            
-            admin = True
-            
-            self.admin_mode = CTkButton(self.header , text = 'Admin Logout' ,command = lambda: Pops.deactivate_admin(self) , width = 80)
-            self.admin_mode.place(relx = 0.7 , rely = 0.1)
-    
 
     def change_employee(self , e):
         
@@ -100,25 +121,7 @@ class Pops:
             mb.showinfo("Permisos" , "Se necesitan permisos de Administrador para realizar esta acción.")
             self.employee.set(alias.employee_alias)
     
-    
-    def deactivate_admin(self):
-        
-        global admin
-        admin = False
-        
-        self.admin_mode.place_forget()
-        
-        self.active_employee_id.set("")
-        self.company_id.set("")
-        
-        clean = self.info.get_children()
-        
-        for x in clean:
-            self.info.delete(x)
-        
-        Pops.login(self)
-        
-     
+ 
     def create_contact(self , company = ""): # #ecibir el id de la empresa.
         
         frame = tk.Toplevel()
@@ -223,8 +226,19 @@ class Pops:
             
             print(f"[get_person_data]: {e}")
                  
-            
+  
+    def current_combo(data, combo):
         
+        if combo == "employees":
+            combo = [" < 10" , "10 - 50" , "50 - 250" , " > 250"]
+
+        index = combo.index(data)
+            
+        return (index)   
+     
+
+class NewCompany:
+    
     def new_company(self, data = {"Nombre Empresa: " : '' , "N.I.F.: " : '' , "NACE: " : '' , "Empleados: " : '', "Dirección: " : "" , "Código Postal: " : ""  , "Web: " : '', "Mail Empresa: " : '', "Teléfono Empresa: " : '', "Teléfono2 Empresa: " : '', "Nombre Contacto: " : '', "Apellidos Contacto: " : '', "Cargo: " : '', "Mail Contacto: " :'', "Teléfono Contacto: " : '', "Móvil Contacto: " : '' , 'save' : True}):
     
         #load_image= Image.open("recursos/upload.png")
@@ -453,10 +467,10 @@ class Pops:
         """ , justify = 'left')
         message.grid(row = 0 , column =0 , columnspan = 2 ,  sticky = W+E)
         
-        show_button = ttk.Button(show , text = "Ver Empresa" , width = 20 , command = lambda: Pops.new_company_window(self , 'show' , show , company_name))
+        show_button = ttk.Button(show , text = "Ver Empresa" , width = 20 , command = lambda: NewCompany.new_company_window(self , 'show' , show , company_name))
         show_button.grid(row = 1 , column = 0 , padx = 10 , pady = 10 , sticky = W+E)
         
-        continue_button = ttk.Button(show , text = "Continuar" , width = 20 , command = lambda: Pops.new_company_window(self , '' , show , company_name) )
+        continue_button = ttk.Button(show , text = "Continuar" , width = 20 , command = lambda: NewCompany.new_company_window(self , '' , show , company_name) )
         continue_button.grid(row = 1 , column = 1 , padx = 10 , pady = 10 , sticky = W+E)
         
         Pops.center_window(Pops , show)
@@ -473,15 +487,6 @@ class Pops:
             else:
                 window.destroy()
  
-    def current_combo(data, combo):
-        
-        if combo == "employees":
-            combo = [" < 10" , "10 - 50" , "50 - 250" , " > 250"]
-
-        index = combo.index(data)
-            
-        return (index)   
-     
  
  
 class MyCalendar():
@@ -490,16 +495,16 @@ class MyCalendar():
         
         if place == "general":
             frame = self.frame_calendar
-            frame.place(x = 320, y = 50) 
+            frame.place(x = 200, y = 5) 
             
         elif place == 'next':
             frame = self.frame_calendar_next
-            frame.place(x = 0, y = 242) 
+            frame.place(x = 0, y = 212) 
             
         
         elif place == "pop":
             frame = self.frame_calendar_pop
-            frame.place(x = 0, y = 272) 
+            frame.place(x = 0, y = 242) 
             
         frame.lift() 
         
@@ -654,13 +659,22 @@ class LoadInfo():
                 Alerts.refresh_alerts(root , employee.id_employee)
             
                 if employee.employee_alias == "ADMN":
-                    Pops.admin_activate(root , "")
+                    Admin.admin_activate(root , "")
                     
         if not exists:
             mb.showwarning("Login Error" , "El usuario o la contraseña no son correctos")
             window.lift()
+            
+        try:
+            if root.active_employee_id != None:
+                root.new_company.grid(row = 0 , column = 0 , padx = 5)
+                
+            else:
+                root.new_company.grid_foguet()
+                
+        except Exception as e:
+            print(f"[crm_view] (Add Compnay): {e}")
 
-    
     
     def on_heading_click(self , query):
         
@@ -749,6 +763,15 @@ class LoadInfo():
         self.contacts.set(f"Contactos: {contacts}")
 
         Alerts.check_pop_ups(self , employee_id_sended )
+        
+        LoadInfo.combo_state_value(self , state_sended)
+        
+        
+    def combo_state_value(self , state_sended):
+        
+        states = ["Lead", "Candidate", "Contact" , "Pool" , 'All']
+        index = states.index(state_sended)
+        self.combo_state.current(newindex = index)       
     
     
     def contacts_dataframe(self, clients, dataframe, pd_filter , ascending_value): 
@@ -947,50 +970,9 @@ class LoadInfo():
 
         LoadInfo.load_contacts(self , employee , fecha_seleccionada , 'last' , state_sended) 
     
-    
-    def select_tab(self , view):
-            
-        print(f'********{view}********')
-        
-        if view == 'crm':
-           
-            LoadInfo.crm_view(self)
-            self.crm_root.grid(row = 1 , column = 0 , sticky = 'nswe')
-            try:
-                self.sales_root.grid_forget()
-                
-            except AttributeError:
-                pass
-            
-            except Exception as e:
-                print(f"[select_tab] (crm): {e}")
-                
-        else:
-            self.crm_root.grid_forget()
-                   
-            
-    def crm_view(self):
-        
-        self.employee['values'] = LoadInfo.employees_list() 
-        self.employee.grid(row = 0 , column = 3 , padx = 5)
-        
-        self.combo_state['values'] = ["Lead", "Candidate", "Contact" , "Pool" , 'All']
-        
-        try:
-            employee = db.session.get(Employee , self.active_employee_id.get())
-            alias = LoadInfo.employees_list().index(employee.employee_alias)
-            self.employee.current(newindex = alias) 
-
-        except AttributeError:
-            pass
-        
-        except Exception as e:
-            print(e)
-
 
 
 class GetInfo():
-    
         
     def button_a_state(self , state):
         
@@ -1017,8 +999,8 @@ class GetInfo():
     
     def load_comments(self , nif):
         
-        frame_log = CTkScrollableFrame(self.frame_tree, fg_color = "lightgray")
-        frame_log.grid(row = 3 , pady = 5 , padx = 3 , sticky = 'nsew')
+        frame_log = CTkScrollableFrame(self.frame_tree, fg_color = "lightgray" , corner_radius = 0 )
+        frame_log.grid(row = 3 , columnspan = 2 , sticky = 'nsew')
         
         try:
             for log in frame_log.winfo_children():
@@ -1034,18 +1016,15 @@ class GetInfo():
         comments = db.session.query(Contact).filter(Contact.client_id == client.id_client).order_by(Contact.id_contact.desc()).all()
         comments_counter = 0
         
-        for comment in comments:
+        for i, comment in enumerate(comments):
             
-            log_frame = ttk.Frame(frame_log )
-            log_frame.pack(fill = "x" , expand = True , pady = 2)
+            log_frame = CTkFrame(frame_log)
+            log_frame.pack(fill = "x" , expand = True , pady = 5 , padx = 5)
             
-            label_info = tk.Label(log_frame , text = f"{GetInfo.load_info_log(comment.client_id , comment.last_contact_date , comment.contact_type)}" , bg = 'LightBlue4' , fg = "white")
+            label_info = CTkLabel(log_frame , text = f"{GetInfo.load_info_log(comment.client_id , comment.last_contact_date , comment.contact_type)}" , fg_color = 'LightBlue4' , text_color = "white" , corner_radius = 4)
             label_info.pack(fill = "x" , expand = True)
             
-            #frame_log_content = CTkScrollableFrame(log_frame , height = 10)
-            #frame_log_content.pack(fill = "x" , expand = True)
-            
-            label_content = tk.Label(frame_log , text = f"{comment.log}" , bg = "White" , anchor = 'w' ,  wraplength = 570 , justify = "left")
+            label_content = CTkLabel(log_frame , text = f"{comment.log}" , fg_color = "White" , anchor = 'w' ,  wraplength = 570 , justify = "left" , corner_radius = 4)
             label_content.pack(fill = "x" , expand = True)
             
             comments_counter += 1
@@ -1139,9 +1118,7 @@ class GetInfo():
         except Exception as e:
             print(f'Error al cargar los datos: {e}')
         
-        
-        #
-    
+
     def format_adress_to_Show(adress , cp):
         
         street , number , floor , city , province = adress.split("-")
@@ -1329,10 +1306,13 @@ Envíado: {complete_mail}    Formato Correcto: xxx@xxxx.xx...
                 AddInfo.add_company(self , data , add_company_frame)
                             
             else:
-                Pops.new_company(self , data)
+                NewCompany.new_company(self , data)
             
         except Exception as e:
             print(f'[test_add_company]: {e}') 
+            
+        finally:
+            add_company_frame.destroy()
                 
         
         
@@ -1359,24 +1339,37 @@ class AddInfo():
             
             add_company_frame.destroy() 
              
-            Pops.show_new_company(self , data['Nombre Empresa: '] , data['Nombre Contacto: '] , data['Apellidos Contacto: '] , data['Cargo: '])
+            NewCompany.show_new_company(self , data['Nombre Empresa: '] , data['Nombre Contacto: '] , data['Apellidos Contacto: '] , data['Cargo: '])
 
         except Exception as e:
             
             if isinstance(e, IntegrityError) or isinstance(e, SQLAlchemyError) :
                 print("[add_company SQL]" , e)
                 mb.showerror("Error de Integridad" , f"La empresa ya existe, el Nombre o el N.I.F. ya existen en la Base de Datos.")
+                db.session.rollback()
                 
             else:
                 print("[add_company]" , e)
                 mb.showerror("Ha ocurrido un error inesperado" , f"{e}")
                 
-            db.session.delete(vcontact_person.id_person)
-            db.session.close()
+            
+            AddInfo.delete_peson_by_error(self)
             
             add_company_frame.destroy()    
+            data["N.I.F.: "] = ""
+            NewCompany.new_company(self , data)
             
-            Pops.new_company(data)
+            
+            
+    def delete_peson_by_error(self):
+        
+        query = db.session.query(ContactPerson).filter(ContactPerson.client_id == 'Id de la Empresa')
+        
+        for contact in query:
+            db.session.delete(contact)
+        
+        db.session.commit()
+        db.session.close()
  
             
     def add_companies_from_file():
@@ -1424,7 +1417,7 @@ class AddInfo():
            company_id=  "Id de la Empresa"
         
         try:                                                                                                                                                                                                # TO-DO sustituir por la empresa adminstradora
-            contact_person = ContactPerson(data["Nombre Contacto: "] , data["Apellidos Contacto: "] , data["Cargo: "] , data["Teléfono Contacto: "] , data["Móvil Contacto: "] , data["Mail Contacto: "] , company_id , employee_adder)
+            contact_person = ContactPerson(data["Nombre Contacto: "] , data["Apellidos Contacto: "] , data["Cargo: "] , data["Teléfono Contacto: "] , data["Móvil Contacto: "] , data["Mail Contacto: "] , company_id , "" , employee_adder)
                 
             db.session.add(contact_person)
             db.session.commit()
@@ -1530,7 +1523,9 @@ class Alerts():
         
     def view_alert(self , name , window , employee_id_sended , date):
         
-        LoadInfo.load_contacts(self , employee_id_sended , date , query = 'last' , state_sended = "Contact")
+        company = db.session.query(Client).filter(and_(Client.name == name , Client.employee_id == employee_id_sended)).first()
+        
+        LoadInfo.load_contacts(self , employee_id_sended , date , query = 'last' , state_sended = company.state)
         
         tree = self.info.get_children()
         
@@ -1851,26 +1846,44 @@ class Update:
         self.close_update_button = CTkButton(self.frame_update_adress , text = 'x' , height = 5 , width = 20, fg_color = 'Lightblue4' , command = lambda: self.frame_update_adress.grid_forget())
         self.close_update_button.grid(row = 0 , column =0 , sticky = W)
         
+        self.label_update_street = CTkLabel(self.frame_update_adress , text = "Calle" , text_color = 'Lightblue4' , anchor = 'w'  , font = ("" , 12 , 'bold'))
+        self.label_update_street.grid(row = 1 , column = 0 , sticky = W+E , padx = 5)
+           
         self.entry_update_street = CTkEntry(self.frame_update_adress , textvariable = self.street , width = 150 , fg_color = "white" , border_width = 1 , border_color = 'Lightblue4' , corner_radius = 3 , text_color = 'gray')
-        self.entry_update_street.grid(row = 1 , column = 0 , sticky = W+E , padx = 5 , pady = 5)
+        self.entry_update_street.grid(row = 2 , column = 0 , sticky = W+E , padx = 5 , pady = 5)
+        
+        self.label_update_number = CTkLabel(self.frame_update_adress , text = "Número" , text_color = 'Lightblue4' , anchor = 'w'  , font = ("" , 12 , 'bold'))
+        self.label_update_number.grid(row = 1 , column = 1 , sticky = W+E , padx = 5)
                 
         self.entry_update_number = CTkEntry(self.frame_update_adress , textvariable = self.number , width = 35 , fg_color = "white" , border_width = 1 , border_color = 'Lightblue4' , corner_radius = 3 , text_color = 'gray')
-        self.entry_update_number.grid(row = 1 , column = 1 , sticky = W+E , padx = 5 , pady = 5)
-                
+        self.entry_update_number.grid(row = 2 , column = 1 , sticky = W+E , padx = 5 , pady = 5)
+        
+        self.label_update_floor = CTkLabel(self.frame_update_adress , text = "Piso" , text_color = 'Lightblue4' , anchor = 'w'  , font = ("" , 12 , 'bold'))
+        self.label_update_floor.grid(row = 1 , column = 2 , sticky = W+E , padx = 5)
+                        
         self.entry_update_floor = CTkEntry(self.frame_update_adress , textvariable = self.floor , width = 35 , fg_color = "white" , border_width = 1 , border_color = 'Lightblue4' , corner_radius = 3 , text_color = 'gray')
-        self.entry_update_floor.grid(row = 1 , column = 2 , sticky = W+E , padx = 5 , pady = 5)
+        self.entry_update_floor.grid(row = 2 , column = 2 , sticky = W+E , padx = 5 , pady = 5)
         
+        self.label_update_province = CTkLabel(self.frame_update_adress , text = "Provincia" , text_color = 'Lightblue4' , anchor = 'w'  , font = ("" , 12 , 'bold'))
+        self.label_update_province.grid(row = 1 , column = 3 , sticky = W+E , padx = 5)
+               
         self.entry_update_province = CTkEntry(self.frame_update_adress , textvariable = self.province , width = 60 , fg_color = "white" , border_width = 1 , border_color = 'Lightblue4' , corner_radius = 3 , text_color = 'gray')
-        self.entry_update_province.grid(row = 1 , column = 3 , sticky = W+E , padx = 5 , pady = 5)
+        self.entry_update_province.grid(row = 2 , column = 3 , sticky = W+E , padx = 5 , pady = 5)
         
+        self.label_update_city = CTkLabel(self.frame_update_adress , text = "Ciudad" , text_color = 'Lightblue4' , anchor = 'w'  , font = ("" , 12 , 'bold'))
+        self.label_update_city.grid(row = 1 , column = 4 , sticky = W+E , padx = 5)
+           
         self.entry_update_city = CTkEntry(self.frame_update_adress , textvariable = self.city , width = 60 , fg_color = "white" , border_width = 1 , border_color = 'Lightblue4' , corner_radius = 3 , text_color = 'gray')
-        self.entry_update_city.grid(row = 1 , column = 4 , sticky = W+E , padx = 5 , pady = 5)
+        self.entry_update_city.grid(row = 2 , column = 4 , sticky = W+E , padx = 5 , pady = 5)
         
+        self.label_update_postal_code = CTkLabel(self.frame_update_adress , text = "Código Postal" , text_color = 'Lightblue4' , anchor = 'w'  , font = ("" , 12 , 'bold'))
+        self.label_update_postal_code.grid(row = 1 , column = 5 , sticky = W+E , padx = 5)
+           
         self.entry_update_postal_code = CTkEntry(self.frame_update_adress , textvariable = self.postal_code , width = 60 , fg_color = "white" , border_width = 1 , border_color = 'Lightblue4' , corner_radius = 3 , text_color = 'gray')
-        self.entry_update_postal_code.grid(row = 1 , column = 5 , sticky = W+E , padx = 5 , pady = 5)
+        self.entry_update_postal_code.grid(row = 2 , column = 5 , sticky = W+E , padx = 5 , pady = 5)
         
         self.update_adress_button = CTkButton(self.frame_update_adress , text = 'Save' , width = 60 , fg_color = 'Lightblue4' , corner_radius = 2 , height = 10 , command = lambda: Update.update_adress_fields(self))
-        self.update_adress_button.grid(row = 2 , column = 0 , columnspan = 6  , padx = 5 , pady = 5)
+        self.update_adress_button.grid(row = 3 , column = 0 , columnspan = 6  , padx = 5 , pady = 5)
     
     
     def update_adress_fields(self):
@@ -2035,96 +2048,263 @@ class States:
     
     def change_contact_state(self , client ,employee):
         
-        client.state = "Pool"
-        client.employee_id = 0
+        try:
+            terminate = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Terminated by: [{employee.id_employee}] {employee.employee_alias}' , client.id_client , employee.id_employee , client.contact_person  ,'Termninated'  , client.counter , False )
+            db.session.add(terminate)
+            
+            client.state = "Pool"
+            client.employee_id = 0
+            
+            row = States.update_row(self, client)
+            
+            Logs.confirm_unique_pop(terminate)
+            
+            row[1][3] = row[1][3].replace( '◉' , "")
+            
+            self.info.item( row[2] , text = "(Terminated)" , values = row[1] , tags=("font_red"))
         
-        terminate = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Terminated by: [{employee.id_employee}] {employee.employee_alias}' , client.id_client , employee.id_employee , client.contact_person  ,'Termninated'  , client.counter , False )
-        db.session.add(terminate)
-        
-        row = Logs.row_to_change(self , client.name) # return [text , values , item]
-        db.session.commit()
-        
-        Logs.confirm_unique_pop(terminate)
-        
-        row[1][3] = row[1][3].replace( '◉' , "")
-        
-        self.info.item( row[2] , text = "(Terminated)" , values = row[1] , tags=("font_red"))
+        except Exception as e:
+            print(f"[change_contact_state]: {e}")
 
         
     def change_candidate_state(self , client ,employee):  
-                                                                                                                
-        contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Started by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Candidate'  , client.counter , False )
-        db.session.add(contact)
         
-        client.state = "Contact"
+        try:                                                                                                    
+            contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Started by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Candidate'  , client.counter , False )
+            db.session.add(contact)
+            
+            client.state = "Contact"
+            
+            row = States.update_row(self, client)
+            
+            self.info.item( row[2] , text = "Contact" , values = row[1] , tags=("font_green"))
         
-        client.start_contact_date = str(datetime.now())[0:16]
-        
-        row = States.update_row(self, client)
-        
-        self.info.item( row[2] , text = "Contact" , values = row[1] , tags=("font_green"))
+        except Exception as e:
+            print(f"[change_candidate_state]: {e}")
         
     
     def change_pool_state(self , client ,employee):
-  
-        client.counter = client.counter + 1  
-        client.employee_id = employee.id_employee
-                                                                                                                
-        contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Add by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Pool'  , client.counter , False )
-        db.session.add(contact)
         
-        client.state = "Lead"
+        try:
+            client.counter = client.counter + 1  
+            client.employee_id = employee.id_employee
+                                                                                                                    
+            contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Add by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Pool'  , client.counter , False )
+            db.session.add(contact)
+            
+            client.state = "Lead"
+            
+            row = States.update_row(self, client)
+            
+            self.info.item( row[2] , text = "Lead" , values = row[1] , tags=("font_green"))
         
-        row = States.update_row(self, client)
-        
-        self.info.item( row[2] , text = "Lead" , values = row[1] , tags=("font_green"))
-    
+        except Exception as e:
+            print(f"[change_pool_state]: {e}")
+            
     
     def change_lead_state(self , client ,employee):
         
-        contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Checked by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Pool'  , client.counter , False )
-        db.session.add(contact)
+        try:
+            contact = Contact(str(datetime.now())[0:16] , str(datetime.now())[0:16] , f'Checked by: [{employee.id_employee}] {employee.employee_alias} --OK--' , client.id_client , employee.id_employee , client.contact_person  ,'Pool'  , client.counter , False )
+            db.session.add(contact)
+            
+            client.state = "Candidate"
+            
+            row = States.update_row(self, client)
+            
+            self.info.item( row[2] , text = "Candidate" , values = row[1] , tags=("font_green"))
         
-        client.state = "Candidate"
-        
-        row = States.update_row(self, client)
-        
-        self.info.item( row[2] , text = "Candidate" , values = row[1] , tags=("font_green"))
+        except Exception as e:
+            print(f"[change_lead_state]: {e}")
 
 
     def update_row(self, client):
         
-        client.start_contact_date = str(datetime.now())[0:16]
+        try:
+            client.start_contact_date = str(datetime.now())[0:16]
+            
+            row = Logs.row_to_change(self , client.name) # return [text , values , item]
+            row[1][2] = MyCalendar.format_date_to_show(str(datetime.now())[0:16])
+            row[1][3] = MyCalendar.format_date_to_show(str(datetime.now())[0:16])
+            
+            return row    
         
-        row = Logs.row_to_change(self , client.name) # return [text , values , item]
-        row[1][2] = MyCalendar.format_date_to_show(str(datetime.now())[0:16])
-        row[1][3] = MyCalendar.format_date_to_show(str(datetime.now())[0:16])
-        
-        return row    
+        except Exception as e:
+            print(f"[update_row]: {e}")
         
         
         
 class Tabs:
-    
-    def crm_tab(self , view):
+
+
+    def select_tab(self , view):
+            
+        print(f'********{view}********')
         
-        if view == 'CRM':
-            self.frame_tree.grid(row = 1 , column = 0 , sticky = "nswe" ,  rowspan=3)
-            self.frame_company.grid(row = 1 , column = 5 , sticky = "nswe" , columnspan = 4, padx = 5) 
-            self.contact_frame.grid(row = 3 , column = 5 , columnspan=2 , rowspan = 2 ,  padx = 5 , sticky='nsew')
-            self.company_contact_buttons.grid(row = 2 , column = 5 , columnspan = 2 ,sticky = 'nswe' , padx   = 5 )
-            self.new_company.grid(row = 0 , column = 0 , padx = 5)
+        if view == 'crm':
+            Tabs.hide_tabs(self)
+            
+            Tabs.crm_view(self)
+            Tabs.enabled_view_button(self.crm_view_button)
+            Tabs.disabled_view_button(self.sales_view_button)
+            Tabs.disabled_view_button(self.statistics_view_button)
+            
+            
+        elif view == 'sales':
+            Tabs.hide_tabs(self)
+
+            Tabs.sales_view(self)
+            
+
+        else:
+            Tabs.hide_tabs(self)
+            
+            Tabs.statistics_view(self)
+            
+    
+    def hide_tabs(self):
+
+        try:
+            self.statistics_frame.grid_forget()
+            
+        except AttributeError:
+            pass
+        
+        except Exception as e:
+            print(f"[hide_tabs] (statistics): {e}")
+            
+        try:
+            self.sales_frame.grid_forget()
+            
+        except AttributeError:
+            pass
+        
+        except Exception as e:
+            print(f"[hide_tabs] (sales): {e}")
+            
+        try:
+            self.crm_frame.grid_forget()
+            
+        except AttributeError:
+            pass
+        
+        except Exception as e:
+            print(f"[hide_tabs] (crm): {e}")
+            
+        
+            
+    def crm_view(self):
+        
+        try:
+            self.crm_frame.grid(row = 2 , column = 0 , rowspan = 2 , sticky = 'nswe')
             self.label_calendar_button.grid(row = 0, column = 6)
             self.boton_fecha.grid(row=0, column=1, sticky="ew")
             self.combo_state.grid(row = 0 , column = 4 , padx = 5)
             self.frame_calendar_button.grid(row = 0 , column = 5 , padx = 5)
+            self.employee.grid(row = 0 , column = 3 , padx = 5)
+            self.combo_state['values'] = ["Lead", "Candidate", "Contact" , "Pool" , 'All']
+            self.combo_state.current(newindex = 2)   
             
-            LoadInfo.select_tab(self , 'crm')
+            if self.active_employee_id.get():
+                self.new_company.grid(row = 0 , column = 0 , padx = 5)    
             
-            self.combo_state.current(newindex = 2)
+            self.employee['values'] = LoadInfo.employees_list() 
+        
+        except Exception as e:
+            print(f"[crm_view] (grids): {e}")
+  
+        try:
+            employee = db.session.get(Employee , self.active_employee_id.get())
+            alias = LoadInfo.employees_list().index(employee.employee_alias)
+            self.employee.current(newindex = alias) 
 
-
+        except AttributeError:
+            pass
+        
+        except Exception as e:
+            print(f"[crm_view] (employee): {e}")
             
+        
+    def sales_view(self):
+        
+        Tabs.forget_crm_header(self)
+        
+        try:
+            self.statistics_frame.grid_forget()
+
+        except AttributeError:
+            pass
+
+        except Exception as e:
+            print(f"[sales_view]: {e}")
+        
+        try:
+            self.sales_frame.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
+            Tabs.enabled_view_button(self.sales_view_button)
+            Tabs.disabled_view_button(self.statistics_view_button)
+            Tabs.disabled_view_button(self.crm_view_button)
+  
+        except AttributeError:
+            print('AttributeError: sales')
+            
+            
+    def enabled_view_button(button):
+        
+        button.configure(state = 'disabled')
+        button.configure(fg_color = 'white')
+        button.configure(border_width = 2)
+        button.configure(border_color = 'Lightblue4')
+        button.configure(text_color_disabled = 'Lightblue4') 
+        
+        
+    def disabled_view_button(button):
+        
+        button.configure(state = 'normal')
+        button.configure(border_width = 0)
+        button.configure(fg_color = 'Lightblue4')
+        button.configure(text_color = 'white') 
+              
+            
+    def statistics_view(self):
+        
+        Tabs.forget_crm_header(self)
+        
+        try:
+            self.sales_frame.grid_forget()
+
+        except AttributeError:
+            pass
+
+        except Exception as e:
+            print(f"[statistics_view]: {e}")
+        
+        try:
+            self.statistics_frame.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
+            Tabs.enabled_view_button(self.statistics_view_button)
+            Tabs.disabled_view_button(self.sales_view_button)
+            Tabs.disabled_view_button(self.crm_view_button)
+
+        except AttributeError:
+            print('AttributeError: statistics')
+    
+        
+        
+    def forget_crm_header(self):
+        
+        try:
+            self.crm_frame.grid_forget()
+            self.new_company.grid_forget()
+            self.label_calendar_button.grid_forget()
+            self.boton_fecha.grid_forget()
+            self.combo_state.grid_forget()
+            self.frame_calendar_button.grid_forget()
+            self.employee.grid_forget()
+            
+        except AttributeError:
+            pass
+        
+                
+
 class ContactActions:
     
     
@@ -2148,6 +2328,12 @@ class ContactActions:
         self.other_contact.pack(side = "left" , fill = "y")
         self.new_contact_button.pack(side = "right") 
         self.contacts_frame.pack_forget()
+        
+        try:
+            self.frame_update_adress.grid_forget()
+        
+        except Exception as e:
+            print(f"[close_other_contact] (frame_update_adress): {e}")
         
     
     def charge_contacts(self):

@@ -21,20 +21,11 @@ class StatisticsTab:
     
     def statistics_root(self):
         
-        try:
-            self.sales_root.grid_forget()
-            
-        except AttributeError as e:
-            pass
-        
-        except Exception as e:
-            print(f"[statistics_root]: {e}")
-            
-        
-        LoadInfo.select_tab(self , 'statistics') 
-        
         self.statistics_frame = CTkFrame(self.main_window , fg_color = 'transparent')
-        self.statistics_frame.grid(row = 2, column = 0, columnspan = 6 , rowspan = 2 , sticky = 'nswe' , padx = 5 , pady = 5)
+        
+        Tabs.select_tab(self , 'statistics') 
+        
+        self.statistics_frame.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
         self.statistics_frame.grid_columnconfigure(0 ,weight = 4)
         self.statistics_frame.grid_columnconfigure(1 ,weight = 1)
         self.statistics_frame.grid_rowconfigure(0 ,weight = 1)        
