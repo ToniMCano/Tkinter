@@ -1,5 +1,5 @@
 from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs 
-from sales_actions import OrderFunctions
+from sales_actions import OrderFunctions , ModifyDeleteOrder
 import tkinter as tk
 from tkinter import ttk , filedialog
 from tkinter import *
@@ -94,7 +94,7 @@ class SalesTab:
         self.products_tree.column("#3" , width = 25 , anchor="center")
         self.products_tree.column("#4" , width = 80 , anchor="w")
         self.products_tree.column("#5" , width = 80 , anchor="w")
-        self.products_tree.bind("<ButtonRelease-1>" , lambda event: OrderFunctions.get_product(self , event))       
+        self.products_tree.bind("<ButtonRelease-1>" , lambda event: OrderFunctions.get_product(self , "products" , event))       
                 
         OrderFunctions.show_products(self)
         
@@ -148,7 +148,7 @@ class SalesTab:
         self.order_tree.column("#4" , width = 40 , anchor="w")
         self.order_tree.column("#5" , width = 40 , anchor="w")
         
-        self.order_tree.bind("<ButtonRelease-1>" , lambda event: OrderFunctions.get_product(self , "products" ,event))
+        self.order_tree.bind("<ButtonRelease-1>" , lambda event: ModifyDeleteOrder.focus_product_list(self , event))
         
         
         OrderFunctions.show_products(self)
@@ -175,7 +175,7 @@ class SalesTab:
         self.add_units_button = CTkButton(self.sales_order_dashboard , textvariable = self.add_units_button_text , corner_radius = 2 , fg_color = 'Lightblue4' , height = 15 , text_color = 'white' , width = 50 , command = lambda: OrderFunctions.get_product(self , 'order'))
         self.add_units_button.grid(row = 0 , column = 1 , sticky = W+E , padx = 5 , pady = 5)
         
-        self.delete_button = CTkButton(self.sales_order_dashboard , text = 'Eliminar' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 1 , border_color = "gray" , width = 50 , command = lambda: OrderFunctions.eliminate_product(self))
+        self.delete_button = CTkButton(self.sales_order_dashboard , text = 'Eliminar' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 1 , border_color = "gray" , width = 50 , command = lambda: ModifyDeleteOrder.delete_product(self))
         self.delete_button.grid(row = 0 , column = 2 , sticky = W+E , padx = 5 , pady = 5)
         
         self.send_order = CTkButton(self.sales_order_dashboard , text = 'Realizar Pedido' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'Lightblue4' , border_width = 2 , border_color = "Lightblue4" , width = 50 , command = lambda: OrderFunctions.send_order(self))

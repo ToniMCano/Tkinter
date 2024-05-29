@@ -1051,7 +1051,7 @@ class GetInfo():
             return f"{MyCalendar.format_date_to_show(last_contact)} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}] {pop}"
             
         except Exception as e:
-            print("load_info_log" , e)
+            print("[load_info_log:]" , e)
 
 
     def load_client_info(tree , client_name):

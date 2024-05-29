@@ -118,8 +118,7 @@ class OrderFunctions:
         return contacts
     
     
-    def get_product(self , place , e):
-
+    def get_product(self , place , e): # Revisar desde delete_product
         try:
             reference = LoadInfo.get_item(self , "products" , self.products_tree , e)
             print(reference)
@@ -200,21 +199,7 @@ class OrderFunctions:
             print(f"[calculate_import]: {e}")
         
         
-        
-    def delete_product(self):
-        
-        try:
-            item = self.order_tree.focus()
-            
-            self.order_tree.delete(item)
-            
-            OrderFunctions.get_product(self , "products" , e)
-            
-            OrderFunctions.calculate_import(self , e = "")
-        
-        except Exception as e:
-            print(f"[delete_product]: {e}")
-        
+
         
     def send_order(self): 
   
@@ -464,12 +449,7 @@ class OrderFunctions:
         
             self.products_total_import = CTkLabel(self.product_view_frame  , text = f'{product.total_import}' , text_color = 'gray')
             self.products_total_import.grid(row = 0 , column = 5 , padx = 5 , pady = 5 , sticky = W+E)
-            
-            #self.delete_product_button = CTkButton(self.product_view_frame , width = 20 , text = 'x' , fg_color = 'red' , corner_radius = 4 , text_color = 'white' , command = lambda reference = self.reference_view.get() , row = i: ModifyDeleteOrder.delete_product(self , reference , window , historical_window , order[0].id_order))
-            #self.delete_product_button.grid(row = 0 , column = 6 , padx = 5 , pady = 5)
-            
-            
-            
+   
         self.order_footer = CTkFrame(window , fg_color = 'transparent')
         self.order_footer .grid(row = 3 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
         self.order_footer.grid_columnconfigure(2 , weight = 1)
@@ -545,7 +525,7 @@ class ModifyDeleteOrder:
             mb.showerror("Elimniar Pedido" , f"\n{e}\n")
         
         
-    def delete_product(self , reference , window , historical_window , order_id_to_show):
+    '''def delete_product(self , reference , window , historical_window , order_id_to_show):
         
         try:
             product = db.session.query(Orders).filter(and_(Orders.id_order == order_id_to_show , Orders.product_reference == reference)).first()
@@ -561,7 +541,22 @@ class ModifyDeleteOrder:
         except Exception as e:
             print(f"[delete_product]: {e}")
             
-            mb.showerror("Elimniar Producto" , f"\n{e}\n")
+            mb.showerror("Elimniar Producto" , f"\n{e}\n")'''
+        
+            
+    def delete_product(self):
+        
+        try:
+            item = self.order_tree.focus()
+            
+            self.order_tree.delete(item)
+            
+            OrderFunctions.get_product(self , "products" , "")
+            
+            OrderFunctions.calculate_import(self , e = "")
+        
+        except Exception as e:
+            print(f"[delete_product]: {e}")
         
         
             
