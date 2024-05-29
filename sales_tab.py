@@ -148,7 +148,7 @@ class SalesTab:
         self.order_tree.column("#4" , width = 40 , anchor="w")
         self.order_tree.column("#5" , width = 40 , anchor="w")
         
-        self.order_tree.bind("<ButtonRelease-1>" , lambda event: OrderFunctions.get_product(self , event))
+        self.order_tree.bind("<ButtonRelease-1>" , lambda event: OrderFunctions.get_product(self , "products" ,event))
         
         
         OrderFunctions.show_products(self)

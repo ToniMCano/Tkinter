@@ -118,7 +118,7 @@ class OrderFunctions:
         return contacts
     
     
-    def get_product(self , e):
+    def get_product(self , place , e):
 
         try:
             reference = LoadInfo.get_item(self , "products" , self.products_tree , e)
@@ -127,8 +127,8 @@ class OrderFunctions:
             
             OrderFunctions.load_product(self , product)
             
-            if e == "order":
-                OrderFunctions.add_product(self , product)
+            if place == "order":
+                OrderFunctions.add_product(self , product)                
             
         except Exception as e:
             print(f'[get_product]: {e}')
@@ -138,8 +138,10 @@ class OrderFunctions:
        
         try:
             self.header_description.set(f"[{product.reference}] {product.product_name}")
+            
             self.product_description.delete(1.0 , 'end')
             self.product_description.insert('end' , product.description)
+           
             self.expiration.set(MyCalendar.format_date_to_show(f'{product.expiration} 08:00')[0:-6])
         
         except Exception as e:
@@ -156,10 +158,12 @@ class OrderFunctions:
                     row_import = row_import - (row_import * int(product.discount) / 100)
                     
                 self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , self.product_units_entry.get() , f"{product.discount} %" , row_import))
+                
                 self.product_description.delete(1.0 , 'end')
                 self.product_description.insert('end' , product.description)
                 
                 OrderFunctions.calculate_import(self)
+                
             except Exception as e:
                 print(f"[add_product]: {e}")
                 
@@ -184,6 +188,7 @@ class OrderFunctions:
             
             if self.discount.get():
                 with_discount =  sum(total) - (sum(total) * int(self.discount.get()) / 100)
+                
                 total_order_import = with_discount + with_discount * 8 / 100
                 
             else:
@@ -196,18 +201,19 @@ class OrderFunctions:
         
         
         
-    def eliminate_product(self):
+    def delete_product(self):
         
         try:
             item = self.order_tree.focus()
             
             self.order_tree.delete(item)
             
+            OrderFunctions.get_product(self , "products" , e)
             
             OrderFunctions.calculate_import(self , e = "")
         
         except Exception as e:
-            print(f"[eliminate_product]: {e}")
+            print(f"[delete_product]: {e}")
         
         
     def send_order(self): 
@@ -236,6 +242,10 @@ class OrderFunctions:
                 
                 db.session.add(order_entry)
                 db.session.commit()
+                
+                id_order_to_update = db.session.query(Orders).filter(Orders.id_order == id_order).order_by(Orders.null_id.desc()).first()
+                
+                Stock.update_stock_send(self , id_order_to_update , "send")
                 
             db.session.close()
             
@@ -485,62 +495,135 @@ class ModifyDeleteOrder:
     
     def modify_order(self , order_id , single_order_window , historical_window): # order =[order[0].id_order , self.reference_view , self.units_view , self.product_discount]
         
-        #self.sales_frame = ttk.Frame(self.main_window)  
-        
-        Tabs.select_tab(self , 'sales')
+        self.sales_root_from_modify()
         
         order = db.session.query(Orders).filter(Orders.id_order == order_id).all()
         
-        for row in order:
-            product = db.session.get(Products , row.product_reference)
+        try:
+            for row in order:
+                product = db.session.get(Products , row.product_reference)
+                
+                row_import = round(int(row.product_units) * product.price , 2)
+                
+                if int(product.discount) > 0:
+                    row_import - ModifyDeleteOrder.percentage(row_import , product.discount)
+                # Cargamos los producto en el nuevo pedido que tendrá el mismo id.
+                self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , row.product_units , f"{product.discount} %" , row_import))
+                
+            self.modify_order_id = [True , order_id]  # Pasamos el mismo id de pedido.
             
-            row_import = round(int(row.product_units) * product.price , 2)
-            
-            if int(product.discount) > 0:
-                row_import - ModifyDeleteOrder.percentage(row_import , product.discount)
-            # Cargamos los producto en el nuevo pedido que tendrá el mismo id.
-            self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , row.product_units , f"{product.discount} %" , row_import))
-            
-        self.modify_order_id = [True , order_id]  # Pasamos el mismo id de pedido.
-            
-        single_order_window.destroy() # 
-        historical_window.destroy()
- 
+            single_order_window.destroy() # 
+            historical_window.destroy()
         
-        
+        except Exception as e:
+            print(f"[modify_order]: {e}")
+            
+            mb.showerror("Modificar Pedido" , f"\n{e}\n")
+            
+
     def delete_order(self , order_id_to , single_order_window , historical_window , old = False):
         
-        products = db.session.query(Orders).filter(Orders.id_order == order_id_to).all()
-        
-        for product in products:
-            db.session.delete(product)
-        
-        Update.save_close()
-        
-        if not old:
-            historical_window.destroy()
-            single_order_window.destroy()
+        try:
+            products = db.session.query(Orders).filter(Orders.id_order == order_id_to).all()
             
-            OrderFunctions.sales_historical(self)
+            for product in products:                
+                Stock.update_stock_send(self , product , "delete")
+                
+                db.session.delete(product)
+                db.session.commit()
+            db.session.close()
+            
+            if not old:
+                historical_window.destroy()
+                single_order_window.destroy()
+                
+                OrderFunctions.sales_historical(self)
+            
+        except Exception as e:
+            print(f"[delete_order]: {e}")
+            
+            mb.showerror("Elimniar Pedido" , f"\n{e}\n")
         
         
     def delete_product(self , reference , window , historical_window , order_id_to_show):
         
-        product = db.session.query(Orders).filter(and_(Orders.id_order == order_id_to_show , Orders.product_reference == reference)).first()
-                                                  
-        db.session.delete(product)
+        try:
+            product = db.session.query(Orders).filter(and_(Orders.id_order == order_id_to_show , Orders.product_reference == reference)).first()
+                                                    
+            db.session.delete(product)
+            
+            Update.save_close()
+            
+            window.destroy()
+            
+            OrderFunctions.view_single_order(self , order_id_to_show , historical_window)
         
-        Update.save_close()
+        except Exception as e:
+            print(f"[delete_product]: {e}")
+            
+            mb.showerror("Elimniar Producto" , f"\n{e}\n")
         
-        window.destroy()
         
-        OrderFunctions.view_single_order(self , order_id_to_show , historical_window)
             
             
     def percentage(number , percentage):
         
-        result = round((number * percentage) / 100 , 2)
+        try:
+            result = round((number * percentage) / 100 , 2)
+            
+            return result
         
-        return result
+        except Exception as e:
+            print(f"[percentage]: {e}")
     
-    #def row_import():
+    
+    def focus_product_list(self , e):
+        
+        order_products = self.order_tree.get_children()
+        
+        try:
+            for order_product in order_products:
+                if order_product == self.order_tree.focus():
+                    reference = self.order_tree.item(order_product  , 'text') 
+                    
+            products = self.products_tree.get_children()
+            
+            for product in products:
+                if self.products_tree.item(product , 'text') == reference:
+                    self.products_tree.selection_set(product)
+        
+        except UnboundLocalError:
+            pass
+        
+        except Exception as e:
+            print(f"[focus_product_list]: {e}")
+            
+            mb.showerror("Error" , f"\n{e}\n")
+                
+                
+class Stock:
+    
+    def update_stock_send(self , product , actions):
+                       
+        try:
+            product_to_update = db.session.get(Products , product.product_reference)
+            
+            if actions == "send" and   product_to_update.units > product.product_units:
+                product_to_update.units -= product.product_units
+            
+            else:
+                product_to_update.units += product.product_units
+            
+            db.session.commit()
+        
+        except Exception as e:
+            db.session.rollback()
+            
+            print(f"[update_stock]: {e}")
+            
+            mb.showerror("Actualizar Stock" , f"\n{e}\n")
+            
+                
+                
+  
+                

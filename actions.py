@@ -36,7 +36,7 @@ class Admin:
                 
                 admin = True
                 
-                self.admin_mode = CTkButton(self.header , text = 'Admin Logout' ,command = lambda: Pops.deactivate_admin(self) , width = 80)
+                self.admin_mode = CTkButton(self.header , text = 'Admin Logout' ,command = lambda: Admin.deactivate_admin(self) , width = 80)
                 self.admin_mode.place(relx = 0.7 , rely = 0.1)
                 
         
@@ -559,7 +559,7 @@ class MyCalendar():
             hour.current(newindex = 0)
             hour.config(justify=CENTER)
             hour.pack(fill = "x" , expand = True , anchor = "center")
-            send = ttk.Button(frame , text = "Save" , command = lambda: Logs.add_log(self , frame.calendar.get_date() , log_type , hour.get()))#lambda: MyCalendar.format_date(self , place , hour = hour.get()) )
+            send = ttk.Button(frame , text = "Save" , command = lambda: Logs.add_log(self , frame.calendar.get_date() , log_type , hour.get()))
             send.pack(pady = 5)
             
 
@@ -1510,7 +1510,12 @@ class Alerts():
     
     def refresh_alerts(self , employee_id):
         
-        threading.Timer(60 , Alerts.refresh_alerts, args=[self , employee_id]).start()
+        if self.timer is not None:
+            self.timer.cancel()
+
+        self.timer =  threading.Timer(15 , Alerts.refresh_alerts, args=[self , employee_id])
+        
+        self.timer.start()
 
         try:
             Alerts.check_pop_ups(self, employee_id)
@@ -2147,10 +2152,11 @@ class Tabs:
             Tabs.crm_view(self)
             Tabs.enabled_view_button(self.crm_view_button)
             Tabs.disabled_view_button(self.sales_view_button)
-            Tabs.disabled_view_button(self.statistics_view_button)
+            #Tabs.disabled_view_button(self.statistics_view_button)
             
             
         elif view == 'sales':
+                        
             Tabs.hide_tabs(self)
 
             Tabs.sales_view(self)
@@ -2241,7 +2247,7 @@ class Tabs:
         try:
             self.sales_frame.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
             Tabs.enabled_view_button(self.sales_view_button)
-            Tabs.disabled_view_button(self.statistics_view_button)
+            #Tabs.disabled_view_button(self.statistics_view_button)
             Tabs.disabled_view_button(self.crm_view_button)
   
         except AttributeError:
@@ -2280,7 +2286,7 @@ class Tabs:
         
         try:
             self.statistics_frame.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
-            Tabs.enabled_view_button(self.statistics_view_button)
+            #Tabs.enabled_view_button(self.statistics_view_button)
             Tabs.disabled_view_button(self.sales_view_button)
             Tabs.disabled_view_button(self.crm_view_button)
 

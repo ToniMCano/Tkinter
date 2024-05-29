@@ -34,10 +34,10 @@ class Main:
         self.main_window.geometry('1200x800')
         self.main_window.configure(bg="#f4f4f4") 
         self.main_window.grid_columnconfigure(0 , weight = 1)
-        #self.main_window.grid_columnconfigure(5 , weight = 1)
-        #self.main_window.grid_rowconfigure(1 , weight = 1)
         self.main_window.grid_rowconfigure(2 , weight = 1)
         Pops.center_window(self, self.main_window)
+        
+        self.timer = None
                        
         # INFO LISTA
         
@@ -180,8 +180,8 @@ class Main:
         self.sales_view_button = CTkButton(self.frame_views , text = "Venta" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: SalesTab.sales_root(self))
         self.sales_view_button.place(relx=0.5, rely=0.5 , anchor = 'center')
         
-        self.statistics_view_button = CTkButton(self.frame_views , text = "Estadísticas" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: StatisticsTab.statistics_root(self))
-        self.statistics_view_button.place(relx=0.8, rely=0.5 , anchor = 'center')
+        #self.statistics_view_button = CTkButton(self.frame_views , text = "Estadísticas" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: StatisticsTab.statistics_root(self))
+        #self.statistics_view_button.place(relx=0.8, rely=0.5 , anchor = 'center')
         
         self.login_button = ttk.Button(self.header , text = "Login" , command = lambda: Pops.login(self))
         self.login_button.grid(row = 0 , column = 10 , sticky = E)
@@ -445,8 +445,23 @@ class Main:
         self.rcontact_label_responsable_id.grid(row = 0 , column = 3 , sticky = W+E)
 
         Tabs.select_tab(self , 'crm')
-
-  
+        
+        self.main_window.protocol("WM_DELETE_WINDOW", self.cancel_timer)
+        
+        
+    def sales_root_from_modify(self):
+        
+        SalesTab.sales_root(self)
+        
+        
+    def cancel_timer(self):
+        
+        if self.timer is not None and self.timer.is_alive():
+            self.timer.cancel()
+            
+        self.main_window.destroy()
+    
+    
   
 if __name__ == "__main__":
     
