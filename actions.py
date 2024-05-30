@@ -887,17 +887,20 @@ class LoadInfo():
             row = tree.focus()
             
             item = tree.item(row)
-            
+            print(f'Item1: {item["text"]} - {item}')
             if place == 'crm':
                 client_name = item['values'][1]
             
                 GetInfo.load_client_info(self , client_name)
-                
+            
+            #elif place == 'changes':
+                #return item
+            
             else:
                 return item['text']
 
             ContactActions.close_other_contact(self)
-            
+            print(f'Item2: {item["text"]}')
         except AttributeError:
             pass
         

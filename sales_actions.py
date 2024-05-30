@@ -120,9 +120,14 @@ class OrderFunctions:
     
     def get_product(self , place , e): # Revisar desde delete_product
         try:
-            reference = LoadInfo.get_item(self , "products" , self.products_tree , e)
-            print(reference)
-            product = db.session.query(Products).filter(Products.reference == reference).first()
+            reference = LoadInfo.get_item(self , place , self.products_tree , e)
+            
+            #if place == 'changes':
+                #reference = e
+                
+            print(f'Reference: {reference}')
+            
+            product = db.session.query(Products).filter(Products.reference == int(reference)).first()
             
             OrderFunctions.load_product(self , product)
             
@@ -573,22 +578,20 @@ class ModifyDeleteOrder:
     
     
     def focus_product_list(self , e):
-        
-        order_products = self.order_tree.get_children()
-        
+         
         try:
-            for order_product in order_products:
-                if order_product == self.order_tree.focus():
-                    reference = self.order_tree.item(order_product  , 'text') 
-                    
+            reference = self.order_tree.item(self.order_tree.focus()  , 'text')
+            
             products = self.products_tree.get_children()
             
             for product in products:
                 if self.products_tree.item(product , 'text') == reference:
-                    self.products_tree.selection_set(product)
+                    self.products_tree.focus(product)
+                    
+            OrderFunctions.get_product(self , "products" , reference)
         
         except UnboundLocalError:
-            pass
+            print(f"[focus_product_list] (ULE): {e}")
         
         except Exception as e:
             print(f"[focus_product_list]: {e}")

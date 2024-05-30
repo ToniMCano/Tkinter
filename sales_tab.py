@@ -158,21 +158,14 @@ class SalesTab:
         self.sales_order_dashboard = CTkFrame(self.sales_order_frame , fg_color = 'transparent' , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')
         self.sales_order_dashboard.grid(row = 2 , column = 0 , sticky = 'nswe', padx = 5)
         
-        #self.sales_order_dashboard.grid_columnconfigure(0 , weight = 1)
-        #self.sales_order_dashboard.grid_columnconfigure(1 , weight = 1)
-        #self.sales_order_dashboard.grid_columnconfigure(2 , weight = 1)
-        #self.sales_order_dashboard.grid_columnconfigure(3 , weight = 1)
-        #self.sales_order_dashboard.grid_columnconfigure(5 , weight = 1)
-        
         self.product_units_entry = CTkLabel(self.sales_order_dashboard , text = "Unidades: " , text_color = 'gray' , width = 30)
         self.product_units_entry.grid(row = 0 , column = 0 , sticky = W , padx = 5 , pady = 5)
-        
         
         self.product_units_entry = CTkEntry(self.sales_order_dashboard , textvariable = self.product_units , corner_radius = 4 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 2 , border_color = "Lightblue4" , width = 35)
         self.product_units_entry.grid(row = 0 , column = 0 , sticky = E , padx = 5 , pady = 5)
         self.product_units_entry .focus()
-        
-        self.add_units_button = CTkButton(self.sales_order_dashboard , textvariable = self.add_units_button_text , corner_radius = 2 , fg_color = 'Lightblue4' , height = 15 , text_color = 'white' , width = 50 , command = lambda: OrderFunctions.get_product(self , 'order'))
+        #Añadir
+        self.add_units_button = CTkButton(self.sales_order_dashboard , textvariable = self.add_units_button_text , corner_radius = 2 , fg_color = 'Lightblue4' , height = 15 , text_color = 'white' , width = 50 , command = lambda: OrderFunctions.get_product(self , 'order' , ""))
         self.add_units_button.grid(row = 0 , column = 1 , sticky = W+E , padx = 5 , pady = 5)
         
         self.delete_button = CTkButton(self.sales_order_dashboard , text = 'Eliminar' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 1 , border_color = "gray" , width = 50 , command = lambda: ModifyDeleteOrder.delete_product(self))
