@@ -1455,7 +1455,7 @@ class Alerts():
             if new_alerts != old_alerts and log == False:
                 Alerts.pop_up_alert(self , employee_id , date , new_alerts)
             
-            Actions.pop_ups_number(self)
+            Actions.pop_ups_number(self , new_alerts)
             
         except Exception as e:
             print(f'[check_pop_ups]: {e}')
@@ -2453,16 +2453,16 @@ class Actions:
             print(f"[call_phone]: {e}")
             
             
-    def pop_ups_number(self):
+    def pop_ups_number(self , pops):
         
-        pop_ups = db.session.query(Contact).filter(and_(Contact.pop_up == True , Contact.next_contact < str(datetime.now())[:16])).all()
+        #pop_ups = db.session.query(Contact).filter(and_(Contact.pop_up == True , Contact.next_contact < str(datetime.now())[:16])).all()
         
-        if len(pop_ups) > 0:
+        if len(pops) > 0:
             self.pop_up_advise.place(relx = 0.98 , rely = 0)
             
         else:
             self.pop_up_advise.place_forget()
             
-        self.advises.set(f'{len(pop_ups)}')
+        self.advises.set(f'{len(pops)}')
             
             

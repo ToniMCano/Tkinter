@@ -241,6 +241,8 @@ class OrderFunctions:
             
             OrderFunctions.clean_order(self)
             
+            self.sales_root_from_modify()
+            
             self.modify_order_id = [False , None]
 
         except Exception as e:
@@ -274,7 +276,6 @@ class OrderFunctions:
         self.historial_frame = CTkFrame(window , fg_color = 'transparent')
         self.historial_frame.grid(row = 0 , column = 0 , padx = 10 , pady = 10 , sticky = "nswe")
         self.historial_frame.grid_columnconfigure(0 , weight = 1)
-        #self.historial_frame.grid_rowconfigure(1 , weight = 1)
         
         self.historial_header = CTkFrame(self.historial_frame , border_width = 1 , border_color = 'gray' , fg_color = 'transparent' , height = 40)
         self.historial_header.grid(row = 0 , column = 0 ,  sticky = W+E , padx = 3 , pady = 3)
@@ -312,7 +313,7 @@ class OrderFunctions:
         
     def group_orders(self , historical_window):
         
-        orders = db.session.query(Orders).filter(Orders.order_client_id == self.company_id.get()).all()
+        orders = db.session.query(Orders).filter(Orders.order_client_id == self.company_id.get()).order_by(Orders.order_date.desc()).all()
         
         orders_id = []
         
