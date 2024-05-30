@@ -238,24 +238,30 @@ class OrderFunctions:
             db.session.close()
             
             self.sales_root_from_modify()
-                
-        try:
-            if id_order is not None and not self.modify_order_id[0]:
-                id_order = id_order.id_order + 1
-                
-                self.modify_order_id = [True , id_order]
-                print(self.modify_order_id , f'Después ID: {id_order}' )
-               
-                            
-            elif id_order is None and not self.modify_order_id[0]:    
-                id_order = 1 
+            
+        else:
+            try:
+                if id_order is not None and not self.modify_order_id[0]:
+                    id_order = id_order.id_order + 1
+                    
+                    self.modify_order_id = [True , id_order]
+                    print(self.modify_order_id , f'Después ID: {id_order}' )
+                    OrderFunctions.add_entry_order(self , id_order , buyer , add_product_entry)
+                                
+                elif id_order is None and not self.modify_order_id[0]:    
+                    id_order = 1 
 
-            OrderFunctions.add_entry_order(self , id_order , buyer , add_product_entry)
+                    OrderFunctions.add_entry_order(self , id_order , buyer , add_product_entry)
+                    
+                else:
+                    OrderFunctions.add_entry_order(self , id_order.id_order , buyer , add_product_entry)
+                    
                 
-            db.session.commit()
-                
-        except Exception as e:
-            print(f"[send_order]: {e}")
+                    
+                db.session.commit()
+                    
+            except Exception as e:
+                print(f"[send_order]: {e}")
     
     
     def add_entry_order(self , id_order , buyer , add_product):
