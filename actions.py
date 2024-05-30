@@ -1051,7 +1051,15 @@ class GetInfo():
             else:
                 pop = ""
                 
-            return f"{MyCalendar.format_date_to_show(last_contact)} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}] {pop}"
+            if "True" in str(comment.contact_type):
+                administrator = "(Admin)"
+                print(f"HAY TRUE {comment.contact_type}")
+                
+            else:
+                administrator = ""
+                print(f"NO   HAY TRUE {comment.contact_type}")
+                
+            return f"{MyCalendar.format_date_to_show(last_contact)} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}] {pop} {administrator}"
             
         except Exception as e:
             print("[load_info_log:]" , e)
@@ -1587,7 +1595,7 @@ class Logs:
         Logs.confirm_unique_pop(new_comment)
 
         row = row_text_values_item
-        
+        print(f"NEW COMMENT: {new_comment}")
         if all_ok:  
        
             db.session.add(new_comment)
@@ -1649,7 +1657,7 @@ class Logs:
         try:
             last_comment = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee , Contact.client_id == company_info.id_client)).order_by(Contact.last_contact_date.desc()).all()
         
-            new_comment = Contact(str(datetime.now())[:16] , last_comment[0].next_contact , self.text_log.get(1.0, "end") , company_info.id_client , employee , company_info.contact_person , f'{company_info.state}/log' , company_info.counter , False)
+            new_comment = Contact(str(datetime.now())[:16] , last_comment[0].next_contact , self.text_log.get(1.0, "end").strip('\n') , company_info.id_client , employee , company_info.contact_person , f'{company_info.state}/log - ({admin})' , company_info.counter , False)
             
             all_ok = True
             
@@ -1681,13 +1689,13 @@ class Logs:
             
             if calendar == 'pop':
                 pop = True
-                state = f'{company_info.state}/pop'
+                state = f'{company_info.state}/pop - ({admin})'
                 
             else:
                 pop = False
-                state = f'{company_info.state}/next'
-                
-            new_comment = Contact(str(datetime.now())[:16] , date , self.text_log.get(1.0, "end") , company_info.id_client , self.active_employee_id.get() , company_info.contact_person , state , company_info.counter , pop)
+                state = f'{company_info.state}/next - ({admin})'
+            
+            new_comment = Contact(str(datetime.now())[:16] , date , self.text_log.get(1.0, "end").strip('\n') , company_info.id_client , self.active_employee_id.get() , company_info.contact_person , state , company_info.counter , pop)
            
             Logs.log_next_pop(self , calendar_date , hour, row_text_values_item , new_comment , calendar)
        
@@ -1708,7 +1716,7 @@ class Logs:
                 pop = f' {dot}'
             else:
                 pop = ""
-            row_text_values_item[1][3] = MyCalendar.format_date_to_show(f'{calendar_date} {hour}') + pop
+            row_text_values_item[1][3] = MyCalendar.format_date_to_show(f'{calendar_date} {hour}') + pop 
             row_text_values_item[1][2] = MyCalendar.format_date_to_show(f'{calendar_date} {hour}') 
             all_ok = True
             
@@ -2454,8 +2462,6 @@ class Actions:
             
             
     def pop_ups_number(self , pops):
-        
-        #pop_ups = db.session.query(Contact).filter(and_(Contact.pop_up == True , Contact.next_contact < str(datetime.now())[:16])).all()
         
         if len(pops) > 0:
             self.pop_up_advise.place(relx = 0.98 , rely = 0)
