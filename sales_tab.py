@@ -171,7 +171,7 @@ class SalesTab:
         self.delete_button = CTkButton(self.sales_order_dashboard , text = 'Eliminar' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 1 , border_color = "gray" , width = 50 , command = lambda: ModifyDeleteOrder.delete_product(self))
         self.delete_button.grid(row = 0 , column = 2 , sticky = W+E , padx = 5 , pady = 5)
         
-        self.send_order = CTkButton(self.sales_order_dashboard , text = 'Realizar Pedido' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'Lightblue4' , border_width = 2 , border_color = "Lightblue4" , width = 50 , command = lambda: OrderFunctions.send_order(self))
+        self.send_order = CTkButton(self.sales_order_dashboard , text = 'Realizar Pedido' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'Lightblue4' , border_width = 2 , border_color = "Lightblue4" , width = 50 , command = lambda: OrderFunctions.send_order(self , False))
         self.send_order.grid(row = 0 , column = 3 , sticky = W+E , padx = 5 , pady = 5)
         
         self.sales_order_info = CTkFrame(self.sales_order_dashboard , fg_color = 'transparent' , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')

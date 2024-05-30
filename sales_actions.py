@@ -121,10 +121,7 @@ class OrderFunctions:
     def get_product(self , place , e): # Revisar desde delete_product
         try:
             reference = LoadInfo.get_item(self , place , self.products_tree , e)
-            
-            #if place == 'changes':
-                #reference = e
-                
+
             print(f'Reference: {reference}')
             
             product = db.session.query(Products).filter(Products.reference == int(reference)).first()
@@ -154,24 +151,43 @@ class OrderFunctions:
         
     def add_product(self , product):
         
-        if self.product_units_entry.get().isdigit():      
-            row_import = round(int(self.product_units_entry.get()) * product.price , 2)
+        avialivility = "6 de Junio" # Se implementará en el futuro.
+        
+        #self.modify_order_id[0] = True
+        
+        if self.product_units_entry.get().isdigit():
+
+            units = int(self.product_units_entry.get())
             
-            try:
-                if product.discount != 0:
-                    row_import = row_import - (row_import * int(product.discount) / 100)
+            row_import = units * product.price
+             
+            if units < product.units: 
+                
+                try:
+                    if product.discount != 0:
+                        row_import = row_import - (row_import * int(product.discount) / 100)
+                        
+                    self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , self.product_units_entry.get() , f"{product.discount} %" , row_import))
                     
-                self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , self.product_units_entry.get() , f"{product.discount} %" , row_import))
-                
-                self.product_description.delete(1.0 , 'end')
-                self.product_description.insert('end' , product.description)
-                
-                OrderFunctions.calculate_import(self)
-                
-            except Exception as e:
-                print(f"[add_product]: {e}")
-                
-                mb.showerror("Añadir Producto" , f"Error: {e}.")
+                    add_product_entry = [product.reference , product.product_name , product.price , units , row_import , product.discount ]
+      
+                    OrderFunctions.send_order(self , True , add_product_entry)
+                    
+                    self.product_description.delete(1.0 , 'end')
+                    self.product_description.insert('end' , product.description)
+                    
+                    OrderFunctions.calculate_import(self)
+
+                    Stock.update_stock_send(self , product , "send" , units)
+
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"[add_product]: {e}")
+                    
+                    mb.showerror("Añadir Producto" , f"Error: {e}.")
+                    
+            else:
+                mb.showwarning("Sin Stock" , f"No suficientes unidades.\n\n Disponibilidad a partir de: {avialivility}")
                 
         else:
             mb.showwarning("Unidades" , "Las unidades deben ser un número entero.")
@@ -206,48 +222,63 @@ class OrderFunctions:
         
 
         
-    def send_order(self): 
+    def send_order(self , keep , add_product_entry= ""): 
   
-        id_order = db.session.query(Orders).order_by(Orders.id_order.desc()).first()
-        buyer = db.session.get(Client , self.company_id.get())
+        id_order = db.session.query(Orders).filter(Orders.seller_id == self.active_employee_id.get()).order_by(Orders.id_order.desc()).first()
+        company = self.company_id.get()
+        buyer = db.session.get(Client , company)
         buyer = buyer.contact_person
-        print(self.modify_order_id , id_order )
-        print((id_order is not None) ,( not self.modify_order_id[0]))
+
+        print(self.modify_order_id , f'ID: {id_order.id_order}' )
+        if keep == False:
+            self.modify_order_id = [False , None]
+                
+            OrderFunctions.clean_order(self)
+            
+            db.session.close()
+            
+            self.sales_root_from_modify()
+                
         try:
             if id_order is not None and not self.modify_order_id[0]:
                 id_order = id_order.id_order + 1
+                
+                self.modify_order_id = [True , id_order]
+                print(self.modify_order_id , f'Después ID: {id_order}' )
+               
                             
             elif id_order is None and not self.modify_order_id[0]:    
                 id_order = 1 
-                
-            else:
-                id_order = self.modify_order_id[1]
-                ModifyDeleteOrder.delete_order(self , id_order , "" , "" , True)
-                
-            order = self.order_tree.get_children()
-            print(f"ORDER ID: {id_order}")  
-            for x in order:#         id_order , product_reference ,                product_units ,                        order_client_id ,                 seller_id ,         buyer_id ,            order_date ,                total_import                         , order_notes):
-                
-                order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") , self.discount.get() )
-                
-                db.session.add(order_entry)
-                db.session.commit()
-                
-                id_order_to_update = db.session.query(Orders).filter(Orders.id_order == id_order).order_by(Orders.null_id.desc()).first()
-                
-                Stock.update_stock_send(self , id_order_to_update , "send")
-                
-            db.session.close()
-            
-            OrderFunctions.clean_order(self)
-            
-            self.sales_root_from_modify()
-            
-            self.modify_order_id = [False , None]
 
+            OrderFunctions.add_entry_order(self , id_order , buyer , add_product_entry)
+                
+            db.session.commit()
+                
         except Exception as e:
             print(f"[send_order]: {e}")
     
+    
+    def add_entry_order(self , id_order , buyer , add_product):
+        
+        #add_product_entry = [reference , product_name , price , units , total_import , discount ]
+        order_entry = Orders(id_order ,add_product[0] , add_product[3], self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , add_product[4] , self.oreder_notes.get(1.0, "end") , self.discount.get() )
+            
+        db.session.add(order_entry)
+   
+   
+    def modify_order(self):
+        
+        id_order = self.modify_order_id[1]
+        ModifyDeleteOrder.delete_order(self , id_order , "" , "" , True)
+        
+        order = self.order_tree.get_children()
+
+        for x in order:#         id_order  product_reference                 product_units                            order_client_id         seller_id                       buyer_id     order_date             total_import                            order_notes
+            
+            order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") , self.discount.get() )
+            
+            db.session.add(order_entry)
+            
     
     def clean_order(self):
         
@@ -464,7 +495,7 @@ class OrderFunctions:
         self.delete_order_button = CTkButton(self.order_footer , text = "Eliminar Pedido" , fg_color = 'Lightblue4', text_color = 'white' , corner_radius = 3 , command = lambda: ModifyDeleteOrder.delete_order(self, order[0].id_order ,  window , historical_window))
         self.delete_order_button.grid(row = 0 , column = 1 , padx = 5 , pady = 5 , sticky = W)
         
-        self.modify_order_button = CTkButton(self.order_footer , text = "Modificar Pedido" , fg_color = 'Lightblue4', text_color = 'white' , corner_radius = 3, command = lambda: ModifyDeleteOrder.modify_order(self, order[0].id_order ,  window , historical_window))
+        self.modify_order_button = CTkButton(self.order_footer , text = "Modificar Pedido" , fg_color = 'Lightblue4', text_color = 'white' , corner_radius = 3, command = lambda: ModifyDeleteOrder.modify_order_load(self, order[0].id_order ,  window , historical_window))
         self.modify_order_button.grid(row = 0 , column = 2 , padx = 5 , pady = 5 , sticky = W)
             
         self.order_total_import = CTkLabel(self.order_footer , text = f'   Iporte Total: {(sum(imports)):.2f} €    Descuento en pedido:   {0 if order[0].order_discount is None else order[0].order_discount } %   ' , fg_color = 'Lightblue4', text_color = 'white' , corner_radius = 3)
@@ -479,7 +510,7 @@ class OrderFunctions:
 class ModifyDeleteOrder:
     
     
-    def modify_order(self , order_id , single_order_window , historical_window): # order =[order[0].id_order , self.reference_view , self.units_view , self.product_discount]
+    def modify_order_load(self , order_id , single_order_window , historical_window): # order =[order[0].id_order , self.reference_view , self.units_view , self.product_discount]
         
         self.sales_root_from_modify()
         
@@ -502,7 +533,7 @@ class ModifyDeleteOrder:
             historical_window.destroy()
         
         except Exception as e:
-            print(f"[modify_order]: {e}")
+            print(f"[modify_order_load]: {e}")
             
             mb.showerror("Modificar Pedido" , f"\n{e}\n")
             
@@ -529,26 +560,10 @@ class ModifyDeleteOrder:
             print(f"[delete_order]: {e}")
             
             mb.showerror("Elimniar Pedido" , f"\n{e}\n")
-        
-        
-    '''def delete_product(self , reference , window , historical_window , order_id_to_show):
-        
-        try:
-            product = db.session.query(Orders).filter(and_(Orders.id_order == order_id_to_show , Orders.product_reference == reference)).first()
-                                                    
-            db.session.delete(product)
             
-            Update.save_close()
-            
-            window.destroy()
-            
-            OrderFunctions.view_single_order(self , order_id_to_show , historical_window)
-        
-        except Exception as e:
-            print(f"[delete_product]: {e}")
-            
-            mb.showerror("Elimniar Producto" , f"\n{e}\n")'''
-        
+        finally:
+            self.sales_root_from_modify()
+    
             
     def delete_product(self):
         
@@ -602,17 +617,17 @@ class ModifyDeleteOrder:
                 
 class Stock:
     
-    def update_stock_send(self , product , actions):
-                       
+    def update_stock_send(self , product , actions , units = 0):
+        print(f"Asociado: {product.units}")
         try:
-            product_to_update = db.session.get(Products , product.product_reference)
+            if actions == "send" and   product.units > units:
+                product.units -= units
             
-            if actions == "send" and   product_to_update.units > product.product_units:
-                product_to_update.units -= product.product_units
-            
-            else:
-                product_to_update.units += product.product_units
-            
+            elif actions == "delete":
+                    product_to_update = db.session.get(Products , product.product_reference)
+                    
+                    product_to_update.units += product.product_units
+
             db.session.commit()
         
         except Exception as e:
