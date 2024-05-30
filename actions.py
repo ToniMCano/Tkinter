@@ -1053,11 +1053,9 @@ class GetInfo():
                 
             if "True" in str(comment.contact_type):
                 administrator = "(Admin)"
-                print(f"HAY TRUE {comment.contact_type}")
                 
             else:
                 administrator = ""
-                print(f"NO   HAY TRUE {comment.contact_type}")
                 
             return f"{MyCalendar.format_date_to_show(last_contact)} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}] {pop} {administrator}"
             

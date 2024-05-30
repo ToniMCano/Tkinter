@@ -15,6 +15,7 @@ from customtkinter import *
 import pandas as pd
 
 
+add_product_entry = []
 
 class OrderFunctions:
     
@@ -129,7 +130,7 @@ class OrderFunctions:
             OrderFunctions.load_product(self , product)
             
             if place == "order":
-                OrderFunctions.add_product(self , product)                
+                OrderFunctions.add_product(self , product)            
             
         except Exception as e:
             print(f'[get_product]: {e}')
@@ -253,10 +254,11 @@ class OrderFunctions:
 
                     OrderFunctions.add_entry_order(self , id_order , buyer , add_product_entry)
                     
+                elif add_product_entry[-1] == "modify":  # [Modificar Pedido 2/2] Para que no se dupliquen las referencias que se añadan al modificar que funciona diferente.                    
+                    OrderFunctions.get_product(self , "products" , "")
+                    
                 else:
                     OrderFunctions.add_entry_order(self , id_order.id_order , buyer , add_product_entry)
-                    
-                
                     
                 db.session.commit()
                     
@@ -274,17 +276,25 @@ class OrderFunctions:
    
     def modify_order(self):
         
-        id_order = self.modify_order_id[1]
-        ModifyDeleteOrder.delete_order(self , id_order , "" , "" , True)
-        
-        order = self.order_tree.get_children()
+        try:
+            add_product_entry.append('modify') # [Modificar Pedido 1/2] Para que en "send_order" se cumpla una condición diferente ya que "Añadir" inserta una fila en Orders
+            id_order = self.modify_order_id[1]
+            
+            ModifyDeleteOrder.delete_order(self , id_order , "" , "" , True)
+            
+            buyer = db.session.query(Orders).filter(Orders.id_order == id_order).first().buyer_id
+            
+            order = self.order_tree.get_children()
 
-        for x in order:#         id_order  product_reference                 product_units                            order_client_id         seller_id                       buyer_id     order_date             total_import                            order_notes
-            
-            order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") , self.discount.get() )
-            
-            db.session.add(order_entry)
-            
+            for x in order:#         id_order  product_reference                 product_units                            order_client_id         seller_id                       buyer_id     order_date             total_import                            order_notes
+                
+                order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") , self.discount.get() )
+                print(f"ADD [{id_order}]: {self.order_tree.item(x , 'text')} UNITS {self.order_tree.item(x , 'values')[2]}")
+                db.session.add(order_entry)
+        
+        except Exception as e:
+            print(f"[modify_order]: {e}")
+    
     
     def clean_order(self):
         
@@ -461,8 +471,8 @@ class OrderFunctions:
         self.order_view_frame.grid(row = 2 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
         self.order_view_frame.grid_columnconfigure(0 , weight = 1)
         
-        for i, product in enumerate(order):          # Obtenemos los productos del pedido
-            imports.append(product.total_import)
+        for i, order_product in enumerate(order):          # Obtenemos los productos del pedido
+            imports.append(order_product.total_import)
             
             self.product_view_frame = CTkFrame(self.order_view_frame , fg_color = 'transparent')
             self.product_view_frame.grid(row = i , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
@@ -473,7 +483,7 @@ class OrderFunctions:
             self.product_view_frame.grid_columnconfigure(4 , weight = 2)
             self.product_view_frame.grid_columnconfigure(5 , weight = 2)
         
-            product_info = db.session.get(Products , product.product_reference)
+            product_info = db.session.get(Products , order_product.product_reference)
             
             self.reference_view = CTkLabel(self.product_view_frame  , text = f'{product_info.reference}' , text_color = 'gray')
             self.reference_view.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E)
@@ -484,13 +494,13 @@ class OrderFunctions:
             self.price_view = CTkLabel(self.product_view_frame , text = f'{product_info.price}' , text_color = 'gray')
             self.price_view.grid(row = 0 , column = 2 , padx = 5 , pady = 5 )
             
-            self.units_view = CTkLabel(self.product_view_frame  , text = f'{product.product_units}' , text_color = 'gray')
+            self.units_view = CTkLabel(self.product_view_frame  , text = f'{order_product.product_units}' , text_color = 'gray')
             self.units_view.grid(row = 0 , column = 3 , padx = 5 , pady = 5 )
             
             self.product_discount = CTkLabel(self.product_view_frame , text = f'{product_info.discount}' , text_color = 'gray')
             self.product_discount.grid(row = 0 , column = 4 , padx = 5 , pady = 5 )
         
-            self.products_total_import = CTkLabel(self.product_view_frame  , text = f'{product.total_import}' , text_color = 'gray')
+            self.products_total_import = CTkLabel(self.product_view_frame  , text = f'{order_product.total_import}' , text_color = 'gray')
             self.products_total_import.grid(row = 0 , column = 5 , padx = 5 , pady = 5 , sticky = W+E)
    
         self.order_footer = CTkFrame(window , fg_color = 'transparent')
@@ -547,12 +557,12 @@ class ModifyDeleteOrder:
     def delete_order(self , order_id_to , single_order_window , historical_window , old = False):
         
         try:
-            products = db.session.query(Orders).filter(Orders.id_order == order_id_to).all()
+            grouped_order = db.session.query(Orders).filter(Orders.id_order == order_id_to).all()
             
-            for product in products:                
-                Stock.update_stock_send(self , product , "delete")
+            for order_product in grouped_order:                
+                Stock.update_stock_send(self , order_product , "delete")
                 
-                db.session.delete(product)
+                db.session.delete(order_product)
                 db.session.commit()
             db.session.close()
             
@@ -572,7 +582,7 @@ class ModifyDeleteOrder:
     
             
     def delete_product(self):
-        
+        print("Dentro de Delete")
         try:
             item = self.order_tree.focus()
             
@@ -581,12 +591,16 @@ class ModifyDeleteOrder:
             OrderFunctions.get_product(self , "products" , "")
             
             OrderFunctions.calculate_import(self , e = "")
+            
+            order_product = db.session.query(Orders).filter(Orders.id_order == self.modify_order_id[1]).first()
+
+            db.session.delete(order_product)
+            
+            db.session.commit()
         
         except Exception as e:
             print(f"[delete_product]: {e}")
         
-        
-            
             
     def percentage(number , percentage):
         
@@ -623,16 +637,17 @@ class ModifyDeleteOrder:
                 
 class Stock:
     
-    def update_stock_send(self , product , actions , units = 0):
-        print(f"Asociado: {product.units}")
+    def update_stock_send(self , order_product , actions , units = 0):
+
         try:
-            if actions == "send" and   product.units > units:
-                product.units -= units
+            if actions == "send":
+                if order_product.units > units:
+                    order_product.units -= units
             
             elif actions == "delete":
-                    product_to_update = db.session.get(Products , product.product_reference)
+                    product_to_update = db.session.get(Products , order_product.product_reference)
                     
-                    product_to_update.units += product.product_units
+                    product_to_update.units += order_product.product_units
 
             db.session.commit()
         
