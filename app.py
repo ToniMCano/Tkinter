@@ -431,6 +431,7 @@ class Main:
         self.ids_frame .grid_columnconfigure(1,weight=1)
         self.ids_frame .grid_columnconfigure(2,weight=1)
         self.ids_frame .grid_columnconfigure(3,weight=1)
+         
         
         self.lcontact_label_bottom = Label(self.ids_frame , text = 'ID Empresa: ', bg = 'LightBlue4' , fg = 'white' , anchor = 'e')
         self.lcontact_label_bottom.grid(row = 0 , column = 0 , sticky = W+E)

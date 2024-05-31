@@ -594,6 +594,8 @@ class ModifyDeleteOrder:
             
             order_product = db.session.query(Orders).filter(Orders.id_order == self.modify_order_id[1]).first()
 
+            Stock.update_stock_send(self , order_product , "delete")
+            
             db.session.delete(order_product)
             
             db.session.commit()
