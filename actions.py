@@ -1537,6 +1537,15 @@ class Alerts():
         
     def view_alert(self , name , window , employee_id_sended , date):
         
+        try:
+            if self.crm_frame.winfo_ismapped():
+                self.crm_frame.grid_forget()
+            
+            Tabs.select_tab(self , 'crm')
+        
+        except Exception as e:
+            print(f"[view_alert] (select_tab): {e}")
+        
         company = db.session.query(Client).filter(and_(Client.name == name , Client.employee_id == employee_id_sended)).first()
         
         LoadInfo.load_contacts(self , employee_id_sended , date , query = 'last' , state_sended = company.state)
@@ -2152,7 +2161,7 @@ class Tabs:
 
 
     def select_tab(self , view):
-            
+        
         print(f'********{view}********')
         
         if view == 'crm':
@@ -2164,7 +2173,7 @@ class Tabs:
                 Tabs.enabled_view_button(self.crm_view_button)
                 Tabs.disabled_view_button(self.sales_view_button)
                 #Tabs.disabled_view_button(self.statistics_view_button)
-                print(f"\nSHOW crm_view")
+                self.view = 'crm'
 
             except Exception as e:
                 print(f"[select_tab] (crm): {e}")
@@ -2176,7 +2185,7 @@ class Tabs:
                 Tabs.hide_tabs(self)
 
                 Tabs.sales_view(self)
-                print(f"\nSHOW sales_view")
+                self.view = 'sales'
 
             except Exception as e:
                 print(f"[select_tab] (sales): {e}")

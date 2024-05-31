@@ -464,15 +464,25 @@ class Main:
     
     def sales_from_mofify(self):
         
-        SalesTab.sales_root(self)
+        try:                                    
+            if self.sales_frame.winfo_ismapped() and self.view == 'crm':
+                self.sales_frame.grid_forget()   # Si no se elimina se crean mas Frames y no se vuelve a mostar la vista de CRM al ejecutar esta función
+            
+            else:
+                SalesTab.sales_root(self)
+                
+        except AttributeError:
+            SalesTab.sales_root(self)
+
+        except Exception as e:
+            print(f"[view_alert] (select_tab): {e}")
+        
         
   
 if __name__ == "__main__":
-    
     
     db.Base.metadata.create_all(db.engine)
     root = ThemedTk(theme="arc")
     app = Main(root)
     root.mainloop()
     
-#Tengo que crear las fechas en los contacts con coherencia, si no no va a coincidir el último contacto de los logs con el del treeview

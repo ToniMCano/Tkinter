@@ -163,7 +163,7 @@ class OrderFunctions:
             row_import = units * product.price
             
             product_discount = product.discount
-            self.discount.set("mipolla")
+            
             print(self.discount.get())
             product.discount = int(self.discount.get())
             
@@ -295,7 +295,7 @@ class OrderFunctions:
             add_product_entry.append('modify') # [Modificar Pedido 1/2] Para que en "send_order" se cumpla una condición diferente ya que "Añadir" inserta una fila en Orders
             id_order = self.modify_order_id[1]
             
-            #ModifyDeleteOrder.delete_order(self , id_order , "" , "" , True)
+            self.sales_from_mofify()
             
             buyer = db.session.query(Orders).filter(Orders.id_order == id_order).first().buyer_id
             
@@ -545,7 +545,7 @@ class ModifyDeleteOrder:
         
         order = db.session.query(Orders).filter(Orders.id_order == order_id).all()
         
-        #self.sales_from_mofify()
+        self.sales_from_mofify()
         
         try:
             for row in order:
