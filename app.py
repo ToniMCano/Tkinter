@@ -462,6 +462,10 @@ class Main:
             print(f"[cancel_timer]: {e}")
     
     
+    def sales_from_mofify(self):
+        
+        SalesTab.sales_root(self)
+        
   
 if __name__ == "__main__":
     

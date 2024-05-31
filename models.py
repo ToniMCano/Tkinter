@@ -201,10 +201,11 @@ class Orders(Base):
     order_date = Column(Integer , nullable = False)
     total_import = Column(Float , nullable = False)
     order_notes = Column(String)
+    order_product_discount = Column(Integer)
     order_discount = Column(Integer)
     
     
-    def __init__(self , id_order , product_reference , product_units , order_client_id , seller_id , buyer_id, order_date , total_import , order_notes , order_discount):
+    def __init__(self , id_order , product_reference , product_units , order_client_id , seller_id , buyer_id, order_date , total_import , order_notes , order_discount , order_product_discount = 0):
         
         self.id_order = id_order
         self.product_reference = product_reference
@@ -215,6 +216,7 @@ class Orders(Base):
         self. order_date = order_date
         self.total_import = total_import
         self.order_notes = order_notes
+        self.order_product_discount = order_product_discount
         self.order_discount = order_discount
         
     
