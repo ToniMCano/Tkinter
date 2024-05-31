@@ -38,7 +38,7 @@ class Main:
         Pops.center_window(self, self.main_window)
         
         self.timer = None
-                       
+        #Tabs.select_tab(self , 'crm')  
         # INFO LISTA
         
         style = ttk.Style()
@@ -46,6 +46,7 @@ class Main:
         style.layout("mystyle.Treeview" , [("mystyle.Treeview.treearea", {'sticky' : 'nswe'})]) # Eliminar los bordes??
         
         self.crm_frame = CTkFrame(self.main_window , fg_color='transparent')
+        self.crm_frame.grid(row = 2 , column = 0 , rowspan = 2 , sticky = 'nswe')
         self.crm_frame.grid_columnconfigure(0, weight=3) # Configuramos el redimensionamiento del frame principal
         self.crm_frame.grid_columnconfigure(1, weight=1)
         self.crm_frame.grid_rowconfigure(1, weight=1)
@@ -448,19 +449,17 @@ class Main:
         Tabs.select_tab(self , 'crm')
         
         self.main_window.protocol("WM_DELETE_WINDOW", self.cancel_timer)
-        
-        
-    def sales_root_from_modify(self):
-        
-        SalesTab.sales_root(self)
-        
+
         
     def cancel_timer(self):
+        try:
+            if self.timer is not None and self.timer.is_alive():
+                self.timer.cancel()
+                
+            self.main_window.destroy()
         
-        if self.timer is not None and self.timer.is_alive():
-            self.timer.cancel()
-            
-        self.main_window.destroy()
+        except Exception as e:
+            print(f"[cancel_timer]: {e}")
     
     
   

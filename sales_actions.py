@@ -154,8 +154,6 @@ class OrderFunctions:
         
         avialivility = "6 de Junio" # Se implementará en el futuro.
         
-        #self.modify_order_id[0] = True
-        
         if self.product_units_entry.get().isdigit():
 
             units = int(self.product_units_entry.get())
@@ -180,7 +178,9 @@ class OrderFunctions:
                     OrderFunctions.calculate_import(self)
 
                     Stock.update_stock_send(self , product , "send" , units)
-
+                    
+                    OrderFunctions.show_products(self)
+                    
                 except Exception as e:
                     db.session.rollback()
                     print(f"[add_product]: {e}")
@@ -220,9 +220,7 @@ class OrderFunctions:
         except Exception as e:
             print(f"[calculate_import]: {e}")
         
-        
 
-        
     def send_order(self , keep , add_product_entry= ""): 
   
         id_order = db.session.query(Orders).filter(Orders.seller_id == self.active_employee_id.get()).order_by(Orders.id_order.desc()).first()
@@ -230,15 +228,14 @@ class OrderFunctions:
         buyer = db.session.get(Client , company)
         buyer = buyer.contact_person
 
-        print(self.modify_order_id , f'ID: {id_order.id_order}' )
         if keep == False:
             self.modify_order_id = [False , None]
-                
+            print(f'SE HA EJECUTADO:  self.modify_order_id = [False , None]')    
             OrderFunctions.clean_order(self)
             
             db.session.close()
             
-            self.sales_root_from_modify()
+            #self.sales_root_from_modify()
             
         else:
             try:
@@ -280,7 +277,7 @@ class OrderFunctions:
             add_product_entry.append('modify') # [Modificar Pedido 1/2] Para que en "send_order" se cumpla una condición diferente ya que "Añadir" inserta una fila en Orders
             id_order = self.modify_order_id[1]
             
-            ModifyDeleteOrder.delete_order(self , id_order , "" , "" , True)
+            #ModifyDeleteOrder.delete_order(self , id_order , "" , "" , True)
             
             buyer = db.session.query(Orders).filter(Orders.id_order == id_order).first().buyer_id
             
@@ -289,7 +286,7 @@ class OrderFunctions:
             for x in order:#         id_order  product_reference                 product_units                            order_client_id         seller_id                       buyer_id     order_date             total_import                            order_notes
                 
                 order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") , self.discount.get() )
-                print(f"ADD [{id_order}]: {self.order_tree.item(x , 'text')} UNITS {self.order_tree.item(x , 'values')[2]}")
+                print(f"\nmodify_order ---> ADD [ID: {id_order}]: {self.order_tree.item(x , 'text')} UNITS {self.order_tree.item(x , 'values')[2]}\n")
                 db.session.add(order_entry)
         
         except Exception as e:
@@ -591,6 +588,13 @@ class ModifyDeleteOrder:
             OrderFunctions.get_product(self , "products" , "")
             
             OrderFunctions.calculate_import(self , e = "")
+            """    
+           if self.modify_order_id[-1] == 'modify':
+                order_product = db.session.query(Orders).filter(Orders.id_order == self.modify_order_id[1]).first()
+
+            else:
+                order_product = db.session.query(Orders).filter(Orders.id_order == self.modify_order_id[1]).first()
+            """
             
             order_product = db.session.query(Orders).filter(Orders.id_order == self.modify_order_id[1]).first()
 

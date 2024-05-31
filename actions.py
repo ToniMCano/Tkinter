@@ -2156,52 +2156,72 @@ class Tabs:
         print(f'********{view}********')
         
         if view == 'crm':
-            Tabs.hide_tabs(self)
-            
-            Tabs.crm_view(self)
-            Tabs.enabled_view_button(self.crm_view_button)
-            Tabs.disabled_view_button(self.sales_view_button)
-            #Tabs.disabled_view_button(self.statistics_view_button)
+            try:
+
+                Tabs.hide_tabs(self)
+                
+                Tabs.crm_view(self)
+                Tabs.enabled_view_button(self.crm_view_button)
+                Tabs.disabled_view_button(self.sales_view_button)
+                #Tabs.disabled_view_button(self.statistics_view_button)
+                print(f"\nSHOW crm_view")
+
+            except Exception as e:
+                print(f"[select_tab] (crm): {e}")
             
             
         elif view == 'sales':
-                        
-            Tabs.hide_tabs(self)
+            try:
 
-            Tabs.sales_view(self)
+                Tabs.hide_tabs(self)
+
+                Tabs.sales_view(self)
+                print(f"\nSHOW sales_view")
+
+            except Exception as e:
+                print(f"[select_tab] (sales): {e}")
             
 
         else:
-            Tabs.hide_tabs(self)
-            
-            Tabs.statistics_view(self)
+            try:
+
+                Tabs.hide_tabs(self)
+                
+                Tabs.statistics_view(self)
+                print(f"\nSHOW statistics_frame")
+
+            except Exception as e:
+                print(f"[select_tab] (statistics): {e}")
             
     
     def hide_tabs(self):
 
         try:
             self.statistics_frame.grid_forget()
+            print(f"\nHIDE statistics_frame")
             
-        except AttributeError:
-            pass
+        except AttributeError as ae:
+            print(f"[hide_tabs] (statistics_frame) - AttributeError: {ae}")
         
         except Exception as e:
             print(f"[hide_tabs] (statistics): {e}")
             
         try:
             self.sales_frame.grid_forget()
+            print(f"\nHIDE sales_frame")
             
-        except AttributeError:
-            pass
+        except AttributeError as ae:
+             print(f"[hide_tabs] (sales_frame) - AttributeError: {ae}")
         
         except Exception as e:
             print(f"[hide_tabs] (sales): {e}")
             
         try:
             self.crm_frame.grid_forget()
+            print(f"\nHIDE crm_frame")
             
-        except AttributeError:
-            pass
+        except AttributeError as ae:
+             print(f"[hide_tabs] (crm_frame) - AttributeError: {ae}")
         
         except Exception as e:
             print(f"[hide_tabs] (crm): {e}")
@@ -2224,6 +2244,8 @@ class Tabs:
                 self.new_company.grid(row = 0 , column = 0 , padx = 5)    
             
             self.employee['values'] = LoadInfo.employees_list() 
+            
+            self.main_window.update() 
         
         except Exception as e:
             print(f"[crm_view] (grids): {e}")
@@ -2233,8 +2255,8 @@ class Tabs:
             alias = LoadInfo.employees_list().index(employee.employee_alias)
             self.employee.current(newindex = alias) 
 
-        except AttributeError:
-            pass
+        except AttributeError as ae:
+            print(f"[crm_view] (employee) - AttributeError: {ae}")
         
         except Exception as e:
             print(f"[crm_view] (employee): {e}")
