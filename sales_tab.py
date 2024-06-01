@@ -121,6 +121,8 @@ class SalesTab:
         self.order_label = CTkLabel(self.sales_order_frame , textvariable = self.order_header , fg_color = 'Lightblue4' , corner_radius = 3 , text_color = "white")
         self.order_label.grid(row = 0 , column = 0 , sticky = W+E)
         
+        
+        
         self.sales_oreder_view = ttk.Frame(self.sales_order_frame)
         self.sales_oreder_view.grid(row = 1 , column = 0 , sticky = 'nswe', padx = 5 , pady = 5)
         self.sales_oreder_view.grid_columnconfigure(0 , weight = 1)

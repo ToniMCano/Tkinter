@@ -246,7 +246,7 @@ class OrderFunctions:
 
         if keep == False:
             self.modify_order_id = [False , None]
-            print(f'SE HA EJECUTADO:  self.modify_order_id = [False , None]')    
+  
             OrderFunctions.clean_order(self)
             
             db.session.close()
