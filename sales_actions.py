@@ -73,7 +73,7 @@ class OrderFunctions:
             client = db.session.get(Client , self.company_id.get())
             
             if client is not None:
-                self.order_header.set(f'[{client.id_client}] {client.name}')
+                self.order_header.set(f'{client.name} [ID: {client.id_client}]')
                                 
             else:
                 self.order_header.set('Pedido')
@@ -130,7 +130,9 @@ class OrderFunctions:
             OrderFunctions.load_product(self , product)
             
             if place == "order":
-                OrderFunctions.add_product(self , product)            
+                OrderFunctions.add_product(self , product)   
+                
+            return reference         
             
         except Exception as e:
             print(f'[get_product]: {e}')
@@ -246,6 +248,8 @@ class OrderFunctions:
 
         if keep == False:
             self.modify_order_id = [False , None]
+
+            self.order_number_label.place_forget() 
   
             OrderFunctions.clean_order(self)
             
@@ -261,7 +265,7 @@ class OrderFunctions:
                     self.modify_order_id = [True , id_order]
                     print(self.modify_order_id , f'Después ID: {id_order}' )
                     OrderFunctions.add_entry_order(self , id_order , buyer , add_product_entry)
-                                
+                               
                 elif id_order is None and not self.modify_order_id[0]:    
                     id_order = 1 
 
@@ -271,10 +275,14 @@ class OrderFunctions:
                     pass
                     
                 else:
-                    OrderFunctions.add_entry_order(self , id_order.id_order , buyer , add_product_entry)
+                    id_order = id_order.id_order
+                    OrderFunctions.add_entry_order(self , id_order, buyer , add_product_entry)
                     
                 db.session.commit()
-                    
+                
+                self.order_number.set(f"Nº {id_order:04d}") 
+                self.order_number_label.place(x = 3 , rely = 0.125)
+                
             except Exception as e:
                 print(f"[send_order]: {e}")
     
@@ -294,6 +302,8 @@ class OrderFunctions:
         try:
             add_product_entry.append('modify') # [Modificar Pedido 1/2] Para que en "send_order" se cumpla una condición diferente ya que "Añadir" inserta una fila en Orders
             id_order = self.modify_order_id[1]
+            
+            self.order_number.set(f"Nº {id_order:04d}") 
             
             self.sales_from_mofify()
             
@@ -560,6 +570,11 @@ class ModifyDeleteOrder:
                 
             self.modify_order_id = [True , order_id]  # Pasamos el mismo id de pedido.
             
+            self.order_number.set(f"Nº {order_id:04d}")
+            self.order_number_label.place(x = 3 , rely = 0.125)
+             
+            #self.total_order_import.set(OrderFunctions.calculate_import(self))
+            
             single_order_window.destroy() # 
             historical_window.destroy()
         
@@ -601,7 +616,7 @@ class ModifyDeleteOrder:
             
             self.order_tree.delete(item)
             
-            OrderFunctions.get_product(self , "products" , "")
+            reference = OrderFunctions.get_product(self , "products" , "")
             
             OrderFunctions.calculate_import(self , e = "")
             
@@ -614,10 +629,27 @@ class ModifyDeleteOrder:
             db.session.delete(order_product)
             
             db.session.commit()
-        
+            print(f"#######SIN {len(self.order_tree.get_children() == 0)}######")
+            if len(self.order_tree.get_children() == 0):
+                print(f"#######{len(self.order_tree.get_children() == 0)}######")
+                OrderFunctions.send_order(self , False , add_product_entry= "")
+                
+            print(f"##############3 {reference}")
+            #ModifyDeleteOrder.deleted_focus(self , reference)
+            
         except Exception as e:
             print(f"[delete_product]: {e}")
         
+    
+    def deleted_focus(self , reference):
+                
+        products = self.products_tree.get_children()
+        
+        for product in products:
+            
+            if product['text'] == reference:
+                self.products_tree.focus(product)
+                self.products_tree .selection_set(product)
             
     def percentage(number , percentage):
         

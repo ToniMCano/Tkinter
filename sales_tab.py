@@ -32,6 +32,8 @@ class SalesTab:
         self.order_header = StringVar()
         self.order_header.set('Pedido')
         
+        self.order_number = StringVar()
+        
         self.header_description = StringVar()
         self.header_description.set('Descripción Producto')
             
@@ -121,7 +123,7 @@ class SalesTab:
         self.order_label = CTkLabel(self.sales_order_frame , textvariable = self.order_header , fg_color = 'Lightblue4' , corner_radius = 3 , text_color = "white")
         self.order_label.grid(row = 0 , column = 0 , sticky = W+E)
         
-        
+        self.order_number_label = CTkLabel(self.order_label , textvariable = self.order_number, fg_color = "white" , height = 10 , corner_radius = 2 , padx = 2 , pady = 2 , text_color = 'Lightblue4')
         
         self.sales_oreder_view = ttk.Frame(self.sales_order_frame)
         self.sales_oreder_view.grid(row = 1 , column = 0 , sticky = 'nswe', padx = 5 , pady = 5)
@@ -173,7 +175,7 @@ class SalesTab:
         self.delete_button = CTkButton(self.sales_order_dashboard , text = 'Eliminar' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 1 , border_color = "gray" , width = 50 , command = lambda: ModifyDeleteOrder.delete_product(self))
         self.delete_button.grid(row = 0 , column = 2 , sticky = W+E , padx = 5 , pady = 5)
         
-        self.send_order = CTkButton(self.sales_order_dashboard , text = 'Realizar Pedido' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'Lightblue4' , border_width = 2 , border_color = "Lightblue4" , width = 50 , command = lambda: OrderFunctions.send_order(self , False))
+        self.send_order = CTkButton(self.sales_order_dashboard , text = 'Finalizar' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'Lightblue4' , border_width = 2 , border_color = "Lightblue4" , width = 50 , command = lambda: OrderFunctions.send_order(self , False))
         self.send_order.grid(row = 0 , column = 3 , sticky = W+E , padx = 5 , pady = 5)
         
         self.sales_order_info = CTkFrame(self.sales_order_dashboard , fg_color = 'transparent' , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')
