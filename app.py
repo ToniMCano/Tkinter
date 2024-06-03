@@ -38,7 +38,7 @@ class Main:
         Pops.center_window(self, self.main_window)
         
         self.timer = None
-        #Tabs.select_tab(self , 'crm')  
+
         # INFO LISTA
         
         style = ttk.Style()
@@ -465,11 +465,11 @@ class Main:
     def sales_from_mofify(self):
         
         try:                                    
-            if self.sales_frame.winfo_ismapped() and self.view == 'crm':
+            if self.sales_frame.winfo_ismapped():
                 self.sales_frame.grid_forget()   # Si no se elimina se crean mas Frames y no se vuelve a mostar la vista de CRM al ejecutar esta función
             
-            else:
-                SalesTab.sales_root(self)
+            
+            SalesTab.sales_root(self)
                 
         except AttributeError:
             SalesTab.sales_root(self)

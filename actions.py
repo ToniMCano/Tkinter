@@ -2160,20 +2160,28 @@ class Tabs:
         print(f'********{view}********')
         
         if view == 'crm':
-            try:
+            
+            if self.modify_order_id[1] != None:
+                response = mb.askquestion("Pedido sin Cerrar" , "No has Finalizado el pedido.\n\n ¿Deseas Mantenerlo abierto?")
 
-                Tabs.hide_tabs(self)
+                if response =="yes":
+                    pass
                 
-                Tabs.crm_view(self)
-                Tabs.enabled_view_button(self.crm_view_button)
-                Tabs.disabled_view_button(self.sales_view_button)
-                #Tabs.disabled_view_button(self.statistics_view_button)
-                self.view = 'crm'
+                else:
+                    try:
+                        Tabs.hide_tabs(self)
+                        
+                        Tabs.crm_view(self)
+                        Tabs.enabled_view_button(self.crm_view_button)
+                        Tabs.disabled_view_button(self.sales_view_button)
+                        #Tabs.disabled_view_button(self.statistics_view_button)
+                        self.view = 'crm'
+                    
+                    except Exception as e:
+                        print(f"[select_tab] (crm): {e}")
+                        
+                    self.modify_order_id = [False , None]
 
-            except Exception as e:
-                print(f"[select_tab] (crm): {e}")
-            
-            
         elif view == 'sales':
             try:
 
