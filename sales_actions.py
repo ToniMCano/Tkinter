@@ -94,7 +94,7 @@ class OrderFunctions:
             
             if place == "order":
                 OrderFunctions.add_product(self , product)   
-                
+            print(f"REFERENCE FROM get_product: {reference}")    
             return reference         
             
         except Exception as e:
@@ -280,8 +280,6 @@ class OrderFunctions:
         window.grid_columnconfigure(0 , weight = 1)
         window.grid_rowconfigure(0 , weight = 1)
         
-        client = db.session.get(Client , self.company_id.get())
- 
         self.historial_frame = CTkFrame(window , fg_color = 'transparent')
         self.historial_frame.grid(row = 0 , column = 0 , padx = 10 , pady = 10 , sticky = "nswe")
         self.historial_frame.grid_columnconfigure(0 , weight = 1)
@@ -459,10 +457,10 @@ class OrderFunctions:
             self.units_view = CTkLabel(self.product_view_frame  , text = f'{order_product.product_units}' , text_color = 'gray')
             self.units_view.grid(row = 0 , column = 3 , padx = 5 , pady = 5 )
             
-            self.product_discount = CTkLabel(self.product_view_frame , text = f'{product_info.discount}' , text_color = 'gray')
+            self.product_discount = CTkLabel(self.product_view_frame , text = f'{order_product.order_discount} %' , text_color = 'gray')
             self.product_discount.grid(row = 0 , column = 4 , padx = 5 , pady = 5 )
         
-            self.products_total_import = CTkLabel(self.product_view_frame  , text = f'{order_product.total_import}' , text_color = 'gray')
+            self.products_total_import = CTkLabel(self.product_view_frame  , text = f'{order_product.total_import:2f}' , text_color = 'gray')
             self.products_total_import.grid(row = 0 , column = 5 , padx = 5 , pady = 5 , sticky = W+E)
    
         self.order_footer = CTkFrame(window , fg_color = 'transparent')
@@ -551,14 +549,10 @@ class ModifyDeleteOrder:
     def delete_product(self):
 
         try:
-            item = self.order_tree.focus()
-            
-            self.order_tree.delete(item)
-            
             reference = OrderFunctions.get_product(self , "products" , "")
 
-            order_product = db.session.query(Orders).filter(Orders.id_order == self.modify_order_id[1]).first()
-            print(f"\n[1] ID:{order_product.id_order} (Current Stock) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
+            order_product = db.session.query(Orders).filter(and_(Orders.id_order == self.modify_order_id[1] , Orders.product_reference == reference)).first()
+            print(f"\n[0] ID:{order_product.id_order} (Current Stock) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}\n")
             Stock.update_stock_send(self , order_product , "delete")
             print(f"\n[1] ID:{order_product.id_order} (update_stock_send) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
             OrderFunctions.show_products(self)
@@ -575,6 +569,12 @@ class ModifyDeleteOrder:
             ModifyDeleteOrder.deleted_focus(self , reference)
             
             OrderFunctions.calculate_import(self , "")
+            
+            item = self.order_tree.focus()
+            
+            self.order_tree.delete(item)
+            
+
             
         except Exception as e:
             print(f"[delete_product]: {e}")
@@ -635,12 +635,18 @@ class Stock:
                     order_product.units -= units
             
             elif actions == "delete":
+                    print(f'REFERENCE FROM DELETE: {order_product.product_reference}\n')
                     product_to_update = db.session.get(Products , order_product.product_reference)
+                    print(f"# (update_stock_send) DELETE: [ID: {order_product.id_order}] Reference: {product_to_update.reference} Stock: {product_to_update.units}")
                     
                     product_to_update.units += order_product.product_units
 
             db.session.commit()
-        
+            
+            if actions == "delete":
+                product_to_update = db.session.get(Products , order_product.product_reference)
+                print(f"(update_stock_send) # DELETE: [ID: {order_product.id_order}] Reference: {product_to_update.reference} Stock: {product_to_update.units}")
+
         except Exception as e:
             db.session.rollback()
             

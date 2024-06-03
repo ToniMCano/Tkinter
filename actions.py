@@ -887,7 +887,7 @@ class LoadInfo():
             row = tree.focus()
             
             item = tree.item(row)
-            print(f'(get_item) 1: {item["text"]}')
+            print(f'REFERENCE FROM (get_item): {item["text"]}')
             if place == 'crm':
                 client_name = item['values'][1]
             
@@ -2501,7 +2501,7 @@ class Actions:
     def pop_ups_number(self , pops):
         
         if len(pops) > 0:
-            self.pop_up_advise.place(relx = 0.98 , rely = 0)
+            self.pop_up_advise.place(relx = 0.7 , rely = 0)
             
         else:
             self.pop_up_advise.place_forget()

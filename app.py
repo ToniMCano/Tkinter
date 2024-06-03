@@ -191,7 +191,7 @@ class Main:
         self.pop_up.config(cursor = 'arrow')
         self.pop_up.grid(row = 0 , column = 11 , padx = 5 , sticky = E)
         
-        self.pop_up_advise  = CTkLabel(self.header , textvariable = self.advises , text_color = 'white' , fg_color = 'red' , corner_radius = 50 , height = 15 , width = 15 , font = ("" , 10 , 'bold'))
+        self.pop_up_advise  = CTkLabel(self.pop_up , textvariable = self.advises , text_color = 'white' , fg_color = 'red' , corner_radius = 50 , height = 15 , width = 15 , font = ("" , 10 , 'bold'))
         
         
         # LOG
