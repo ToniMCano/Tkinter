@@ -887,7 +887,7 @@ class LoadInfo():
             row = tree.focus()
             
             item = tree.item(row)
-            print(f'Item1: {item["text"]} - {item}')
+            print(f'(get_item) 1: {item["text"]}')
             if place == 'crm':
                 client_name = item['values'][1]
             
@@ -900,7 +900,7 @@ class LoadInfo():
                 return item['text']
 
             ContactActions.close_other_contact(self)
-            print(f'Item2: {item["text"]}')
+            print(f'(get_item) 2: {item["text"]}')
         except AttributeError:
             pass
         
@@ -1168,7 +1168,7 @@ class CheckInfo:
 
      
     def check_phones(self , phone , which_phone , data):
-        print(phone,which_phone)
+        print(f'Phone: {phone} Type: {which_phone}')
         try: 
             if len(phone) == 9 and str(phone).isdigit():
                 return phone
@@ -1602,7 +1602,7 @@ class Logs:
         Logs.confirm_unique_pop(new_comment)
 
         row = row_text_values_item
-        print(f"NEW COMMENT: {new_comment}")
+        print(f"(save_log) NEW COMMENT: {new_comment}")
         if all_ok:  
        
             db.session.add(new_comment)
@@ -1626,7 +1626,7 @@ class Logs:
        
         try:
             for i , contact in enumerate(contacts):
-                print(f"*** [{contact.id_contact}]({len(contacts)}/{i+1}) < Alerts Antes de remover : {alerts} ***")
+                print(f"*** [{contact.id_contact}]({len(contacts)}/{i+1}) > Alerts Antes de remover : {alerts} ***")
                     
                 if contact.id_contact in alerts:
                     alerts.remove(contact.id_contact)
@@ -1920,12 +1920,7 @@ class Update:
             province = self.province.get()
             city = self.city.get() 
             postal_code =  CheckInfo.check_postal_code(self , self.postal_code.get() , "")
-            print(street)
-            print(number)
-            print(floor)
-            print(province)
-            print(city)
-            
+
             company.adress = f"{street}-{number}-{floor}-{province}-{city}"
             company.postal_code = postal_code
             
@@ -2197,7 +2192,7 @@ class Tabs:
                 Tabs.hide_tabs(self)
                 
                 Tabs.statistics_view(self)
-                print(f"\nSHOW statistics_frame")
+                print(f"\n* Show: statistics_frame")
 
             except Exception as e:
                 print(f"[select_tab] (statistics): {e}")
@@ -2207,7 +2202,7 @@ class Tabs:
 
         try:
             self.statistics_frame.grid_forget()
-            print(f"\nHIDE statistics_frame")
+            print(f"\n* Hide: statistics_frame")
             
         except AttributeError as ae:
             print(f"[hide_tabs] (statistics_frame) - AttributeError: {ae}")
@@ -2217,7 +2212,7 @@ class Tabs:
             
         try:
             self.sales_frame.grid_forget()
-            print(f"\nHIDE sales_frame")
+            print(f"\n* Hide: sales_frame")
             
         except AttributeError as ae:
              print(f"[hide_tabs] (sales_frame) - AttributeError: {ae}")
@@ -2227,7 +2222,7 @@ class Tabs:
             
         try:
             self.crm_frame.grid_forget()
-            print(f"\nHIDE crm_frame")
+            print(f"\n* Hide: crm_frame")
             
         except AttributeError as ae:
              print(f"[hide_tabs] (crm_frame) - AttributeError: {ae}")
@@ -2401,7 +2396,7 @@ class ContactActions:
                 delete_button = CTkButton(self.new_contact , text = 'x' , command = lambda contact_id = contact.id_person: ContactActions.delete_contact(self , contact_id) , width = 5 , height = 5 , fg_color = 'red' , corner_radius = 4 , text_color = 'white')
                 delete_button.pack(fill = 'y' , side = 'right')
                 
-                print(f"{contact.contact_name} {contact.contact_surname} {contact.contact_job_title}")
+                print(f"New Contact: {contact.contact_name} {contact.contact_surname} {contact.contact_job_title}")
     
     
     def change_contact(self , e , contact_sended):
