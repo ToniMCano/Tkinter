@@ -81,49 +81,12 @@ class OrderFunctions:
         except Exception as e:
             print(f'[show_products] (order_header): {e}')
             
-        
-    def row_colors(self, clients , ordenado , date , bgcolor , contacts , dot):
-        for i , client in enumerate(clients):
-
-            if ordenado.at[i, 'next'] <= str(date)[:11] + "23:59":               
-                
-                if int(ordenado.at[i, "days"]) >= 60:
-                    font = "font_red"
-                    
-                else:
-                    font = ""
-                
-                if bgcolor % 2 == 0:
-                    color= "odd"
-                
-                else:
-                    color= "even"
-   
-                if ordenado.at[i, 'pop'] == True:
-                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])} {dot}"
-                
-                else:
-                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])}"
-                    
-                if len(str(ordenado.at[i, 'cp'])) == 4:
-                    postal_code = f"0{ordenado.at[i, 'cp']}"
-                    
-                else:
-                    postal_code = ordenado.at[i, 'cp']
-                    
-                self.infoproducts_tree.insert("" , 0 , text = ordenado.at[i, 'state'] , values = (str(ordenado.at[i, 'days']).lstrip("0") , ordenado.at[i, 'name'] , MyCalendar.format_date_to_show(ordenado.at[i, 'last'])  , next_contact , postal_code) , tags=(color, font) )
-                
-                contacts += 1
-                bgcolor += 1
-                
-        return contacts
-    
     
     def get_product(self , place , e): # Revisar desde delete_product
         try:
             reference = LoadInfo.get_item(self , place , self.products_tree , e)
 
-            print(f'Get Product - Reference: {reference}')
+            print(f'(get_product) - Reference: {reference}')
             
             product = db.session.query(Products).filter(Products.reference == int(reference)).first()
             
@@ -148,16 +111,15 @@ class OrderFunctions:
            
             self.expiration.set(MyCalendar.format_date_to_show(f'{product.expiration} 08:00')[0:-6])
             
-            self.discount.set(product.discount)
             
         except Exception as e:
             print(f"[load_product]: {e}")
-        
+    
         
     def add_product(self , product):
-        
+
         avialivility = "6 de Junio" # Se implementará en el futuro.
-        
+
         if self.product_units_entry.get().isdigit():
 
             units = int(self.product_units_entry.get())
@@ -166,28 +128,28 @@ class OrderFunctions:
             
             product_discount = product.discount
             
-            print(self.discount.get())
-            product.discount = int(self.discount.get())
-            
+            if self.discount_entry.get().isdigit() and product.discount == 0:
+
+                product.discount = int(self.discount_entry.get())
+
             db.session.commit()
-            print(f"(Add Product) DESCUENTO ANTES {db.session.query(Products ).filter(Products.reference == product.reference).first().discount}")
+
             if units < product.units: 
                 
                 try:
                     if product.discount != 0:
                         row_import = row_import - (row_import * int(product.discount) / 100)
                         
-                    self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , self.product_units_entry.get() , f"{product.discount} %" , row_import))
+                    self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , units, f"{product.discount} %" , row_import))
                     
                     add_product_entry = [product.reference , product.product_name , product.price , units , row_import , product.discount , product.discount ]
       
                     OrderFunctions.send_order(self , True , add_product_entry)
                     
                     product.discount = product_discount
+                    
                     db.session.commit()
-                    
-                    print(f"(Add Product) DESCUENTO DESPUÉS {db.session.query(Products ).filter(Products.reference == product.reference).first().discount}")
-                    
+
                     self.product_description.delete(1.0 , 'end')
                     self.product_description.insert('end' , product.description)
                     
@@ -241,7 +203,7 @@ class OrderFunctions:
 
     def send_order(self , keep , add_product_entry= ""): 
   
-        id_order = db.session.query(Orders).filter(Orders.seller_id == self.active_employee_id.get()).order_by(Orders.id_order.desc()).first()
+        id_order = db.session.query(Orders).filter(and_(Orders.seller_id == self.active_employee_id.get() , Orders.order_client_id == self.company_id.get())).order_by(Orders.id_order.desc()).first()
         company = self.company_id.get()
         buyer = db.session.get(Client , company)
         buyer = buyer.contact_person
@@ -255,8 +217,6 @@ class OrderFunctions:
             
             db.session.close()
             
-            #self.sales_root_from_modify()
-            
         else:
             try:
                 if id_order is not None and not self.modify_order_id[0]:
@@ -268,6 +228,7 @@ class OrderFunctions:
                                
                 elif id_order is None and not self.modify_order_id[0]:    
                     id_order = 1 
+                    self.modify_order_id = [True , id_order]
 
                     OrderFunctions.add_entry_order(self , id_order , buyer , add_product_entry)
                     
@@ -295,32 +256,8 @@ class OrderFunctions:
         db.session.add(order_entry)
         
         print(f"(add_entry_order) ADDED: [ID Order]{id_order} Reference: {add_product[0]}")
-   
-   
-    def modify_order(self):
-        
-        try:
-            add_product_entry.append('modify') # [Modificar Pedido 1/2] Para que en "send_order" se cumpla una condición diferente ya que "Añadir" inserta una fila en Orders
-            id_order = self.modify_order_id[1]
-            
-            self.order_number.set(f"Nº {id_order:04d}") 
-            
-            self.sales_from_mofify()
-            
-            buyer = db.session.query(Orders).filter(Orders.id_order == id_order).first().buyer_id
-            
-            order = self.order_tree.get_children()
 
-            for x in order:#         id_order  product_reference                 product_units                            order_client_id         seller_id                       buyer_id     order_date             total_import                            order_notes
-                
-                order_entry = Orders(id_order ,self.order_tree.item(x , 'text') , self.order_tree.item(x , 'values')[2] , self.company_id.get() , self.active_employee_id.get() , buyer,  str(datetime.now())[0:16] , self.order_tree.item(x , 'values')[4] , self.oreder_notes.get(1.0, "end") , 0 , self.discount.get() )
-                print(f"\nmodify_order ---> ADD [ID: {id_order}]: {self.order_tree.item(x , 'text')} UNITS {self.order_tree.item(x , 'values')[2]}\n")
-                db.session.add(order_entry)
-        
-        except Exception as e:
-            print(f"[modify_order]: {e}")
-    
-    
+
     def clean_order(self):
         
         clean = self.order_tree.get_children()
@@ -619,25 +556,25 @@ class ModifyDeleteOrder:
             self.order_tree.delete(item)
             
             reference = OrderFunctions.get_product(self , "products" , "")
-            
-            OrderFunctions.calculate_import(self , "")
-            
+
             order_product = db.session.query(Orders).filter(Orders.id_order == self.modify_order_id[1]).first()
-            print(f"\n[1] * (Current Stock) SIN {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
+            print(f"\n[1] ID:{order_product.id_order} (Current Stock) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
             Stock.update_stock_send(self , order_product , "delete")
-            print(f"\n[1] * (update_stock_send) SIN {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
+            print(f"\n[1] ID:{order_product.id_order} (update_stock_send) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
             OrderFunctions.show_products(self)
-            print(f"\n[2] * (show_products) SIN {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
+            print(f"\n[2] ID:{order_product.id_order} (show_products) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
             db.session.delete(order_product)
-            print(f"\n[3] * (delete) SIN {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
+            print(f"\n[3] ID:{order_product.id_order} (delete) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
             db.session.commit()
-            print(f"\n[4] * () SIN {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
-            if len(self.order_tree.get_children())== 0:
-                print(f"\n[5] * {len(self.order_tree.get_children())}")
+            print(f"\n[4] ID:{order_product.id_order} (commit) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
+            if len(self.order_tree.get_children()) == 0:
+                print(f"\n[5] ID:{order_product.id_order} {len(self.order_tree.get_children())}")
                 OrderFunctions.send_order(self , False , add_product_entry= "")
                 
             print(f"\n[6] * DELETED -  Reference: {reference} Units: {db.session.get(Products , reference).units}\n")
             ModifyDeleteOrder.deleted_focus(self , reference)
+            
+            OrderFunctions.calculate_import(self , "")
             
         except Exception as e:
             print(f"[delete_product]: {e}")

@@ -900,12 +900,12 @@ class LoadInfo():
                 return item['text']
 
             ContactActions.close_other_contact(self)
-            print(f'(get_item) 2: {item["text"]}')
-        except AttributeError:
-            pass
+            print(f'[get_item] 2: {item["text"]}')
+        except AttributeError as e:
+            print(f'[get_item] AttributeError: {e}')
         
-        except IndexError:
-            pass
+        except IndexError as e:
+            print(f'[get_item] IndexError: {e}')
         
         except Exception as e:
             print(e , type(e))
@@ -2160,6 +2160,7 @@ class Tabs:
         print(f'********{view}********')
         
         if view == 'crm':
+            response = "no"
             
             if self.modify_order_id[1] != None:
                 response = mb.askquestion("Pedido sin Cerrar" , "No has Finalizado el pedido.\n\n ¿Deseas Mantenerlo abierto?")
@@ -2168,19 +2169,10 @@ class Tabs:
                     pass
                 
                 else:
-                    try:
-                        Tabs.hide_tabs(self)
-                        
-                        Tabs.crm_view(self)
-                        Tabs.enabled_view_button(self.crm_view_button)
-                        Tabs.disabled_view_button(self.sales_view_button)
-                        #Tabs.disabled_view_button(self.statistics_view_button)
-                        self.view = 'crm'
-                    
-                    except Exception as e:
-                        print(f"[select_tab] (crm): {e}")
-                        
                     self.modify_order_id = [False , None]
+                    
+            if response == "no":       
+                Tabs.crm_option(self)
 
         elif view == 'sales':
             try:
@@ -2205,7 +2197,20 @@ class Tabs:
             except Exception as e:
                 print(f"[select_tab] (statistics): {e}")
             
-    
+            
+    def crm_option(self):
+        
+        try:
+            Tabs.hide_tabs(self)
+            Tabs.crm_view(self)
+            Tabs.enabled_view_button(self.crm_view_button)
+            Tabs.disabled_view_button(self.sales_view_button)
+            self.view = 'crm'
+        
+        except Exception as e:
+            print(f"[select_tab] (crm): {e}")
+            
+            
     def hide_tabs(self):
 
         try:
