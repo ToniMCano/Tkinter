@@ -338,9 +338,12 @@ class Main:
         
         self.button_a = CTkButton(self.company_contact_buttons , textvariable = self.button_a_value , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: States.change_state(self))
         self.button_a.grid(row = 0 , column = 0 , sticky = "we" , pady = 5 , padx = 5)
+        
+        self.decline_button = CTkButton(self.company_contact_buttons , text = "Decline" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: States.change_state(self , True))
+        self.decline_button.grid(row = 0 , column = 1 , sticky = "we" , pady = 5 , padx = 5)
 
         self.historical_button = CTkButton(self.company_contact_buttons , text = "Historial" , height = 2 , fg_color = "#f4f4f4" , text_color = 'LightBlue4' , border_color = "LightBlue4" , border_width = 2 , hover_color = 'LightBlue4' , command = lambda: OrderFunctions.sales_historical(self))
-        self.historical_button.grid(row = 0 , column = 1 , sticky = "we" , pady = 5 , padx = 5)
+        self.historical_button.grid(row = 0 , column = 2 , sticky = "we" , pady = 5 , padx = 5)
         
         #FRAME CONTACTO
         

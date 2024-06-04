@@ -187,13 +187,12 @@ class OrderFunctions:
                                     
             self.order_import.set(round(sum(total) , 2))
             
-            if self.discount.get():
-                with_discount =  sum(total) - (sum(total) * int(self.discount.get()) / 100)
+            #if self.discount.get():   Más adelante incluiré la opción de hacer descuento en el total del pedido.
+               # with_discount =  sum(total) - (sum(total) * int(self.discount.get()) / 100)
                 
-                total_order_import = with_discount + with_discount * 8 / 100
+                #total_order_import = with_discount + with_discount * 8 / 100
                 
-            else:
-                total_order_import = sum(total) + (sum(total) * 8 / 100)
+            total_order_import = sum(total) + (sum(total) * 8 / 100)
                 
             self.total_order_import.set(round(total_order_import , 2))
         
@@ -536,7 +535,7 @@ class ModifyDeleteOrder:
                 single_order_window.destroy()
                 
                 OrderFunctions.sales_historical(self)
-                
+                OrderFunctions.clean_order(self)
                 OrderFunctions.show_products(self)
             
         except Exception as e:

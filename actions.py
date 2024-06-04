@@ -753,12 +753,15 @@ class LoadInfo():
         
         if company_name:
             try:
-                selected_row = Logs.row_to_change(self , company_name) # return [text , values , item]
-                # Establecer el foco en la fila seleccionada
-                self.info.selection_set(selected_row[-1])
+                
+                for row in self.info.get_children():
+                    if row['values'][1] == company_name:
+                        self.info.focus(row)
+                        self.info.selection_set(row)
+                        print(row , row['values'])
             
             except Exception as e:
-                pass
+                print(f"[load_contacts] (company_name): {e}")
                 
         self.contacts.set(f"Contactos: {contacts}")
 
@@ -823,40 +826,48 @@ class LoadInfo():
         
         
     def row_colors(self, clients , ordenado , date , bgcolor , contacts , dot):
-        for i , client in enumerate(clients):
+        
+        try:
+            for i , client in enumerate(clients):
 
-            if ordenado.at[i, 'next'] <= str(date)[:11] + "23:59":               
-              
-                if int(ordenado.at[i, "days"]) >= 60:
-                    font = "font_red"
-                    
-                else:
-                    font = ""
+                if ordenado.at[i, 'next'] <= str(date)[:11] + "23:59":               
                 
-                if bgcolor % 2 == 0:
-                    color= "odd"
-                
-                else:
-                    color= "even"
-                #print(ordenado.at[i, 'pop'])
-                if ordenado.at[i, 'pop'] == True:
-                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])} {dot}"
-                
-                else:
-                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])}"
+                    if int(ordenado.at[i, "days"]) >= 60:
+                        font = "font_red"
+                        
+                    else:
+                        font = ""
                     
-                if len(str(ordenado.at[i, 'cp'])) == 4:
-                    postal_code = f"0{ordenado.at[i, 'cp']}"
+                    if bgcolor % 2 == 0:
+                        color= "odd"
                     
-                else:
-                    postal_code = ordenado.at[i, 'cp']
+                    else:
+                        color= "even"
+                    #print(ordenado.at[i, 'pop'])
+                    if ordenado.at[i, 'pop'] == True:
+                        next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])} {dot}"
                     
-                self.info.insert("" , 0 , text = ordenado.at[i, 'state'] , values = (str(ordenado.at[i, 'days']).lstrip("0") , ordenado.at[i, 'name'] , MyCalendar.format_date_to_show(ordenado.at[i, 'last'])  , next_contact , postal_code) , tags=(color, font) )
-               
-                contacts += 1
-                bgcolor += 1
+                    else:
+                        next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])}"
+                        
+                    if len(str(ordenado.at[i, 'cp'])) == 4:
+                        postal_code = f"0{ordenado.at[i, 'cp']}"
+                        
+                    else:
+                        postal_code = ordenado.at[i, 'cp']
+                        
+                    self.info.insert("" , 0 , text = ordenado.at[i, 'state'] , values = (str(ordenado.at[i, 'days']).lstrip("0") , ordenado.at[i, 'name'] , MyCalendar.format_date_to_show(ordenado.at[i, 'last'])  , next_contact , postal_code) , tags=(color, font) )
                 
-        return contacts
+                    contacts += 1
+                    bgcolor += 1
+                    
+            return contacts
+        
+        except TypeError:
+            pass
+        
+        except Exception as e:
+            print(f"[row_colors]: {e}")
 
             
     def get_days(client):
@@ -1382,39 +1393,43 @@ class AddInfo():
  
             
     def add_companies_from_file():
-    
-        excel_paht = filedialog.askopenfilename(title = "Cargar desde Excel" , filetypes = (("Ficheros Excel" , "*.xlsx"),))
-        excel = openpyxl.open(excel_paht)
-        
-        rows = []
-        ready = []
-        errores = []
-        
-        for row in excel["Sheet"].rows:
             
-            for cell in row:
-                rows.append(cell.value)
-                
-            ready.append(rows)
+            excel_paht = filedialog.askopenfilename(title = "Cargar desde Excel" , filetypes = (("Ficheros Excel" , "*.xlsx"),))
+            excel = openpyxl.open(excel_paht)
+            
             rows = []
-        
-        for i , registro in enumerate(ready):
-
-            new = Client(registro[0] , registro[1] , registro[2] , registro[3] , registro[4] , registro[5] , registro[6] , registro[7] , registro[8] , registro[9] , registro[10] , registro[11] , registro[12] , registro[13] , registro[14])
+            ready = []
+            errores = []
             
-            try:
-                db.session.add(new)
-                db.session.commit()
+            for sheet in excel.sheetnames:
+                for row in excel[sheet].rows:
+                    
+                    for cell in row:
+                        rows.append(cell.value)
+                        
+                    ready.append(rows)
+                    rows = []
                 
-            except Exception as e:   
-                errores.append(i+1)
-            
-        db.session.close()
-        
-        if len(errores) > 0:
-            
-            mb.showwarning("Errores en la inserción de Empresas" , f"Empresas que no han podido ser insertadas: {errores}")    
-            
+                for i , registro in enumerate(ready):
+
+                    new = Client(registro[0] , registro[1] , registro[2] , registro[3] , registro[4] , registro[5] , registro[6] , registro[7] , registro[8] , registro[9] , registro[10] , registro[11] , registro[12] , registro[13] , registro[14])
+                    
+                    try:
+                        db.session.add(new)
+                        db.session.commit()
+                        print(f"Company: {new}")
+                        
+                    except Exception as e:   
+                        errores.append(i+1)
+                        
+                        print(f"[add_companies_from_file]: {e}")
+                    
+                db.session.close()
+                
+                if len(errores) > 0:
+                    
+                    mb.showwarning("Errores en la inserción de Empresas" , f"Empresas que no han podido ser insertadas: {len(errores)}")    
+                
      
     def add_contact_person(self, data , employee_adder , place = ""):
         
@@ -1694,10 +1709,13 @@ class Logs:
             
             row_text_values_item = Logs.row_to_change(self , company_info.name)
             
-            if calendar == 'pop':
+            if calendar == 'pop' and company_info.state != 'Pool':
                 pop = True
                 state = f'{company_info.state}/pop - ({admin})'
-                
+            
+            elif company_info.state == 'Pool':
+                mb.showinfo("Pool" , "No se pueden Añadir PopUps desde el Pool General")
+            
             else:
                 pop = False
                 state = f'{company_info.state}/next - ({admin})'
@@ -1707,9 +1725,10 @@ class Logs:
             Logs.log_next_pop(self , calendar_date , hour, row_text_values_item , new_comment , calendar)
        
         except Exception as e:
-            print("add_log" , e)
+            print(f"[add_log]: {e}")
             
-            mb.showerror("Datos No Válidos (Next Contact)" , f"\n\nDatos incompletos o erróneos.\n\n")
+            if company_info.state != 'Pool':
+                mb.showerror("Datos No Válidos (Next Contact)" , f"\n\nDatos incompletos o erróneos.\n\n")
             
                                     
     def log_next_pop(self , calendar_date , hour, row_text_values_item , new_comment , calendar):
@@ -2042,26 +2061,33 @@ class Update:
 
 class States:       
         
-    def change_state(self):
+    def change_state(self , decline = False):
         
         client = db.session.get(Client , self.company_id.get())
         employee = db.session.get(Employee , self.active_employee_id.get())
         
-        if client.state == "Lead":
-            States.change_lead_state(self , client ,employee)
+        try:
+            if client.state == "Contact" or decline:
+                if client.state != "Pool":
+                    States.change_contact_state(self , client ,employee)
+
+            elif client.state == "Lead" and not decline:
+                States.change_lead_state(self , client ,employee)
+
+            elif client.state == "Candidate" and not decline:
+                States.change_candidate_state(self , client ,employee)
+                
+            elif client.state == "Pool":
+                if not decline:
+                    print(decline , not decline)
+                    States.change_pool_state(self , client ,employee)
+                
+            db.session.commit()   
+            GetInfo.load_comments(self, client.nif)
+            db.session.close()
             
-        elif client.state == "Candidate":
-            States.change_candidate_state(self , client ,employee)
-            
-        elif client.state == "Contact":
-            States.change_contact_state(self , client ,employee)
-            
-        elif client.state == "Pool":
-            States.change_pool_state(self , client ,employee)
-            
-        db.session.commit()   
-        GetInfo.load_comments(self, client.nif)
-        db.session.close()
+        except Exception as e:
+            print("[change_state]: {e}")
     
     
     def change_contact_state(self , client ,employee):
