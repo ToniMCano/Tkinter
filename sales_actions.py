@@ -134,8 +134,8 @@ class OrderFunctions:
 
             db.session.commit()
 
-            if units < product.units: 
-                
+            if units <= product.units: 
+                print(f"ENTRA: {units}/{product.units}")
                 try:
                     if product.discount != 0:
                         row_import = row_import - (row_import * int(product.discount) / 100)
@@ -631,7 +631,7 @@ class Stock:
 
         try:
             if actions == "send":
-                if order_product.units > units:
+                if order_product.units >= units:
                     order_product.units -= units
             
             elif actions == "delete":
