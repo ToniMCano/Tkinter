@@ -180,8 +180,8 @@ class Main:
         self.sales_view_button = CTkButton(self.frame_views , text = "Venta" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: SalesTab.sales_root(self))
         self.sales_view_button.place(relx=0.5, rely=0.5 , anchor = 'center')
         
-        #self.statistics_view_button = CTkButton(self.frame_views , text = "Estadísticas" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: StatisticsTab.statistics_root(self))
-        #self.statistics_view_button.place(relx=0.8, rely=0.5 , anchor = 'center')
+        self.statistics_view_button = CTkButton(self.frame_views , text = "Estadísticas" , corner_radius = 2 , fg_color = "Lightblue4" , width = 80 , height = 10 , command = lambda: StatisticsTab.statistics_root(self))
+        self.statistics_view_button.place(relx=0.8, rely=0.5 , anchor = 'center')
         
         self.login_button = ttk.Button(self.header , text = "Login" , command = lambda: Pops.login(self))
         self.login_button.grid(row = 0 , column = 10 , sticky = E)
