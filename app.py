@@ -34,11 +34,11 @@ class Main:
         self.main_window.geometry('1200x800')
         self.main_window.configure(bg="#f4f4f4") 
         self.main_window.grid_columnconfigure(0 , weight = 1)
-        #self.main_window.grid_columnconfigure(5 , weight = 1)
-        #self.main_window.grid_rowconfigure(1 , weight = 1)
         self.main_window.grid_rowconfigure(2 , weight = 1)
         Pops.center_window(self, self.main_window)
-                       
+        
+        self.timer = None
+
         # INFO LISTA
         
         style = ttk.Style()
@@ -46,6 +46,7 @@ class Main:
         style.layout("mystyle.Treeview" , [("mystyle.Treeview.treearea", {'sticky' : 'nswe'})]) # Eliminar los bordes??
         
         self.crm_frame = CTkFrame(self.main_window , fg_color='transparent')
+        self.crm_frame.grid(row = 2 , column = 0 , rowspan = 2 , sticky = 'nswe')
         self.crm_frame.grid_columnconfigure(0, weight=3) # Configuramos el redimensionamiento del frame principal
         self.crm_frame.grid_columnconfigure(1, weight=1)
         self.crm_frame.grid_rowconfigure(1, weight=1)
@@ -190,7 +191,7 @@ class Main:
         self.pop_up.config(cursor = 'arrow')
         self.pop_up.grid(row = 0 , column = 11 , padx = 5 , sticky = E)
         
-        self.pop_up_advise  = CTkLabel(self.header , textvariable = self.advises , text_color = 'white' , fg_color = 'red' , corner_radius = 50 , height = 15 , width = 15 , font = ("" , 10 , 'bold'))
+        self.pop_up_advise  = CTkLabel(self.pop_up , textvariable = self.advises , text_color = 'white' , fg_color = 'red' , corner_radius = 50 , height = 15 , width = 15 , font = ("" , 10 , 'bold'))
         
         
         # LOG
@@ -337,9 +338,12 @@ class Main:
         
         self.button_a = CTkButton(self.company_contact_buttons , textvariable = self.button_a_value , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: States.change_state(self))
         self.button_a.grid(row = 0 , column = 0 , sticky = "we" , pady = 5 , padx = 5)
+        
+        self.decline_button = CTkButton(self.company_contact_buttons , text = "Decline" , height = 2 , fg_color = "#f4f4f4" , corner_radius = 4 , text_color = 'gray' , border_color = "Lightgray" , border_width = 1 , hover_color = 'LightBlue4' , command = lambda: States.change_state(self , True))
+        self.decline_button.grid(row = 0 , column = 1 , sticky = "we" , pady = 5 , padx = 5)
 
         self.historical_button = CTkButton(self.company_contact_buttons , text = "Historial" , height = 2 , fg_color = "#f4f4f4" , text_color = 'LightBlue4' , border_color = "LightBlue4" , border_width = 2 , hover_color = 'LightBlue4' , command = lambda: OrderFunctions.sales_historical(self))
-        self.historical_button.grid(row = 0 , column = 1 , sticky = "we" , pady = 5 , padx = 5)
+        self.historical_button.grid(row = 0 , column = 2 , sticky = "we" , pady = 5 , padx = 5)
         
         #FRAME CONTACTO
         
@@ -431,6 +435,7 @@ class Main:
         self.ids_frame .grid_columnconfigure(1,weight=1)
         self.ids_frame .grid_columnconfigure(2,weight=1)
         self.ids_frame .grid_columnconfigure(3,weight=1)
+         
         
         self.lcontact_label_bottom = Label(self.ids_frame , text = 'ID Empresa: ', bg = 'LightBlue4' , fg = 'white' , anchor = 'e')
         self.lcontact_label_bottom.grid(row = 0 , column = 0 , sticky = W+E)
@@ -445,15 +450,42 @@ class Main:
         self.rcontact_label_responsable_id.grid(row = 0 , column = 3 , sticky = W+E)
 
         Tabs.select_tab(self , 'crm')
+        
+        self.main_window.protocol("WM_DELETE_WINDOW", self.cancel_timer)
 
-  
+        
+    def cancel_timer(self):
+        try:
+            if self.timer is not None and self.timer.is_alive():
+                self.timer.cancel()
+                
+            self.main_window.destroy()
+        
+        except Exception as e:
+            print(f"[cancel_timer]: {e}")
+    
+    
+    def sales_from_mofify(self):
+        
+        try:                                    
+            if self.sales_frame.winfo_ismapped():
+                self.sales_frame.grid_forget()   # Si no se elimina se crean mas Frames y no se vuelve a mostar la vista de CRM al ejecutar esta función
+            
+            
+            SalesTab.sales_root(self)
+                
+        except AttributeError:
+            SalesTab.sales_root(self)
+
+        except Exception as e:
+            print(f"[view_alert] (select_tab): {e}")
+        
+        
   
 if __name__ == "__main__":
-    
     
     db.Base.metadata.create_all(db.engine)
     root = ThemedTk(theme="arc")
     app = Main(root)
     root.mainloop()
     
-#Tengo que crear las fechas en los contacts con coherencia, si no no va a coincidir el último contacto de los logs con el del treeview

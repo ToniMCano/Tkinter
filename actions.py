@@ -36,7 +36,7 @@ class Admin:
                 
                 admin = True
                 
-                self.admin_mode = CTkButton(self.header , text = 'Admin Logout' ,command = lambda: Pops.deactivate_admin(self) , width = 80)
+                self.admin_mode = CTkButton(self.header , text = 'Admin Logout' ,command = lambda: Admin.deactivate_admin(self) , width = 80)
                 self.admin_mode.place(relx = 0.7 , rely = 0.1)
                 
         
@@ -559,7 +559,7 @@ class MyCalendar():
             hour.current(newindex = 0)
             hour.config(justify=CENTER)
             hour.pack(fill = "x" , expand = True , anchor = "center")
-            send = ttk.Button(frame , text = "Save" , command = lambda: Logs.add_log(self , frame.calendar.get_date() , log_type , hour.get()))#lambda: MyCalendar.format_date(self , place , hour = hour.get()) )
+            send = ttk.Button(frame , text = "Save" , command = lambda: Logs.add_log(self , frame.calendar.get_date() , log_type , hour.get()))
             send.pack(pady = 5)
             
 
@@ -753,12 +753,15 @@ class LoadInfo():
         
         if company_name:
             try:
-                selected_row = Logs.row_to_change(self , company_name) # return [text , values , item]
-                # Establecer el foco en la fila seleccionada
-                self.info.selection_set(selected_row[-1])
+                
+                for row in self.info.get_children():
+                    if row['values'][1] == company_name:
+                        self.info.focus(row)
+                        self.info.selection_set(row)
+                        print(row , row['values'])
             
             except Exception as e:
-                pass
+                print(f"[load_contacts] (company_name): {e}")
                 
         self.contacts.set(f"Contactos: {contacts}")
 
@@ -823,40 +826,48 @@ class LoadInfo():
         
         
     def row_colors(self, clients , ordenado , date , bgcolor , contacts , dot):
-        for i , client in enumerate(clients):
+        
+        try:
+            for i , client in enumerate(clients):
 
-            if ordenado.at[i, 'next'] <= str(date)[:11] + "23:59":               
-              
-                if int(ordenado.at[i, "days"]) >= 60:
-                    font = "font_red"
-                    
-                else:
-                    font = ""
+                if ordenado.at[i, 'next'] <= str(date)[:11] + "23:59":               
                 
-                if bgcolor % 2 == 0:
-                    color= "odd"
-                
-                else:
-                    color= "even"
-                #print(ordenado.at[i, 'pop'])
-                if ordenado.at[i, 'pop'] == True:
-                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])} {dot}"
-                
-                else:
-                    next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])}"
+                    if int(ordenado.at[i, "days"]) >= 60:
+                        font = "font_red"
+                        
+                    else:
+                        font = ""
                     
-                if len(str(ordenado.at[i, 'cp'])) == 4:
-                    postal_code = f"0{ordenado.at[i, 'cp']}"
+                    if bgcolor % 2 == 0:
+                        color= "odd"
                     
-                else:
-                    postal_code = ordenado.at[i, 'cp']
+                    else:
+                        color= "even"
+                    #print(ordenado.at[i, 'pop'])
+                    if ordenado.at[i, 'pop'] == True:
+                        next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])} {dot}"
                     
-                self.info.insert("" , 0 , text = ordenado.at[i, 'state'] , values = (str(ordenado.at[i, 'days']).lstrip("0") , ordenado.at[i, 'name'] , MyCalendar.format_date_to_show(ordenado.at[i, 'last'])  , next_contact , postal_code) , tags=(color, font) )
-               
-                contacts += 1
-                bgcolor += 1
+                    else:
+                        next_contact = f"{MyCalendar.format_date_to_show(ordenado.at[i, 'next'])}"
+                        
+                    if len(str(ordenado.at[i, 'cp'])) == 4:
+                        postal_code = f"0{ordenado.at[i, 'cp']}"
+                        
+                    else:
+                        postal_code = ordenado.at[i, 'cp']
+                        
+                    self.info.insert("" , 0 , text = ordenado.at[i, 'state'] , values = (str(ordenado.at[i, 'days']).lstrip("0") , ordenado.at[i, 'name'] , MyCalendar.format_date_to_show(ordenado.at[i, 'last'])  , next_contact , postal_code) , tags=(color, font) )
                 
-        return contacts
+                    contacts += 1
+                    bgcolor += 1
+                    
+            return contacts
+        
+        except TypeError:
+            pass
+        
+        except Exception as e:
+            print(f"[row_colors]: {e}")
 
             
     def get_days(client):
@@ -887,22 +898,25 @@ class LoadInfo():
             row = tree.focus()
             
             item = tree.item(row)
-            
+            print(f'REFERENCE FROM (get_item): {item["text"]}')
             if place == 'crm':
                 client_name = item['values'][1]
             
                 GetInfo.load_client_info(self , client_name)
-                
+            
+            #elif place == 'changes':
+                #return item
+            
             else:
                 return item['text']
 
             ContactActions.close_other_contact(self)
-            
-        except AttributeError:
-            pass
+            print(f'[get_item] 2: {item["text"]}')
+        except AttributeError as e:
+            print(f'[get_item] AttributeError: {e}')
         
-        except IndexError:
-            pass
+        except IndexError as e:
+            print(f'[get_item] IndexError: {e}')
         
         except Exception as e:
             print(e , type(e))
@@ -1048,10 +1062,16 @@ class GetInfo():
             else:
                 pop = ""
                 
-            return f"{MyCalendar.format_date_to_show(last_contact)} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}] {pop}"
+            if "True" in str(comment.contact_type):
+                administrator = "(Admin)"
+                
+            else:
+                administrator = ""
+                
+            return f"{MyCalendar.format_date_to_show(last_contact)} {contact_person.contact_name} {contact_person.contact_surname} [{employee.employee_alias}] {pop} {administrator}"
             
         except Exception as e:
-            print("load_info_log" , e)
+            print("[load_info_log:]" , e)
 
 
     def load_client_info(tree , client_name):
@@ -1159,7 +1179,7 @@ class CheckInfo:
 
      
     def check_phones(self , phone , which_phone , data):
-        print(phone,which_phone)
+        print(f'Phone: {phone} Type: {which_phone}')
         try: 
             if len(phone) == 9 and str(phone).isdigit():
                 return phone
@@ -1373,39 +1393,43 @@ class AddInfo():
  
             
     def add_companies_from_file():
-    
-        excel_paht = filedialog.askopenfilename(title = "Cargar desde Excel" , filetypes = (("Ficheros Excel" , "*.xlsx"),))
-        excel = openpyxl.open(excel_paht)
-        
-        rows = []
-        ready = []
-        errores = []
-        
-        for row in excel["Sheet"].rows:
             
-            for cell in row:
-                rows.append(cell.value)
-                
-            ready.append(rows)
+            excel_paht = filedialog.askopenfilename(title = "Cargar desde Excel" , filetypes = (("Ficheros Excel" , "*.xlsx"),))
+            excel = openpyxl.open(excel_paht)
+            
             rows = []
-        
-        for i , registro in enumerate(ready):
-
-            new = Client(registro[0] , registro[1] , registro[2] , registro[3] , registro[4] , registro[5] , registro[6] , registro[7] , registro[8] , registro[9] , registro[10] , registro[11] , registro[12] , registro[13] , registro[14])
+            ready = []
+            errores = []
             
-            try:
-                db.session.add(new)
-                db.session.commit()
+            for sheet in excel.sheetnames:
+                for row in excel[sheet].rows:
+                    
+                    for cell in row:
+                        rows.append(cell.value)
+                        
+                    ready.append(rows)
+                    rows = []
                 
-            except Exception as e:   
-                errores.append(i+1)
-            
-        db.session.close()
-        
-        if len(errores) > 0:
-            
-            mb.showwarning("Errores en la inserción de Empresas" , f"Empresas que no han podido ser insertadas: {errores}")    
-            
+                for i , registro in enumerate(ready):
+
+                    new = Client(registro[0] , registro[1] , registro[2] , registro[3] , registro[4] , registro[5] , registro[6] , registro[7] , registro[8] , registro[9] , registro[10] , registro[11] , registro[12] , registro[13] , registro[14])
+                    
+                    try:
+                        db.session.add(new)
+                        db.session.commit()
+                        print(f"Company: {new}")
+                        
+                    except Exception as e:   
+                        errores.append(i+1)
+                        
+                        print(f"[add_companies_from_file]: {e}")
+                    
+                db.session.close()
+                
+                if len(errores) > 0:
+                    
+                    mb.showwarning("Errores en la inserción de Empresas" , f"Empresas que no han podido ser insertadas: {len(errores)}")    
+                
      
     def add_contact_person(self, data , employee_adder , place = ""):
         
@@ -1452,7 +1476,7 @@ class Alerts():
             if new_alerts != old_alerts and log == False:
                 Alerts.pop_up_alert(self , employee_id , date , new_alerts)
             
-            Actions.pop_ups_number(self)
+            Actions.pop_ups_number(self , new_alerts)
             
         except Exception as e:
             print(f'[check_pop_ups]: {e}')
@@ -1510,7 +1534,12 @@ class Alerts():
     
     def refresh_alerts(self , employee_id):
         
-        threading.Timer(60 , Alerts.refresh_alerts, args=[self , employee_id]).start()
+        if self.timer is not None:
+            self.timer.cancel()
+
+        self.timer =  threading.Timer(15 , Alerts.refresh_alerts, args=[self , employee_id])
+        
+        self.timer.start()
 
         try:
             Alerts.check_pop_ups(self, employee_id)
@@ -1522,6 +1551,15 @@ class Alerts():
     
         
     def view_alert(self , name , window , employee_id_sended , date):
+        
+        try:
+            if self.crm_frame.winfo_ismapped():
+                self.crm_frame.grid_forget()
+            
+            Tabs.select_tab(self , 'crm')
+        
+        except Exception as e:
+            print(f"[view_alert] (select_tab): {e}")
         
         company = db.session.query(Client).filter(and_(Client.name == name , Client.employee_id == employee_id_sended)).first()
         
@@ -1579,7 +1617,7 @@ class Logs:
         Logs.confirm_unique_pop(new_comment)
 
         row = row_text_values_item
-        
+        print(f"(save_log) NEW COMMENT: {new_comment}")
         if all_ok:  
        
             db.session.add(new_comment)
@@ -1603,7 +1641,7 @@ class Logs:
        
         try:
             for i , contact in enumerate(contacts):
-                print(f"*** [{contact.id_contact}]({len(contacts)}/{i+1}) < Alerts Antes de remover : {alerts} ***")
+                print(f"*** [{contact.id_contact}]({len(contacts)}/{i+1}) > Alerts Antes de remover : {alerts} ***")
                     
                 if contact.id_contact in alerts:
                     alerts.remove(contact.id_contact)
@@ -1641,7 +1679,7 @@ class Logs:
         try:
             last_comment = db.session.query(Contact).filter(and_(Contact.contact_employee_id == employee , Contact.client_id == company_info.id_client)).order_by(Contact.last_contact_date.desc()).all()
         
-            new_comment = Contact(str(datetime.now())[:16] , last_comment[0].next_contact , self.text_log.get(1.0, "end") , company_info.id_client , employee , company_info.contact_person , f'{company_info.state}/log' , company_info.counter , False)
+            new_comment = Contact(str(datetime.now())[:16] , last_comment[0].next_contact , self.text_log.get(1.0, "end").strip('\n') , company_info.id_client , employee , company_info.contact_person , f'{company_info.state}/log - ({admin})' , company_info.counter , False)
             
             all_ok = True
             
@@ -1671,22 +1709,26 @@ class Logs:
             
             row_text_values_item = Logs.row_to_change(self , company_info.name)
             
-            if calendar == 'pop':
+            if calendar == 'pop' and company_info.state != 'Pool':
                 pop = True
-                state = f'{company_info.state}/pop'
-                
+                state = f'{company_info.state}/pop - ({admin})'
+            
+            elif company_info.state == 'Pool':
+                mb.showinfo("Pool" , "No se pueden Añadir PopUps desde el Pool General")
+            
             else:
                 pop = False
-                state = f'{company_info.state}/next'
-                
-            new_comment = Contact(str(datetime.now())[:16] , date , self.text_log.get(1.0, "end") , company_info.id_client , self.active_employee_id.get() , company_info.contact_person , state , company_info.counter , pop)
+                state = f'{company_info.state}/next - ({admin})'
+            
+            new_comment = Contact(str(datetime.now())[:16] , date , self.text_log.get(1.0, "end").strip('\n') , company_info.id_client , self.active_employee_id.get() , company_info.contact_person , state , company_info.counter , pop)
            
             Logs.log_next_pop(self , calendar_date , hour, row_text_values_item , new_comment , calendar)
        
         except Exception as e:
-            print("add_log" , e)
+            print(f"[add_log]: {e}")
             
-            mb.showerror("Datos No Válidos (Next Contact)" , f"\n\nDatos incompletos o erróneos.\n\n")
+            if company_info.state != 'Pool':
+                mb.showerror("Datos No Válidos (Next Contact)" , f"\n\nDatos incompletos o erróneos.\n\n")
             
                                     
     def log_next_pop(self , calendar_date , hour, row_text_values_item , new_comment , calendar):
@@ -1700,7 +1742,7 @@ class Logs:
                 pop = f' {dot}'
             else:
                 pop = ""
-            row_text_values_item[1][3] = MyCalendar.format_date_to_show(f'{calendar_date} {hour}') + pop
+            row_text_values_item[1][3] = MyCalendar.format_date_to_show(f'{calendar_date} {hour}') + pop 
             row_text_values_item[1][2] = MyCalendar.format_date_to_show(f'{calendar_date} {hour}') 
             all_ok = True
             
@@ -1897,12 +1939,7 @@ class Update:
             province = self.province.get()
             city = self.city.get() 
             postal_code =  CheckInfo.check_postal_code(self , self.postal_code.get() , "")
-            print(street)
-            print(number)
-            print(floor)
-            print(province)
-            print(city)
-            
+
             company.adress = f"{street}-{number}-{floor}-{province}-{city}"
             company.postal_code = postal_code
             
@@ -2024,26 +2061,33 @@ class Update:
 
 class States:       
         
-    def change_state(self):
+    def change_state(self , decline = False):
         
         client = db.session.get(Client , self.company_id.get())
         employee = db.session.get(Employee , self.active_employee_id.get())
         
-        if client.state == "Lead":
-            States.change_lead_state(self , client ,employee)
+        try:
+            if client.state == "Contact" or decline:
+                if client.state != "Pool":
+                    States.change_contact_state(self , client ,employee)
+
+            elif client.state == "Lead" and not decline:
+                States.change_lead_state(self , client ,employee)
+
+            elif client.state == "Candidate" and not decline:
+                States.change_candidate_state(self , client ,employee)
+                
+            elif client.state == "Pool":
+                if not decline:
+                    print(decline , not decline)
+                    States.change_pool_state(self , client ,employee)
+                
+            db.session.commit()   
+            GetInfo.load_comments(self, client.nif)
+            db.session.close()
             
-        elif client.state == "Candidate":
-            States.change_candidate_state(self , client ,employee)
-            
-        elif client.state == "Contact":
-            States.change_contact_state(self , client ,employee)
-            
-        elif client.state == "Pool":
-            States.change_pool_state(self , client ,employee)
-            
-        db.session.commit()   
-        GetInfo.load_comments(self, client.nif)
-        db.session.close()
+        except Exception as e:
+            print("[change_state]: {e}")
     
     
     def change_contact_state(self , client ,employee):
@@ -2138,55 +2182,89 @@ class Tabs:
 
 
     def select_tab(self , view):
-            
+        
         print(f'********{view}********')
         
         if view == 'crm':
-            Tabs.hide_tabs(self)
+            response = "no"
             
-            Tabs.crm_view(self)
-            Tabs.enabled_view_button(self.crm_view_button)
-            Tabs.disabled_view_button(self.sales_view_button)
-            Tabs.disabled_view_button(self.statistics_view_button)
-            
-            
-        elif view == 'sales':
-            Tabs.hide_tabs(self)
+            if self.modify_order_id[1] != None:
+                response = mb.askquestion("Pedido sin Cerrar" , "No has Finalizado el pedido.\n\n ¿Deseas Mantenerlo abierto?")
 
-            Tabs.sales_view(self)
+                if response =="yes":
+                    pass
+                
+                else:
+                    self.modify_order_id = [False , None]
+                    
+            if response == "no":       
+                Tabs.crm_option(self)
+
+        elif view == 'sales':
+            try:
+
+                Tabs.hide_tabs(self)
+
+                Tabs.sales_view(self)
+                self.view = 'sales'
+
+            except Exception as e:
+                print(f"[select_tab] (sales): {e}")
             
 
         else:
+            try:
+
+                Tabs.hide_tabs(self)
+                
+                Tabs.statistics_view(self)
+                print(f"\n* Show: statistics_frame")
+
+            except Exception as e:
+                print(f"[select_tab] (statistics): {e}")
+            
+            
+    def crm_option(self):
+        
+        try:
             Tabs.hide_tabs(self)
+            Tabs.crm_view(self)
+            Tabs.enabled_view_button(self.crm_view_button)
+            Tabs.disabled_view_button(self.sales_view_button)
+            self.view = 'crm'
+        
+        except Exception as e:
+            print(f"[select_tab] (crm): {e}")
             
-            Tabs.statistics_view(self)
             
-    
     def hide_tabs(self):
 
         try:
             self.statistics_frame.grid_forget()
+            print(f"\n* Hide: statistics_frame")
             
-        except AttributeError:
-            pass
+        except AttributeError as ae:
+            print(f"[hide_tabs] (statistics_frame) - AttributeError: {ae}")
         
         except Exception as e:
             print(f"[hide_tabs] (statistics): {e}")
             
         try:
             self.sales_frame.grid_forget()
+            print(f"\n* Hide: sales_frame")
             
-        except AttributeError:
-            pass
+        except AttributeError as ae:
+             print(f"[hide_tabs] (sales_frame) - AttributeError: {ae}")
         
         except Exception as e:
             print(f"[hide_tabs] (sales): {e}")
             
         try:
             self.crm_frame.grid_forget()
+            print(f"\n* Hide: crm_frame")
             
-        except AttributeError:
-            pass
+        except AttributeError as ae:
+             print(f"[hide_tabs] (crm_frame) - AttributeError: {ae}")
         
         except Exception as e:
             print(f"[hide_tabs] (crm): {e}")
@@ -2209,6 +2287,8 @@ class Tabs:
                 self.new_company.grid(row = 0 , column = 0 , padx = 5)    
             
             self.employee['values'] = LoadInfo.employees_list() 
+            
+            self.main_window.update() 
         
         except Exception as e:
             print(f"[crm_view] (grids): {e}")
@@ -2218,8 +2298,8 @@ class Tabs:
             alias = LoadInfo.employees_list().index(employee.employee_alias)
             self.employee.current(newindex = alias) 
 
-        except AttributeError:
-            pass
+        except AttributeError as ae:
+            print(f"[crm_view] (employee) - AttributeError: {ae}")
         
         except Exception as e:
             print(f"[crm_view] (employee): {e}")
@@ -2241,7 +2321,7 @@ class Tabs:
         try:
             self.sales_frame.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
             Tabs.enabled_view_button(self.sales_view_button)
-            Tabs.disabled_view_button(self.statistics_view_button)
+            #Tabs.disabled_view_button(self.statistics_view_button)
             Tabs.disabled_view_button(self.crm_view_button)
   
         except AttributeError:
@@ -2280,7 +2360,7 @@ class Tabs:
         
         try:
             self.statistics_frame.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
-            Tabs.enabled_view_button(self.statistics_view_button)
+            #Tabs.enabled_view_button(self.statistics_view_button)
             Tabs.disabled_view_button(self.sales_view_button)
             Tabs.disabled_view_button(self.crm_view_button)
 
@@ -2355,7 +2435,7 @@ class ContactActions:
                 delete_button = CTkButton(self.new_contact , text = 'x' , command = lambda contact_id = contact.id_person: ContactActions.delete_contact(self , contact_id) , width = 5 , height = 5 , fg_color = 'red' , corner_radius = 4 , text_color = 'white')
                 delete_button.pack(fill = 'y' , side = 'right')
                 
-                print(f"{contact.contact_name} {contact.contact_surname} {contact.contact_job_title}")
+                print(f"New Contact: {contact.contact_name} {contact.contact_surname} {contact.contact_job_title}")
     
     
     def change_contact(self , e , contact_sended):
@@ -2444,16 +2524,14 @@ class Actions:
             print(f"[call_phone]: {e}")
             
             
-    def pop_ups_number(self):
+    def pop_ups_number(self , pops):
         
-        pop_ups = db.session.query(Contact).filter(and_(Contact.pop_up == True , Contact.next_contact < str(datetime.now())[:16])).all()
-        
-        if len(pop_ups) > 0:
-            self.pop_up_advise.place(relx = 0.98 , rely = 0)
+        if len(pops) > 0:
+            self.pop_up_advise.place(relx = 0.7 , rely = 0)
             
         else:
             self.pop_up_advise.place_forget()
             
-        self.advises.set(f'{len(pop_ups)}')
+        self.advises.set(f'{len(pops)}')
             
             

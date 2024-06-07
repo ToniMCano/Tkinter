@@ -1,5 +1,5 @@
 from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs 
-from sales_actions import OrderFunctions
+from sales_actions import OrderFunctions , ModifyDeleteOrder
 import tkinter as tk
 from tkinter import ttk , filedialog
 from tkinter import *
@@ -32,6 +32,8 @@ class SalesTab:
         self.order_header = StringVar()
         self.order_header.set('Pedido')
         
+        self.order_number = StringVar()
+        
         self.header_description = StringVar()
         self.header_description.set('Descripción Producto')
             
@@ -44,7 +46,7 @@ class SalesTab:
         self.add_units_button_text = StringVar()
         self.add_units_button_text.set('Añadir')
         
-        self.order_import = StringVar() 
+        self.order_import = StringVar()
                
         self.discount = StringVar()    
         
@@ -94,7 +96,7 @@ class SalesTab:
         self.products_tree.column("#3" , width = 25 , anchor="center")
         self.products_tree.column("#4" , width = 80 , anchor="w")
         self.products_tree.column("#5" , width = 80 , anchor="w")
-        self.products_tree.bind("<ButtonRelease-1>" , lambda event: OrderFunctions.get_product(self , event))       
+        self.products_tree.bind("<ButtonRelease-1>" , lambda event: OrderFunctions.get_product(self , "products" , event))       
                 
         OrderFunctions.show_products(self)
         
@@ -120,6 +122,8 @@ class SalesTab:
         
         self.order_label = CTkLabel(self.sales_order_frame , textvariable = self.order_header , fg_color = 'Lightblue4' , corner_radius = 3 , text_color = "white")
         self.order_label.grid(row = 0 , column = 0 , sticky = W+E)
+        
+        self.order_number_label = CTkLabel(self.order_label , textvariable = self.order_number, fg_color = "white" , height = 10 , corner_radius = 2 , padx = 2 , pady = 2 , text_color = 'Lightblue4')
         
         self.sales_oreder_view = ttk.Frame(self.sales_order_frame)
         self.sales_oreder_view.grid(row = 1 , column = 0 , sticky = 'nswe', padx = 5 , pady = 5)
@@ -148,7 +152,7 @@ class SalesTab:
         self.order_tree.column("#4" , width = 40 , anchor="w")
         self.order_tree.column("#5" , width = 40 , anchor="w")
         
-        self.order_tree.bind("<ButtonRelease-1>" , lambda event: OrderFunctions.get_product(self , event))
+        self.order_tree.bind("<ButtonRelease-1>" , lambda event: ModifyDeleteOrder.focus_product_list(self , event))
         
         
         OrderFunctions.show_products(self)
@@ -158,27 +162,20 @@ class SalesTab:
         self.sales_order_dashboard = CTkFrame(self.sales_order_frame , fg_color = 'transparent' , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')
         self.sales_order_dashboard.grid(row = 2 , column = 0 , sticky = 'nswe', padx = 5)
         
-        #self.sales_order_dashboard.grid_columnconfigure(0 , weight = 1)
-        #self.sales_order_dashboard.grid_columnconfigure(1 , weight = 1)
-        #self.sales_order_dashboard.grid_columnconfigure(2 , weight = 1)
-        #self.sales_order_dashboard.grid_columnconfigure(3 , weight = 1)
-        #self.sales_order_dashboard.grid_columnconfigure(5 , weight = 1)
-        
-        self.product_units_entry = CTkLabel(self.sales_order_dashboard , text = "Unidades: " , text_color = 'gray' , width = 30)
-        self.product_units_entry.grid(row = 0 , column = 0 , sticky = W , padx = 5 , pady = 5)
-        
+        self.product_units_label = CTkLabel(self.sales_order_dashboard , text = "Unidades: " , text_color = 'gray' , width = 30)
+        self.product_units_label.grid(row = 0 , column = 0 , sticky = W , padx = 5 , pady = 5)
         
         self.product_units_entry = CTkEntry(self.sales_order_dashboard , textvariable = self.product_units , corner_radius = 4 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 2 , border_color = "Lightblue4" , width = 35)
         self.product_units_entry.grid(row = 0 , column = 0 , sticky = E , padx = 5 , pady = 5)
         self.product_units_entry .focus()
-        
-        self.add_units_button = CTkButton(self.sales_order_dashboard , textvariable = self.add_units_button_text , corner_radius = 2 , fg_color = 'Lightblue4' , height = 15 , text_color = 'white' , width = 50 , command = lambda: OrderFunctions.get_product(self , 'order'))
+        #Añadir
+        self.add_units_button = CTkButton(self.sales_order_dashboard , textvariable = self.add_units_button_text , corner_radius = 2 , fg_color = 'Lightblue4' , height = 15 , text_color = 'white' , width = 50 , command = lambda: OrderFunctions.get_product(self , 'order' , ""))
         self.add_units_button.grid(row = 0 , column = 1 , sticky = W+E , padx = 5 , pady = 5)
         
-        self.delete_button = CTkButton(self.sales_order_dashboard , text = 'Eliminar' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 1 , border_color = "gray" , width = 50 , command = lambda: OrderFunctions.eliminate_product(self))
+        self.delete_button = CTkButton(self.sales_order_dashboard , text = 'Eliminar' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'gray' , border_width = 1 , border_color = "gray" , width = 50 , command = lambda: ModifyDeleteOrder.delete_product(self))
         self.delete_button.grid(row = 0 , column = 2 , sticky = W+E , padx = 5 , pady = 5)
         
-        self.send_order = CTkButton(self.sales_order_dashboard , text = 'Realizar Pedido' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'Lightblue4' , border_width = 2 , border_color = "Lightblue4" , width = 50 , command = lambda: OrderFunctions.send_order(self))
+        self.send_order = CTkButton(self.sales_order_dashboard , text = 'Finalizar' , corner_radius = 2 , fg_color = '#f4f4f4' , height = 15 , text_color = 'Lightblue4' , border_width = 2 , border_color = "Lightblue4" , width = 50 , command = lambda: OrderFunctions.send_order(self , False))
         self.send_order.grid(row = 0 , column = 3 , sticky = W+E , padx = 5 , pady = 5)
         
         self.sales_order_info = CTkFrame(self.sales_order_dashboard , fg_color = 'transparent' , corner_radius = 3 , border_width = 1 , border_color = 'lightgray')
@@ -206,10 +203,10 @@ class SalesTab:
         self.discount_label = CTkLabel(self.discount_frame , text = 'Descuento' , anchor = 'w' , text_color = 'gray')
         self.discount_label.grid(row = 0 , column = 0 ,  sticky = W+E , padx = 5 , pady = 5)
                 
-        self.discount_info = CTkEntry(self.discount_frame , textvariable = self.discount , fg_color = 'transparent' , text_color = 'gray' , border_color = "Lightblue4" , width = 60)
-        self.discount_info.focus_set()
-        self.discount_info.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W )
-        self.discount_info.bind("<Return>" , lambda e: OrderFunctions.calculate_import(self , e))
+        self.discount_entry = CTkEntry(self.discount_frame , textvariable = self.discount , fg_color = 'transparent' , text_color = 'gray' , border_color = "Lightblue4" , width = 60)
+        self.discount_entry.focus_set()
+        self.discount_entry.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W )
+        #self.discount_entry.bind("<Return>" , lambda e: OrderFunctions.calculate_import(self , e))
         
         self.percentage_label = CTkLabel(self.discount_frame , text = '%' , fg_color = 'transparent' , state = 'disabled' , text_color = 'gray' )
         self.percentage_label.grid(row = 1 , column = 1 , sticky = W , padx = 5 , pady = 5)
