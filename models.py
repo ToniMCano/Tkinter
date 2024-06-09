@@ -59,7 +59,7 @@ class Client(Base):                                                      # Defin
     created_by = Column(Integer , ForeignKey("employee.id_employee")) # Persona que añadió la empresa.
     
     
-    def __init__(self , name , nif , adress , postal_code , web , mail , phone , phone2 , activity , contact_person , employee_id = 0 , state = "Terminated" , number_of_employees = "1" , start_contact_date = "" , counter = 0 , created_by = 0): # Creamos el constructor para capturar los valores de cada 
+    def __init__(self , name , nif , adress , postal_code , web , mail , phone , phone2 , activity , contact_person , employee_id = 0 , state = "Pool" , number_of_employees = "1" , start_contact_date = "" , counter = 0 , created_by = 0): # Creamos el constructor para capturar los valores de cada 
                                                                                                                               # columna el id se autogenera, por eso no lo incluimos
         
         self.name = name

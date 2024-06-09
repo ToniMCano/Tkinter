@@ -12,7 +12,6 @@ from sqlalchemy import and_ , or_
 from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs , States , ContactActions , Actions , NewCompany
 from sales_tab import SalesTab
 from sales_actions import OrderFunctions
-from statistics_tab import StatisticsTab
 from datetime import datetime , timedelta
 #import locale
 from tkinter import messagebox as mb

@@ -258,7 +258,7 @@ class NewCompany:
         files_top = ttk.Label(files_frame , text = "")
         files_top.grid(row = 0 , column = 0, sticky = W+E ) 
         
-        files_button = ttk.Button(files_frame , text = "Cargar desde archivo (Varias Empresas)" , command = AddInfo.add_companies_from_file)
+        files_button = ttk.Button(files_frame , text = "Cargar desde archivo (Varias Empresas)" , command = lambda: AddInfo.add_companies_from_file(self))
         files_button.grid(row = 1 , column = 0 , columnspan = 2 , sticky = W+E , padx = 20)        
         
         company_frame = ttk.Labelframe(add_company_frame , text = 'Empresa')
@@ -1343,10 +1343,9 @@ class AddInfo():
         
         
         try:
-            employee_adder = self.active_employee_id.get()
-            vcontact_person = AddInfo.add_contact_person(self , data , employee_adder)
+            vcontact_person = AddInfo.add_contact_person(self , data , self.active_employee_id.get())
             
-            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Código Postal: "], data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , employee_adder , "Pool", data["Empleados: "] , str(datetime.now())[0:16], 0 , self.active_employee_id.get())
+            company = Client(data["Nombre Empresa: "] , data["N.I.F.: "] , data["Dirección: "] , data["Código Postal: "], data["Web: "] , data["Mail Empresa: "] , data["Teléfono Empresa: "] , data["Teléfono2 Empresa: "] , data["NACE: "] , vcontact_person.id_person , self.active_employee_id.get() , "Pool", data["Empleados: "] , str(datetime.now())[0:16], 0 , 0)
             vcontact_person.client_id = vcontact_person.id_person
             
             db.session.add(company)
@@ -1392,7 +1391,7 @@ class AddInfo():
         db.session.close()
  
             
-    def add_companies_from_file():
+    def add_companies_from_file(self):
             
             excel_paht = filedialog.askopenfilename(title = "Cargar desde Excel" , filetypes = (("Ficheros Excel" , "*.xlsx"),))
             excel = openpyxl.open(excel_paht)
@@ -1411,8 +1410,8 @@ class AddInfo():
                     rows = []
                 
                 for i , registro in enumerate(ready):
-
-                    new = Client(registro[0] , registro[1] , registro[2] , registro[3] , registro[4] , registro[5] , registro[6] , registro[7] , registro[8] , registro[9] , registro[10] , registro[11] , registro[12] , registro[13] , registro[14])
+                                # name ,         nif ,          adress ,   postal_code ,     web ,       mail ,      phone ,       phone2 ,       activity , contact_person , employee_id = 0 , state = "Pool" , number_of_employees = "1" , start_contact_date = "" , counter = 0 , created_by = 0)
+                    new = Client(registro[0] , registro[1] , registro[2] , registro[3] , registro[4] , registro[5] , registro[6] , registro[7] , registro[8] , 0 , 0 , "Pool" , registro[9] , str(datetime.now())[0:16] , 0 , self.active_employee_id.get())
                     
                     try:
                         db.session.add(new)
