@@ -162,15 +162,17 @@ def date():
     
     for x in range(25):
         
-        day = str(random.randint(1 , 31))
+        day = str(random.randint(1 , 28))
         month = str(random.randint(1, 12))
+        hours = str(random.randint(10, 21)) 
+        minutes = str(random.randint(10, 59))
         
         if len(day) < 2:
             day =f"0{day}"
-            
-        month =f"0{month}"
+        if len(month) < 2:   
+            month =f"0{month}"
         
-        date_s = f"2024-{month}-{day}"
+        date_s = f"2024-{month}-{day} {hours}:{minutes}"
 
         
     return date_s
@@ -385,7 +387,7 @@ def test_orders():
     clients = db.session.query(Client).all()
     products = db.session.query(Products).all()
     employees = db.session.query(Employee).all()
-    order_id = db.session.query(Orders).order_by(Orders.id_order.desc()).first().id_order
+    order_id = 0
     # id_order , product_reference , product_units , order_client_id , seller_id , buyer_id, order_date , total_import , order_notes , order_discount = 0 , order_product_discount = 0):
         
     for order in range(5000):

@@ -371,6 +371,7 @@ class OrderFunctions:
         
         order = db.session.query(Orders).filter(Orders.id_order == order_id).all()
         client = db.session.get(Client , order[0].order_client_id)
+        print(f">>>>>>>>>>>>>> {order[0].order_client_id}")
         contact_person = db.session.get(ContactPerson , order[0].buyer_id)
         window.title(f"Pedido: ref.{order[0].id_order}")
         
