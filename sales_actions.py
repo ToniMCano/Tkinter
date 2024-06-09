@@ -135,7 +135,7 @@ class OrderFunctions:
             db.session.commit()
 
             if units <= product.units: 
-                print(f"ENTRA: {units}/{product.units}")
+
                 try:
                     if product.discount != 0:
                         row_import = row_import - (row_import * int(product.discount) / 100)
@@ -202,7 +202,7 @@ class OrderFunctions:
 
     def send_order(self , keep , add_product_entry= ""): 
   
-        id_order = db.session.query(Orders).filter(and_(Orders.seller_id == self.active_employee_id.get() , Orders.order_client_id == self.company_id.get())).order_by(Orders.id_order.desc()).first()
+        id_order = db.session.query(Orders).order_by(Orders.id_order.desc()).first()
         company = self.company_id.get()
         buyer = db.session.get(Client , company)
         buyer = buyer.contact_person

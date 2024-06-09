@@ -205,7 +205,7 @@ class Orders(Base):
     order_discount = Column(Integer)
     
     
-    def __init__(self , id_order , product_reference , product_units , order_client_id , seller_id , buyer_id, order_date , total_import , order_notes , order_discount , order_product_discount = 0):
+    def __init__(self , id_order , product_reference , product_units , order_client_id , seller_id , buyer_id, order_date , total_import , order_notes , order_discount = 0 , order_product_discount = 0):
         
         self.id_order = id_order
         self.product_reference = product_reference

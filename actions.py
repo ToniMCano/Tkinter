@@ -954,6 +954,7 @@ class LoadInfo():
         
         if statistics:
             employees_list.append('Company')
+            employees_list.remove('ADMN')
             
         return employees_list
         
