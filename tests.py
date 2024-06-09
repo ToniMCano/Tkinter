@@ -162,22 +162,18 @@ def date():
     
     for x in range(25):
         
-        day = str(random.randint(1 , 15))
-        month = str(random.randint(2, 4))
+        day = str(random.randint(1 , 31))
+        month = str(random.randint(1, 12))
         
         if len(day) < 2:
             day =f"0{day}"
             
         month =f"0{month}"
         
-        last.append(f"2024-{month}-{day}")
+        date_s = f"2024-{month}-{day}"
+
         
-        day = str(random.randint(15 , 30))
-        
-        next.append(f"2024-{month}-{day}")
-        
-        
-    return last , next
+    return date_s
      
         
 def load_contacts():
@@ -383,3 +379,36 @@ def delete_peson_by_error(self):
         db.session.close()
 
 delete_peson_by_error("self")
+
+
+def test_orders():
+    clients = db.session.query(Client).all()
+    products = db.session.query(Products).all()
+    employees = db.session.query(Employee).all()
+    order_id = db.session.query(Orders).order_by(Orders.id_order.desc()).first().id_order
+    # id_order , product_reference , product_units , order_client_id , seller_id , buyer_id, order_date , total_import , order_notes , order_discount = 0 , order_product_discount = 0):
+        
+    for order in range(5000):
+        client = clients[random.randint(1,len(clients) -1)]
+        order_id += 1 
+        seller_id =  employees[random.randint(0,2)].id_employee
+        buyer_id = client.contact_person
+        order_date = date()
+        order_client_id = client.id_client 
+        
+        for product_entry in range(1,18):
+            id_order = order_id
+            product_reference = products[random.randint(1,len(products)) - 1].reference
+            product_units = random.randint(1,24)
+            price = db.session.get(Products , product_reference).price
+            total_import = product_units * price
+            
+            order = Orders(id_order, product_reference , product_units , order_client_id , seller_id , buyer_id , order_date , total_import , "" , 0 , 0)
+            db.session.add(order)
+    db.session.commit()
+    db.session.close()
+        
+    
+test_orders()
+        
+        
