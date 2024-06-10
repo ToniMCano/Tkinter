@@ -3,7 +3,7 @@ import openpyxl
 from openpyxl import Workbook
 import random
 import sqlalchemy
-from sqlalchemy import and_ , or_
+from sqlalchemy import and_ , or_ , func
 import db
 from models import Client , ContactPerson , Employee , Contact , Products , Orders
 from datetime import datetime , timedelta
@@ -16,6 +16,8 @@ import threading
 import time
 from tkinter import *
 from customtkinter import *
+import matplotlib.pyplot as plt
+import numpy as np
 
 nif = ['0','1','2','3','4','5','6','7','8','9']
 
@@ -411,6 +413,75 @@ def test_orders():
     db.session.close()
         
     
-test_orders()
+
+
+
+def graficos():
+    # Generar datos de ejemplo
+    x = np.linspace(0, 10, 100)
+    y = np.sin(x)
+
+    # Crear la gráfica
+    plt.plot(x, y)
+    plt.title("Gráfica de seno")
+    plt.xlabel("x")
+    plt.ylabel("sin(x)")
+
+    # Mostrar la gráfica y bloquear la ejecución del programa
+    plt.show(block=True)
+
+    # Este código se ejecutará después de cerrar la ventana de la gráfica
+    print("La ventana de la gráfica se ha cerrado.")
+
+
+def product_statistics():
+        
+        all_products = db.session.query(Products).all()
+        all_orders = db.session.query(Orders).all()
+      
+        product_reference = list(product.reference for product in all_products)
+        product_stock = list(product.units for product in all_products)
+        product_price = list(product.price for product in all_products)
         
         
+        order_reference = []
+        order_product = []
+        order_product_units = []
+        order_date = []
+        order_client = []
+        order_buyer = []
+        order_seller = []
+        order_import = []
+        order_product_discount = []
+        order_discount = []
+        
+        for order in all_orders:
+            order_reference.append(order.id_order)
+            order_product.append(order.product_reference)
+            order_product_units.append(order.product_units)
+            order_date.append(order.order_date)
+            order_client.append(order.order_client_id)
+            order_buyer.append(order.buyer_id)
+            order_seller.append(order.seller_id)
+            order_import.append(order.total_import)
+            order_product_discount.append(order.order_product_discount)
+            order_discount.append(order.order_discount)
+        
+        orders_dict = {
+            'order_reference' : order_reference ,
+            'order_product' :  order_product ,
+            'order_product_units' : order_product_units ,
+            'order_date' : order_date ,
+            'order_client' : order_client  ,
+            'order_buyer' : order_buyer ,
+            'order_seller' : order_seller ,
+            'order_import' : order_import ,
+            'order_product_discount' : order_product_discount ,
+            'order_discount' : order_discount
+        }
+            
+        orders_dataframe = pd.DataFrame(orders_dict)
+        
+        print(orders_dataframe.head())
+
+product_statistics()      

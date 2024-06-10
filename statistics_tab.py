@@ -148,11 +148,14 @@ class StatisticsTab:
         
         self.All = CTkCheckBox(self.statistics_radiobuttons , text = 'Todos' , checkbox_height = 15 , checkbox_width = 15)
         self.All.grid(row = 0 , column = 3 , sticky =  W+E , pady = 5)
-        
-        self.calculate_button = CTkButton(self.graphics_dashboard_frame , text = "Mostrar")
-        self.calculate_button.grid(row =4 , column = 0 , pady = 10)
+
+        self.calculate_button = CTkButton(self.graphics_dashboard_frame , text = "Mostrar" , fg_color = "white" , corner_radius = 4 , border_color = 'Lightblue4' , border_width = 5 , text_color = 'Lightblue4' , font = ("" , 14 , 'bold') , height = 25)
+        self.calculate_button.grid(row =4 , column = 0 , pady = 10 , sticky =  W+E , padx = 50)
+                
+        self.label_m = CTkLabel(self.graphics_dashboard_frame , text = '' , fg_color = "transparent")
+        self.label_m.grid(row = 5 , column = 0 , sticky =  W+E , padx = 15)
         
     
         
         
-               
+
