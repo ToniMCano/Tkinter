@@ -150,19 +150,221 @@ class Graphics:
             row = CTkFrame(self.grapics , fg_color = "DeepSkyBlue2" , height = column_height , width = 30 , corner_radius = 4)
             row.grid(row = 2 , column = i , sticky = "s" , padx = 10)
             
-            label_refernce = CTkButton(self.grapics , fg_color = "Lightblue4" , text = str(product[0]) , width = 30 , corner_radius = 4 , text_color = "white" , command = lambda reference = product[0]: DataGraphic.data_graphic(self, reference))
+            label_refernce = CTkButton(self.grapics , fg_color = "Lightblue4" , text = str(product[0]) , width = 30 , corner_radius = 4 , text_color = "white" , command = lambda reference = product[0]: DataGraphic.data_to_charge(self, reference))
             label_refernce.grid(row = 0 , column = i , padx = 10 , pady = 10 , sticky = 'we')
             
             
             
-       
-    
+            
     
 class DataGraphic:
     
+    
+    def data_to_charge(self , reference):
+        
+        product = db.session.get(Products , reference)
+        
+        self.units = db.session.query(Orders.product_reference , func.sum(Orders.product_units)).filter(Orders.product_reference == product.reference).first()[-1]
+
+        self.data_graphic_reference = product.reference
+        
+        self.data_graphic_name = product.product_name
+        
+        self.data_graphic_price = product.price
+        
+        self.order_count = db.session.query(Orders).filter(Orders.product_reference == product.reference).group_by(Orders.id_order).all()
+
+        self.products_by_order = self.units // len(self.order_count)
+
+        self.total_product_import = self.units * product.price
+        
+        self.order_periodicity = DataGraphic.peridicity(self , reference , len(self.order_count))
+        
+        data = {
+            'reference' : str(product.reference) ,
+            'name' : product.product_name ,
+            'units' : str(self.units) ,
+            'price' : str(self.data_graphic_price) ,
+            'orders' : str(len(self.order_count)) ,
+            'product_by_order' : str(self.products_by_order) ,
+            'total_import' : str(round(self.total_product_import , 2)) , 
+            'periodicity' : str(self.order_periodicity) ,
+            'category' : product.category ,
+            'subcategory' : product.subcategory 
+        }
+        
+        
+        DataGraphic.charge_data(self , data)
+    
+    
+    def peridicity(self , reference , len_orders):
+        
+        first = db.session.query(Orders).filter(Orders.product_reference == reference).order_by(Orders.order_date).first()
+        last = db.session.query(Orders).filter(Orders.product_reference == reference).order_by(Orders.order_date.desc()).first()
+        
+        first_date = first.order_date.split('-')
+        last_date = last.order_date.split('-')
+        
+        period = datetime(int(last_date[0]) , int(last_date[1]) , int(last_date[2][:2])) - datetime(int(first_date[0]) , int(first_date[1]) , int(first_date[2][:2]))
+        
+        days =  int(period.days) // int(len_orders)
+
+        return days
+        
+        
+    
+    def charge_data(self , data):
+        
+        self.view_data_header = CTkFrame(self.view_data_frame , fg_color = 'transparent' , corner_radius = 4 , height = 40)
+        self.view_data_header.grid(row = 1 , column = 0 , sticky = 'nswe')
+   
+        self.view_data_header.grid_columnconfigure(0, weight = 1)
+        self.view_data_header.grid_columnconfigure(1, weight = 1)
+        #self.view_data_header.grid_columnconfigure(3, weight = 1)
+        #self.view_data_header.grid_columnconfigure(4, weight = 1)
+        #self.view_data_header.grid_columnconfigure(5, weight = 1)
+        #self.view_data_header.grid_columnconfigure(6, weight = 1)
+        #self.view_data_header.grid_columnconfigure(7, weight = 1)
+        #self.view_data_header.grid_columnconfigure(8, weight = 1)
+        #self.view_data_header.grid_rowconfigure(0, weight = 1)
+        self.view_data_header.grid_rowconfigure(1, weight = 1)
+        self.view_data_header.grid_rowconfigure(2, weight = 1)
+        self.view_data_header.grid_rowconfigure(3, weight = 1)
+        self.view_data_header.grid_rowconfigure(4, weight = 1)
+        self.view_data_header.grid_rowconfigure(5, weight = 1)
+        #self.view_data_header.grid_rowconfigure(6, weight = 1)
+        #self.view_data_header.grid_rowconfigure(7, weight = 1)
+        #self.view_data_header.grid_rowconfigure(8, weight = 1)
+        
+        #Productos Más: referencia, nombre, precio, unidades, número de pedidos  pedido , media unidades ,  importe total , fecha
+
+        self.product_reference_view_frame = CTkFrame(self.view_data_header , corner_radius = 3 , border_width = 1 , border_color = 'gray')
+        self.product_reference_view_frame.grid(row = 1 , column = 0 , sticky = 'nswe' ,  padx = 6 , pady = 3)
+        self.product_reference_view_frame.grid_rowconfigure(0 , weight = 1)
+        self.product_reference_view_frame.grid_columnconfigure(0, weight = 1)
+        self.product_reference_view_frame.grid_columnconfigure(1, weight = 1)
+
+        self.product_reference_view_label = CTkLabel(self.product_reference_view_frame , text = 'Referencia' , text_color = "white" , fg_color = 'Lightblue4' , corner_radius = 3 , width = 120)
+        self.product_reference_view_label.grid(row = 0 , column = 0 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.product_reference_info = CTkLabel(self.product_reference_view_frame , text = data['reference'] , text_color = "gray" , font = ("" , 16 , 'bold') , fg_color = 'transparent' , corner_radius = 3 , width = 120)
+        self.product_reference_info.grid(row = 0 , column = 1 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+
+        self.name_view_frame = CTkFrame(self.view_data_header  , corner_radius = 3 , border_width = 1 , border_color = 'gray')
+        self.name_view_frame.grid(row = 2 , column = 0 , sticky = 'nswe' , padx = 6 , pady = 3)
+        self.name_view_frame.grid_rowconfigure(0 , weight = 1)
+        self.name_view_frame.grid_columnconfigure(0, weight = 1)
+        self.name_view_frame.grid_columnconfigure(1, weight = 1)
+
+        self.name_view_label = CTkLabel(self.name_view_frame  , text = 'Nombre' , text_color = "white" , fg_color = 'Lightblue4' , corner_radius = 3 , width = 120)
+        self.name_view_label.grid(row = 0 , column = 0 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.name_view_info = CTkLabel(self.name_view_frame , text = data['name'] , text_color = "gray" , font = ("" , 16 , 'bold') , fg_color = 'transparent' , corner_radius = 3 , width = 120)
+        self.name_view_info.grid(row = 0 , column = 1 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.price_view_frame = CTkFrame(self.view_data_header , corner_radius = 3 , border_width = 1 , border_color = 'gray')
+        self.price_view_frame.grid(row = 3 , column = 0 , sticky = 'nswe' , padx = 6 , pady = 3)
+        self.price_view_frame.grid_rowconfigure(0 , weight = 1)
+        self.price_view_frame.grid_columnconfigure(0, weight = 1)
+        self.price_view_frame.grid_columnconfigure(1, weight = 1)
+
+        self.price_view_label = CTkLabel(self.price_view_frame , text = "Precio" , text_color = "white" , fg_color = 'Lightblue4' , corner_radius = 3 , width = 120)
+        self.price_view_label.grid(row = 0 , column = 0 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.price_view_info = CTkLabel(self.price_view_frame , text = data['price'] , text_color = "gray" , font = ("" , 16 , 'bold') , fg_color = 'transparent' , corner_radius = 3 , width = 120)
+        self.price_view_info.grid(row = 0 , column = 1 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.category_frame = CTkFrame(self.view_data_header , corner_radius = 3 , border_width = 1 , border_color = 'gray')
+        self.category_frame.grid(row = 4 , column = 0 , sticky = 'nswe' , padx = 6 , pady = 3)
+        self.category_frame.grid_rowconfigure(0 , weight = 1)
+        self.category_frame.grid_columnconfigure(0, weight = 1)
+        self.category_frame.grid_columnconfigure(1, weight = 1)
+
+        self.category_label = CTkLabel(self.category_frame , text = "Categoría" , text_color = "white" , fg_color = 'Lightblue4' , corner_radius = 3 , width = 120)
+        self.category_label.grid(row = 0 , column = 0 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.category_info = CTkLabel(self.category_frame , text = data['category'] , text_color = "gray" , font = ("" , 16 , 'bold') , fg_color = 'transparent' , corner_radius = 3 , width = 120)
+        self.category_info.grid(row = 0 , column = 1 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.subcategry_frame = CTkFrame(self.view_data_header , corner_radius = 3 , border_width = 1 , border_color = 'gray')
+        self.subcategry_frame.grid(row = 5 , column = 0 , sticky = 'nswe' , padx = 6 , pady = 3)
+        self.subcategry_frame.grid_rowconfigure(0 , weight = 1)
+        self.subcategry_frame.grid_columnconfigure(0, weight = 1)
+        self.subcategry_frame.grid_columnconfigure(1, weight = 1)
+
+        self.subcategry_label = CTkLabel(self.subcategry_frame , text = "Subcategoría" , text_color = "white" , fg_color = 'Lightblue4' , corner_radius = 3 , width = 120)
+        self.subcategry_label.grid(row = 0 , column = 0 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.subcategry_info = CTkLabel(self.subcategry_frame , text = data['subcategory'] , text_color = "gray" , font = ("" , 16 , 'bold') , fg_color = 'transparent' , corner_radius = 3 , width = 120)
+        self.subcategry_info.grid(row = 0 , column = 1 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.units_view_frame = CTkFrame(self.view_data_header , corner_radius = 3 , border_width = 1 , border_color = 'gray')
+        self.units_view_frame.grid(row = 1 , column = 1 , sticky = 'nswe' , padx = 6 , pady = 3)
+        self.units_view_frame.grid_rowconfigure(0 , weight = 1)
+        self.units_view_frame.grid_columnconfigure(0, weight = 1)
+        self.units_view_frame.grid_columnconfigure(1, weight = 1)
+
+        self.units_view_label = CTkLabel(self.units_view_frame , text = "Unidades" , text_color = "white" , fg_color = 'Lightblue4' , corner_radius = 3 , width = 120)
+        self.units_view_label.grid(row = 0 , column = 0 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.units_view_info = CTkLabel(self.units_view_frame , text = data['units'] , text_color = "gray" , font = ("" , 16 , 'bold') , fg_color = 'transparent' , corner_radius = 3 , width = 120)
+        self.units_view_info.grid(row = 0 , column = 1 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.orders_view_frame = CTkFrame(self.view_data_header , corner_radius = 3 , border_width = 1 , border_color = 'gray')
+        self.orders_view_frame.grid(row = 2 , column = 1 , sticky = 'nswe' , padx = 6 , pady = 3)
+        self.orders_view_frame.grid_rowconfigure(0 , weight = 1)
+        self.orders_view_frame.grid_columnconfigure(0, weight = 1)
+        self.orders_view_frame.grid_columnconfigure(1, weight = 1)
+
+        self.orders_view_label = CTkLabel(self.orders_view_frame , text = "Pedidos" , text_color = "white" , fg_color = 'Lightblue4' , corner_radius = 3 , width = 120)
+        self.orders_view_label.grid(row = 0 , column = 0 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.orders_view_info = CTkLabel(self.orders_view_frame , text = data['orders'] , text_color = "gray" , font = ("" , 16 , 'bold') , fg_color = 'transparent' , corner_radius = 3 , width = 120)
+        self.orders_view_info.grid(row = 0 , column = 1 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+
+        self.order_units_view_frame = CTkFrame(self.view_data_header , corner_radius = 3 , border_width = 1 , border_color = 'gray')
+        self.order_units_view_frame.grid(row = 3 , column = 1 , sticky = 'nswe' , padx = 6 , pady = 3)
+        self.order_units_view_frame.grid_rowconfigure(0 , weight = 1)
+        self.order_units_view_frame.grid_columnconfigure(0, weight = 1)
+        self.order_units_view_frame.grid_columnconfigure(1, weight = 1)
+
+        self.order_units_view_label = CTkLabel(self.order_units_view_frame , text = " Unidades/Pedido " , text_color = "white" , fg_color = 'Lightblue4' , corner_radius = 3 , width = 120)
+        self.order_units_view_label.grid(row = 0 , column = 0 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.order_units_info = CTkLabel(self.order_units_view_frame , text = data['product_by_order'] , text_color = "gray" , font = ("" , 16 , 'bold') , fg_color = 'transparent' , corner_radius = 3 , width = 120)
+        self.order_units_info.grid(row = 0 , column = 1 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+
+        self.total_import_view_frame = CTkFrame(self.view_data_header , corner_radius = 3 , border_width = 1 , border_color = 'gray')
+        self.total_import_view_frame.grid(row = 4 , column = 1 , sticky = 'nswe' , padx = 6 , pady = 3)
+        self.total_import_view_frame.grid_rowconfigure(0 , weight = 1)
+        self.total_import_view_frame.grid_columnconfigure(0, weight = 1)
+        self.total_import_view_frame.grid_columnconfigure(1, weight = 1)
+
+        self.total_import_view_label = CTkLabel(self.total_import_view_frame , text = "Importe" , text_color = "white" , fg_color = 'Lightblue4' , corner_radius = 3 , width = 120)
+        self.total_import_view_label.grid(row = 0 , column = 0 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.total_import_views_info = CTkLabel(self.total_import_view_frame , text = data['total_import'] , text_color = "gray" , font = ("" , 16 , 'bold') , fg_color = 'transparent' , corner_radius = 3 , width = 120)
+        self.total_import_views_info.grid(row = 0 , column = 1 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+
+        self.date_view_frame = CTkFrame(self.view_data_header , corner_radius = 3 , border_width = 1 , border_color = 'gray')
+        self.date_view_frame.grid(row = 5 , column = 1 , sticky = 'nswe' , padx = 6 , pady = 3)
+        self.date_view_frame.grid_rowconfigure(0 , weight = 1)
+        self.date_view_frame.grid_columnconfigure(0, weight = 1)
+        self.date_view_frame.grid_columnconfigure(1, weight = 1)
+
+        self.date_view_label = CTkLabel(self.date_view_frame , text = "Periodicidad" , text_color = "white" , fg_color = 'Lightblue4' , corner_radius = 3 , width = 120)
+        self.date_view_label.grid(row = 0 , column = 0 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+        self.date_view_info = CTkLabel(self.date_view_frame , text = data['periodicity'] , text_color = "gray" , font = ("" , 16 , 'bold') , fg_color = 'transparent' , corner_radius = 3 , width = 120)
+        self.date_view_info.grid(row = 0 , column = 1 , sticky = 'nswe' ,  padx = 2 , pady = 2)
+        
+
+
+                
+    
     def data_graphic(self , reference):
         
-        print("")
+        print(reference)
         
         
         

@@ -511,11 +511,12 @@ plt.show()
 '''
 
 def example():
-        
-    sum_products = db.session.query(Orders.product_reference , func.sum(Orders.product_units)).group_by(Orders.product_reference).all()[0:30]
+    #2526
+    product = db.session.get(Products , 9903)
     
-    for product in sum_products:
-        
+    units = db.session.query(Orders).filter(Orders.product_reference == product.reference).group_by(Orders.id_order).all()
+    
+    print(len(units))    
         
         
 example()
