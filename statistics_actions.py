@@ -65,7 +65,7 @@ class Statistics:
         return sum_total_orders , sum_total_products_sold
     
         
-    def product_statistics(self):
+    def statistics_dataframe(self):
         
         all_products = db.session.query(Products).all()
         all_orders = db.session.query(Orders).all()
@@ -74,9 +74,10 @@ class Statistics:
         product_stock = list(product.units for product in all_products)
         product_price = list(product.price for product in all_products)
         
-        
         order_reference = []
-        order_product = []
+        order_product_reference = []
+        order_product_name = []
+        order_product_price = []
         order_product_units = []
         order_date = []
         order_client = []
@@ -86,9 +87,13 @@ class Statistics:
         order_product_discount = []
         order_discount = []
         
+        
         for order in all_orders:
+            
             order_reference.append(order.id_order)
-            order_product.append(order.product_reference)
+            order_product_reference.append(order.product_reference)
+            order_product_name.append(db.session.get(Products , order.product_reference).product_name)
+            order_product_price.append(db.session.get(Products , order.product_reference).product_name)
             order_product_units.append(order.product_units)
             order_date.append(order.order_date)
             order_client.append(order.order_client_id)
@@ -97,10 +102,14 @@ class Statistics:
             order_import.append(order.total_import)
             order_product_discount.append(order.order_product_discount)
             order_discount.append(order.order_discount)
-        
+            
+         #Productos Más: referencia, nombre, precio, unidades, número de pedidos  pedido , media unidades ,  importe total , fecha
+         
         orders_dict = {
-            'order_reference' : order_reference ,
-            'order_product' :  order_product ,
+            'order_reference' : order_reference,
+            'order_product_reference' :  order_product_reference ,
+            'order_product_name' : order_product_name,
+            'order_product_price' : order_product_price ,
             'order_product_units' : order_product_units ,
             'order_date' : order_date ,
             'order_client' : order_client  ,
@@ -112,6 +121,42 @@ class Statistics:
         }
             
         orders_dataframe = pd.DataFrame(orders_dict)
+        
+        return orders_dataframe
+    
+    
+class Graphics:
+    
+    def example(self):
+        
+        sum_products = db.session.query(Orders.product_reference , func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(desc('total_units')).all()[0:30]
+        
+        self.grapics_container = CTkFrame(self.view_graphics_frame)
+        self.grapics_container.grid(row = 0 , column = 0 , sticky = "nswe")
+        self.grapics_container.grid_columnconfigure(0 , weight = 1)
+        self.grapics_container.grid_rowconfigure(0 , weight = 1)
+        
+        self.grapics = CTkScrollableFrame(self.grapics_container , orientation =  'horizontal' , fg_color = 'transparent')
+        self.grapics.grid(row = 0 , column = 0 , sticky = "nswe")
+
+        
+        for i, product in enumerate(sum_products):
+            
+            column_height = product[1] // 5
+            
+            units_label = CTkLabel(self.grapics , fg_color = "transparent" , text = str(product[1]), width = 20 , corner_radius = 4)
+            units_label.grid(row = 1 , column = i , sticky = "s" , padx = 20)
+            
+            row = CTkFrame(self.grapics , fg_color = "DeepSkyBlue2" , height = column_height , width = 20 , corner_radius = 4)
+            row.grid(row = 2 , column = i , sticky = "s" , padx = 20)
+            
+            label_refernce = CTkLabel(self.grapics , fg_color = "Lightblue4" , text = str(product[0]) , width = 20 , corner_radius = 4 , text_color = "white")
+            label_refernce.grid(row = 0 , column = i , padx = 20 , pady = 10 , sticky = 'we')
+            
+            print(len(sum_products))
+            
+            
+    
             
         
         

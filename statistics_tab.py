@@ -1,7 +1,7 @@
 
 
 from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs  
-from statistics_actions import StatisticsActions
+from statistics_actions import StatisticsActions , Graphics
 import tkinter as tk
 from tkinter import ttk , filedialog
 from tkinter import *
@@ -45,12 +45,58 @@ class StatisticsTab:
         
         self.view_graphics_frame  = CTkFrame(self.graphics_frame , fg_color = 'transparent' , border_width = 1 , border_color = 'gray')
         self.view_graphics_frame.grid(row = 0 , column = 0 , sticky = 'nswe' , padx = 5 , pady = 5)
+        self.view_graphics_frame.grid_columnconfigure(0 , weight = 1)
+        self.view_graphics_frame.grid_rowconfigure(0 , weight = 1)
         
         # DATA
         
-        self.view_data_frame = CTkScrollableFrame(self.graphics_frame , fg_color = 'transparent' , border_width = 1 , border_color = 'gray' , scrollbar_fg_color = None , bg_color = 'transparent')
+        self.frame_view_data = CTkFrame(self.graphics_frame , fg_color = 'transparent' , border_width = 1 , border_color = 'gray')
+        self.frame_view_data.grid(row = 1 , column = 0 , sticky = 'nswe' , padx = 5 , pady = 5)
+        self.frame_view_data.grid_columnconfigure(0, weight = 1)
+        self.frame_view_data.grid_rowconfigure(1, weight = 1)
+        
+        self.view_data_frame = CTkScrollableFrame(self.frame_view_data , fg_color = 'transparent' , scrollbar_fg_color = None , bg_color = 'transparent')
         self.view_data_frame.grid(row = 1 , column = 0 , sticky = 'nswe' , padx = 5 , pady = 5)
         
+        self.view_data_header = CTkFrame(self.frame_view_data , fg_color = 'Lightblue4' , corner_radius = 4 , height = 40)
+        self.view_data_header.grid(row = 0 , column = 0 , sticky = 'we')
+   
+        self.view_data_header.grid_columnconfigure(1, weight = 1)
+        self.view_data_header.grid_columnconfigure(2, weight = 1)
+        self.view_data_header.grid_columnconfigure(3, weight = 1)
+        self.view_data_header.grid_columnconfigure(4, weight = 1)
+        self.view_data_header.grid_columnconfigure(5, weight = 1)
+        self.view_data_header.grid_columnconfigure(6, weight = 1)
+        self.view_data_header.grid_columnconfigure(7, weight = 1)
+        self.view_data_header.grid_columnconfigure(8, weight = 1)
+        
+        #Productos Más: referencia, nombre, precio, unidades, número de pedidos  pedido , media unidades ,  importe total , fecha
+        
+        self.product_reference_view_label = CTkLabel(self.view_data_header , text = "Referencia Producto" , text_color = "white")
+        self.product_reference_view_label.grid(row = 0 , column = 1 , sticky = 'we')
+        
+        self.name_view_label = CTkLabel(self.view_data_header , text = "Nombre" , text_color = "white")
+        self.name_view_label.grid(row = 0 , column = 2 , sticky = 'we')
+        
+        self.price_view_label = CTkLabel(self.view_data_header , text = "Precio" , text_color = "white")
+        self.price_view_label.grid(row = 0 , column = 3 , sticky = 'we')
+        
+        self.units_view_label = CTkLabel(self.view_data_header , text = "Unidades" , text_color = "white")
+        self.units_view_label.grid(row = 0 , column = 4 , sticky = 'we')
+        
+        self.orders_view_label = CTkLabel(self.view_data_header , text = "Pedidos" , text_color = "white")
+        self.orders_view_label.grid(row = 0 , column = 5 , sticky = 'we')
+        
+        self.order_units_view_label = CTkLabel(self.view_data_header , text = "Unidades/Pedido" , text_color = "white")
+        self.order_units_view_label.grid(row = 0 , column = 6 , sticky = 'we')
+        
+        self.total_import_view_label = CTkLabel(self.view_data_header , text = "Importe" , text_color = "white")
+        self.total_import_view_label.grid(row = 0 , column = 7 , sticky = 'we')
+        
+        self.date_view_label = CTkLabel(self.view_data_header , text = "Fecha" , text_color = "white")
+        self.date_view_label.grid(row = 0 , column = 8 , sticky = 'we')
+        
+
         #DASHBOARD
         
         self.graphics_dashboard_frame  = CTkFrame(self.statistics_frame , fg_color = 'transparent' , border_width = 1 , border_color = 'gray' , width = 450)
@@ -119,20 +165,17 @@ class StatisticsTab:
         self.subcategory = CTkButton(self.statistics_types , text = "Subcategoría" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold'))
         self.subcategory.grid(row = 3 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
-        self.products = CTkButton(self.statistics_types , text = "Productos" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold'))
-        self.products.grid(row = 4 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
-        
         self.orders = CTkButton(self.statistics_types , text = "Pedidos" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold'))
-        self.orders.grid(row = 5 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
+        self.orders.grid(row = 4 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
         self.orders_import = CTkButton(self.statistics_types , text = "Importe Pedido" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold'))
-        self.orders_import.grid(row = 6 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
+        self.orders_import.grid(row = 5 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
         self.client = CTkButton(self.statistics_types , text = "Cliente" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold'))
-        self.client.grid(row = 7 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
+        self.client.grid(row = 6 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
         self.clients = CTkButton(self.statistics_types , text = "Clientes (Todos)" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold'))
-        self.clients.grid(row = 8 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
+        self.clients.grid(row = 7 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
         self.statistics_radiobuttons = CTkFrame(self.statistics_types)
         self.statistics_radiobuttons.grid(row = 9 , column = 0 , sticky = 'nswe' , padx = 5 , pady = 10) 
@@ -155,6 +198,7 @@ class StatisticsTab:
         self.label_m = CTkLabel(self.graphics_dashboard_frame , text = '' , fg_color = "transparent")
         self.label_m.grid(row = 5 , column = 0 , sticky =  W+E , padx = 15)
         
+        Graphics.example(self)
     
         
         
