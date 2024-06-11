@@ -135,7 +135,7 @@ class OrderFunctions:
             db.session.commit()
 
             if units <= product.units: 
-                print(f"ENTRA: {units}/{product.units}")
+
                 try:
                     if product.discount != 0:
                         row_import = row_import - (row_import * int(product.discount) / 100)
@@ -202,7 +202,7 @@ class OrderFunctions:
 
     def send_order(self , keep , add_product_entry= ""): 
   
-        id_order = db.session.query(Orders).filter(and_(Orders.seller_id == self.active_employee_id.get() , Orders.order_client_id == self.company_id.get())).order_by(Orders.id_order.desc()).first()
+        id_order = db.session.query(Orders).order_by(Orders.id_order.desc()).first()
         company = self.company_id.get()
         buyer = db.session.get(Client , company)
         buyer = buyer.contact_person
@@ -220,24 +220,19 @@ class OrderFunctions:
             try:
                 if id_order is not None and not self.modify_order_id[0]:
                     id_order = id_order.id_order + 1
-                    
-                    self.modify_order_id = [True , id_order]
                     print(f'(Send Order) self.modify_order_id: {self.modify_order_id} Después ID: {id_order}' )
-                    OrderFunctions.add_entry_order(self , id_order , buyer , add_product_entry)
-                               
+        
                 elif id_order is None and not self.modify_order_id[0]:    
                     id_order = 1 
                     self.modify_order_id = [True , id_order]
 
-                    OrderFunctions.add_entry_order(self , id_order , buyer , add_product_entry)
-                    
-                elif add_product_entry[-1] == "modify":  # [Modificar Pedido 2/2] Para que no se dupliquen las referencias que se añadan al modificar que funciona diferente.                    
-                    pass
+                elif self.modify_order_id[-1] == "modify":                     
+                    id_order = self.modify_order_id[1]
                     
                 else:
                     id_order = id_order.id_order
-                    OrderFunctions.add_entry_order(self , id_order, buyer , add_product_entry)
-                    
+                
+                OrderFunctions.add_entry_order(self , id_order, buyer , add_product_entry)   
                 db.session.commit()
                 
                 self.order_number.set(f"Nº {id_order:04d}") 
@@ -371,6 +366,7 @@ class OrderFunctions:
         
         order = db.session.query(Orders).filter(Orders.id_order == order_id).all()
         client = db.session.get(Client , order[0].order_client_id)
+        print(f">>>>>>>>>>>>>> {order[0].order_client_id}")
         contact_person = db.session.get(ContactPerson , order[0].buyer_id)
         window.title(f"Pedido: ref.{order[0].id_order}")
         
@@ -499,16 +495,14 @@ class ModifyDeleteOrder:
                 
                 if int(product.discount) > 0:
                     row_import - ModifyDeleteOrder.percentage(row_import , product.discount)
-                # Cargamos los producto en el nuevo pedido que tendrá el mismo id.
-                self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , row.product_units , f"{product.discount} %" , row_import))
+               
+                self.order_tree.insert('' , 0 , text = product.reference , values = (product.product_name , product.price , row.product_units , f"{row.order_product_discount} %" , row_import))
                 
-            self.modify_order_id = [True , order_id]  # Pasamos el mismo id de pedido.
+            self.modify_order_id = [True , order_id , "modify"]  # Pasamos el mismo id de pedido.
             
             self.order_number.set(f"Nº {order_id:04d}")
             self.order_number_label.place(x = 3 , rely = 0.125)
-             
-            #self.total_order_import.set(OrderFunctions.calculate_import(self))
-            
+
             single_order_window.destroy() # 
             historical_window.destroy()
         

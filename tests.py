@@ -3,7 +3,7 @@ import openpyxl
 from openpyxl import Workbook
 import random
 import sqlalchemy
-from sqlalchemy import and_ , or_
+from sqlalchemy import and_ , or_ , func
 import db
 from models import Client , ContactPerson , Employee , Contact , Products , Orders
 from datetime import datetime , timedelta
@@ -16,6 +16,8 @@ import threading
 import time
 from tkinter import *
 from customtkinter import *
+import matplotlib.pyplot as plt
+import numpy as np
 
 nif = ['0','1','2','3','4','5','6','7','8','9']
 
@@ -162,22 +164,20 @@ def date():
     
     for x in range(25):
         
-        day = str(random.randint(1 , 15))
-        month = str(random.randint(2, 4))
+        day = str(random.randint(1 , 28))
+        month = str(random.randint(1, 12))
+        hours = str(random.randint(10, 21)) 
+        minutes = str(random.randint(10, 59))
         
         if len(day) < 2:
             day =f"0{day}"
-            
-        month =f"0{month}"
+        if len(month) < 2:   
+            month =f"0{month}"
         
-        last.append(f"2024-{month}-{day}")
+        date_s = f"2024-{month}-{day} {hours}:{minutes}"
+
         
-        day = str(random.randint(15 , 30))
-        
-        next.append(f"2024-{month}-{day}")
-        
-        
-    return last , next
+    return date_s
      
         
 def load_contacts():
@@ -383,3 +383,139 @@ def delete_peson_by_error(self):
         db.session.close()
 
 delete_peson_by_error("self")
+
+
+def test_orders():
+    clients = db.session.query(Client).all()
+    products = db.session.query(Products).all()
+    employees = db.session.query(Employee).all()
+    order_id = 0
+    # id_order , product_reference , product_units , order_client_id , seller_id , buyer_id, order_date , total_import , order_notes , order_discount = 0 , order_product_discount = 0):
+        
+    for order in range(5000):
+        client = clients[random.randint(1,len(clients) -1)]
+        order_id += 1 
+        seller_id =  employees[random.randint(0,2)].id_employee
+        buyer_id = client.contact_person
+        order_date = date()
+        order_client_id = client.id_client 
+        
+        for product_entry in range(1,18):
+            id_order = order_id
+            product_reference = products[random.randint(1,len(products)) - 1].reference
+            product_units = random.randint(1,24)
+            price = db.session.get(Products , product_reference).price
+            total_import = product_units * price
+            
+            order = Orders(id_order, product_reference , product_units , order_client_id , seller_id , buyer_id , order_date , total_import , "" , 0 , 0)
+            db.session.add(order)
+    db.session.commit()
+    db.session.close()
+        
+    
+
+
+
+def graficos():
+    # Generar datos de ejemplo
+    x = np.linspace(0, 10, 100)
+    y = np.sin(x)
+
+    # Crear la gráfica
+    plt.plot(x, y)
+    plt.title("Gráfica de seno")
+    plt.xlabel("x")
+    plt.ylabel("sin(x)")
+
+    # Mostrar la gráfica y bloquear la ejecución del programa
+    plt.show(block=True)
+
+    # Este código se ejecutará después de cerrar la ventana de la gráfica
+    print("La ventana de la gráfica se ha cerrado.")
+
+
+def product_statistics():
+        
+        all_products = db.session.query(Products).all()
+        all_orders = db.session.query(Orders).all()
+      
+        product_reference = list(product.reference for product in all_products)
+        product_stock = list(product.units for product in all_products)
+        product_price = list(product.price for product in all_products)
+        
+        
+        order_reference = []
+        order_product = []
+        order_product_units = []
+        order_date = []
+        order_client = []
+        order_buyer = []
+        order_seller = []
+        order_import = []
+        order_product_discount = []
+        order_discount = []
+        
+        for order in all_orders:
+            order_reference.append(order.id_order)
+            order_product.append(order.product_reference)
+            order_product_units.append(order.product_units)
+            order_date.append(order.order_date)
+            order_client.append(order.order_client_id)
+            order_buyer.append(order.buyer_id)
+            order_seller.append(order.seller_id)
+            order_import.append(order.total_import)
+            order_product_discount.append(order.order_product_discount)
+            order_discount.append(order.order_discount)
+        
+        orders_dict = {
+            'order_reference' : order_reference ,
+            'order_product' :  order_product ,
+            'order_product_units' : order_product_units ,
+            'order_date' : order_date ,
+            'order_client' : order_client  ,
+            'order_buyer' : order_buyer ,
+            'order_seller' : order_seller ,
+            'order_import' : order_import ,
+            'order_product_discount' : order_product_discount ,
+            'order_discount' : order_discount
+        }
+            
+        orders_dataframe = pd.DataFrame(orders_dict)
+        
+        print(orders_dataframe.head())
+
+    
+
+
+'''
+GRÁFICAS CON MATPLOTLIB
+
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+
+fruits = ['apple', 'blueberry', 'cherry', 'orange']
+counts = [40, 100, 30, 55]
+bar_labels = ['red', 'blue', '_red', 'orange']
+bar_colors = ['tab:red', 'tab:blue', 'tab:red', 'tab:orange']
+
+ax.bar(fruits, counts, label=bar_labels, color=bar_colors)
+
+ax.set_ylabel('fruit supply')
+ax.set_title('Fruit supply by kind and color')
+ax.legend(title='Fruit color')
+
+plt.show()
+
+
+'''
+
+def example():
+        
+    sum_products = db.session.query(Orders.product_reference , func.sum(Orders.product_units)).group_by(Orders.product_reference).all()[0:30]
+    
+    for product in sum_products:
+        
+        
+        
+example()
