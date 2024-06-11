@@ -144,20 +144,28 @@ class Graphics:
             
             column_height = product[1] // 5
             
-            units_label = CTkLabel(self.grapics , fg_color = "transparent" , text = str(product[1]), width = 20 , corner_radius = 4)
-            units_label.grid(row = 1 , column = i , sticky = "s" , padx = 20)
+            units_label = CTkLabel(self.grapics , fg_color = "transparent" , text = str(product[1]), width = 30 , corner_radius = 4)
+            units_label.grid(row = 1 , column = i , sticky = "s" , padx = 10)
             
-            row = CTkFrame(self.grapics , fg_color = "DeepSkyBlue2" , height = column_height , width = 20 , corner_radius = 4)
-            row.grid(row = 2 , column = i , sticky = "s" , padx = 20)
+            row = CTkFrame(self.grapics , fg_color = "DeepSkyBlue2" , height = column_height , width = 30 , corner_radius = 4)
+            row.grid(row = 2 , column = i , sticky = "s" , padx = 10)
             
-            label_refernce = CTkLabel(self.grapics , fg_color = "Lightblue4" , text = str(product[0]) , width = 20 , corner_radius = 4 , text_color = "white")
-            label_refernce.grid(row = 0 , column = i , padx = 20 , pady = 10 , sticky = 'we')
-            
-            print(len(sum_products))
+            label_refernce = CTkButton(self.grapics , fg_color = "Lightblue4" , text = str(product[0]) , width = 30 , corner_radius = 4 , text_color = "white" , command = lambda reference = product[0]: DataGraphic.data_graphic(self, reference))
+            label_refernce.grid(row = 0 , column = i , padx = 10 , pady = 10 , sticky = 'we')
             
             
+            
+       
     
-            
+    
+class DataGraphic:
+    
+    def data_graphic(self , reference):
+        
+        print("")
+        
+        
+        
         
         
     

@@ -777,7 +777,7 @@ class LoadInfo():
         self.combo_state.current(newindex = index)       
     
     
-    def contacts_dataframe(self, clients, dataframe, pd_filter , ascending_value): 
+    def     contacts_dataframe(self, clients, dataframe, pd_filter , ascending_value): 
         
         for i , client in enumerate(clients):  
             # De aquí se deber cargar el útlimo contacto con el "dot" si fuera necesario
