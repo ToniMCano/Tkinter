@@ -207,7 +207,7 @@ class DataGraphic:
         
         period = datetime(int(last_date[0]) , int(last_date[1]) , int(last_date[2][:2])) - datetime(int(first_date[0]) , int(first_date[1]) , int(first_date[2][:2]))
         
-        days =  int(period.days) // int(len_orders)
+        days =  round(int(period.days) / int(len_orders) , 2)
 
         return days
         
@@ -355,7 +355,7 @@ class DataGraphic:
         self.date_view_label = CTkLabel(self.date_view_frame , text = "Periodicidad" , text_color = "white" , fg_color = 'Lightblue4' , corner_radius = 3 , width = 120)
         self.date_view_label.grid(row = 0 , column = 0 , sticky = 'nswe' ,  padx = 2 , pady = 2)
         
-        self.date_view_info = CTkLabel(self.date_view_frame , text = data['periodicity'] , text_color = "gray" , font = ("" , 16 , 'bold') , fg_color = 'transparent' , corner_radius = 3 , width = 120)
+        self.date_view_info = CTkLabel(self.date_view_frame , text = f"{data['periodicity']} días", text_color = "gray" , font = ("" , 16 , 'bold') , fg_color = 'transparent' , corner_radius = 3 , width = 120)
         self.date_view_info.grid(row = 0 , column = 1 , sticky = 'nswe' ,  padx = 2 , pady = 2)
         
 

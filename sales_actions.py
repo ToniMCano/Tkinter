@@ -16,15 +16,16 @@ import pandas as pd
 
 
 add_product_entry = []
-
+product_alerts = {'less_than' : [] , "no_stock" : []}
 class OrderFunctions:
     
     def show_products(self , selected = 'reference'): 
         
-        self.products_tree.tag_configure("color", background="DarkOliveGreen2" )
+        self.products_tree.tag_configure("expiration", background="DarkOliveGreen1" )
         self.products_tree.tag_configure("odd", background="snow2" )
         self.products_tree.tag_configure("even", background="white")
-        self.products_tree.tag_configure("font_red", foreground="red")
+        self.products_tree.tag_configure("font_red", background="red")
+        self.products_tree.tag_configure("font_red", foreground="white")
         self.products_tree.tag_configure("font_green", foreground="green")
         self.products_tree.tag_configure("font_orange", foreground="Darkorange3")
         total = 0
@@ -55,6 +56,10 @@ class OrderFunctions:
             
         elif selected =="price":
             products = db.session.query(Products).order_by(Products.price).all()
+            
+        elif selected =="discount":
+            products = db.session.query(Products).order_by(Products.discount).all()
+        
         
         for i , product in enumerate(products):
             font = ""
@@ -68,23 +73,23 @@ class OrderFunctions:
                 font = "font_green"
                 
             if days < 20 and product.units > 0:
-                bg = "color"
+                bg = "expiration"
                 
                 product.discount = 20
                 
                 db.session.commit()
                 
-            if product.units < 25:
+            if product.units < 25 and product.units != 0:
                 
                 font = "font_orange"
 
-            self.products_tree.insert("" , 0 , text = product.reference , values = (product.product_name , product.price , product.units , product.category , product.subcategory) , tags=(font , bg))
+            self.products_tree.insert("" , 0 , text = product.reference , values = (product.product_name , product.price , product.units , product.category , product.subcategory , product.discount) , tags=(font , bg))
             
             bg = ""
             
             # incluir una lista "reset_discounts" que después de realizar el pedido product.discount = 0
-            product.discount = 0
-            db.session.commit()
+            #product.discount = 0
+            #db.session.commit()
             
         try:
             client = db.session.get(Client , self.company_id.get())
@@ -94,6 +99,7 @@ class OrderFunctions:
                                 
             else:
                 self.order_header.set('Pedido')
+            db.session.close()
             
         except Exception as e:
             print(f'[show_products] (order_header): {e}')
@@ -237,6 +243,8 @@ class OrderFunctions:
             try:
                 if id_order is not None and not self.modify_order_id[0]:
                     id_order = id_order.id_order + 1
+                    self.modify_order_id[1] = id_order
+                    
                     print(f'(Send Order) self.modify_order_id: {self.modify_order_id} Después ID: {id_order}' )
         
                 elif id_order is None and not self.modify_order_id[0]:    
@@ -500,9 +508,8 @@ class ModifyDeleteOrder:
     
     def modify_order_load(self , order_id , single_order_window , historical_window): # order =[order[0].id_order , self.reference_view , self.units_view , self.product_discount]
         
-        order = db.session.query(Orders).filter(Orders.id_order == order_id).all()
-        
         self.sales_from_mofify()
+        order = db.session.query(Orders).filter(Orders.id_order == order_id).all()
         
         try:
             for row in order:
@@ -539,6 +546,7 @@ class ModifyDeleteOrder:
                 
                 db.session.delete(order_product)
                 db.session.commit()
+                
             db.session.close()
             
             if not old:
@@ -555,7 +563,6 @@ class ModifyDeleteOrder:
             mb.showerror("Elimniar Pedido" , f"\n{e}\n")
             
     
-            
     def delete_product(self):
 
         try:
@@ -565,12 +572,13 @@ class ModifyDeleteOrder:
             print(f"\n[0] ID:{order_product.id_order} (Current Stock) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}\n")
             Stock.update_stock_send(self , order_product , "delete")
             print(f"\n[1] ID:{order_product.id_order} (update_stock_send) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
-            OrderFunctions.show_products(self)
             print(f"\n[2] ID:{order_product.id_order} (show_products) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
             db.session.delete(order_product)
             print(f"\n[3] ID:{order_product.id_order} (delete) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
             db.session.commit()
             print(f"\n[4] ID:{order_product.id_order} (commit) {len(self.order_tree.get_children())} Reference: {reference} Units: {db.session.get(Products , reference).units}")
+            OrderFunctions.show_products(self)
+            
             if len(self.order_tree.get_children()) == 0:
                 print(f"\n[5] ID:{order_product.id_order} {len(self.order_tree.get_children())}")
                 OrderFunctions.send_order(self , False , add_product_entry= "")
@@ -583,8 +591,6 @@ class ModifyDeleteOrder:
             item = self.order_tree.focus()
             
             self.order_tree.delete(item)
-            
-
             
         except Exception as e:
             print(f"[delete_product]: {e}")
@@ -653,10 +659,6 @@ class Stock:
 
             db.session.commit()
             
-            if actions == "delete":
-                product_to_update = db.session.get(Products , order_product.product_reference)
-                print(f"(update_stock_send) # DELETE: [ID: {order_product.id_order}] Reference: {product_to_update.reference} Stock: {product_to_update.units}")
-
         except Exception as e:
             db.session.rollback()
             
@@ -664,7 +666,17 @@ class Stock:
             
             mb.showerror("Actualizar Stock" , f"\n{e}\n")
             
+        '''if product_to_update.units < 25:
+            
+            Stock.send_advise(self , product_to_update)
+            
+            
+    def send_advise(self, product):
+        
+        mb.showwarning( "Stock" , f"Reference: {product.reference}  Units: {product.units}")
+            
+    
                 
-                
+                '''
   
                 
