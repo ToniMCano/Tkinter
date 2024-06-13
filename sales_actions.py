@@ -21,11 +21,13 @@ class OrderFunctions:
     
     def show_products(self , selected = 'reference'): 
         
+        self.products_tree.tag_configure("color", background="DarkOliveGreen2" )
         self.products_tree.tag_configure("odd", background="snow2" )
         self.products_tree.tag_configure("even", background="white")
         self.products_tree.tag_configure("font_red", foreground="red")
         self.products_tree.tag_configure("font_green", foreground="green")
         self.products_tree.tag_configure("font_orange", foreground="Darkorange3")
+        total = 0
         
         try:
             clean = self.products_tree.get_children()
@@ -56,19 +58,34 @@ class OrderFunctions:
         
         for i , product in enumerate(products):
             font = ""
+            days = int((datetime.strptime(product.expiration , '%Y-%m-%d') - datetime.now()).days)
+            bg = ""
             
             if product.units == 0:
                 font = 'font_red'
                 
-            elif product.units < 25:
-                
-                font = "font_orange"
-                
-            elif product.discount > 0:
+            if product.discount > 0:
                 font = "font_green"
                 
-            self.products_tree.insert("" , 0 , text = product.reference , values = (product.product_name , product.price , product.units , product.category , product.subcategory) , tags=(font))
+            if days < 20 and product.units > 0:
+                bg = "color"
+                
+                product.discount = 20
+                
+                db.session.commit()
+                
+            if product.units < 25:
+                
+                font = "font_orange"
 
+            self.products_tree.insert("" , 0 , text = product.reference , values = (product.product_name , product.price , product.units , product.category , product.subcategory) , tags=(font , bg))
+            
+            bg = ""
+            
+            # incluir una lista "reset_discounts" que después de realizar el pedido product.discount = 0
+            product.discount = 0
+            db.session.commit()
+            
         try:
             client = db.session.get(Client , self.company_id.get())
             
