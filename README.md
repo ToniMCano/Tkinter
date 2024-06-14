@@ -72,25 +72,25 @@ En la tabla Orders se ha establecido la primary key como null_id dado que sin pr
 ![Example Image](https://drive.google.com/uc?id=1rEEtfySStxJ2YSyRcG-2uhtFrWnz8uOK)
 
 
-**Requisitos del Sistema:**
-**Sistema Operativo:** Sin determinar
-**Procesador:** Intel Core i3 o equivalente
-**Memoria RAM:** Mínimo 4 GB
-**Espacio en Disco:** Se estima un Mínimo 200 MB de espacio libre
+**Requisitos del Sistema:** </br> </br>
+**Sistema Operativo:** Sin determinar </br>
+**Procesador:** Intel Core i3 o equivalente </br>
+**Memoria RAM:** Mínimo 4 GB </br>
+**Espacio en Disco:** Se estima un Mínimo 200 MB de espacio libre </br>
 
-**Requisitos de Software:**
-**Python:** Versión 3.8 o superior
-**Dependencias:** Listadas en el archivo requirements.txt del proyecto
-**Base de Datos:** SQLite 3.0 o superior (o cualquier otra base de datos SQL si se configura)
-**Entorno Virtual** (opcional): virtualenv o venv para gestionar dependencias
+**Requisitos de Software:** </br> </br>
+**Python:** Versión 3.8 o superior </br> 
+**Dependencias:** Listadas en el archivo requirements.txt del proyecto </br> 
+**Base de Datos:** SQLite 3.0 o superior (o cualquier otra base de datos SQL si se configura) </br> 
+**Entorno Virtual** (opcional): virtualenv o venv para gestionar dependencias </br> 
 
- **Requisitos de Red**
+ **Requisitos de Red** </br>
 Conexión a Internet: Requerida para ciertas funcionalidades (no es imprescindible).
 
 ## Manual de Instalación
 **Crear y Activar un Entorno Virtual:**
 
-**Windows:**
+**Windows:** </br>
 ```python
 python -m venv venv
 venv\Scripts\activate
