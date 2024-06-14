@@ -56,7 +56,7 @@ class StatisticsActions:
         print(self.date_from.get() , self.date_to.get())
         
 
-class Statistics:
+class StatisticsDataFrame:
     
     def totals():
         sum_total_products_sold =  db.session.query(func.sum(Orders.product_units)).scalar()
@@ -125,6 +125,35 @@ class Statistics:
         return orders_dataframe
     
     
+class StatisticsValues:
+    
+    def statistics_from(self):
+
+        self.statistics_date_from.set()
+
+
+    def statistics_to(self):
+
+        self.statistics_date_to.set()
+
+
+    def statistics_type(self):
+
+        self.statisticts_types.set()
+
+
+    def statistics_prdoducts(self):
+
+        self.statistics_product_number.set()
+
+
+    def statistics_check_buttons(self):
+
+        self.statistics_wich.set()
+
+
+    
+    
 class Graphics:
     
     def example(self):
@@ -155,8 +184,6 @@ class Graphics:
             
             
             
-            
-    
 class DataGraphic:
     
     
@@ -366,9 +393,8 @@ class DataGraphic:
         
         print(reference)
         
-        
-        
-        
+             
+
         
     
 # Productos Más: precio, unidades, importe total , número de pedidos , media unidades pedido

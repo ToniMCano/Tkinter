@@ -20,12 +20,24 @@ class StatisticsTab:
         self.header_one = StringVar()
         self.header_one.set("Header One")
         
-        self.place = StringVar()
+        self.employee_company = StringVar() 
+        self.employee_company.set("company")
         
-        self.date_to = StringVar(value = datetime.now().strftime("%d %B %Y")) 
-        
-        self.date_from = StringVar(value = datetime.now().strftime("%d %B %Y"))
-        
+        self.statistics_date_from = StringVar()
+        self.statistics_date_from.set(datetime.now().strftime("%d %B %Y")) 
+
+        self.statistics_date_to = StringVar()
+        self.statistics_date_to.set(datetime.now().strftime("%d %B %Y")) 
+
+        self.statisticts_type = StringVar()
+        self.statisticts_type.set("product")
+
+        self.statistics_product_number = StringVar()
+        self.statistics_product_number.set(25)
+
+        self.statistics_wich = StringVar()
+        self.statistics_wich.set('best_seller')
+
         
         self.statistics_frame = CTkFrame(self.main_window , fg_color = 'transparent')
         
@@ -90,14 +102,14 @@ class StatisticsTab:
         self.calendar_from_label = CTkLabel(self.statistics_dates , text = 'Desde:' , text_color = 'Lightblue4' , fg_color = 'transparent' , bg_color = 'transparent' , height = 10 , font = ("" , 12 , 'bold'))
         self.calendar_from_label.grid(row = 0 , column = 0 , padx = 5 , pady = 5, sticky = W)
 
-        self.calendar_from = CTkLabel(self.statistics_dates , textvariable = self.date_from , fg_color = 'white' , corner_radius = 4 , font = ("" , 12 , 'bold') , text_color = "gray")
+        self.calendar_from = CTkLabel(self.statistics_dates , textvariable = self.statistics_date_from, fg_color = 'white' , corner_radius = 4 , font = ("" , 12 , 'bold') , text_color = "gray")
         self.calendar_from.grid(row = 1 , column = 0 , padx = 5 ,pady = 5 , sticky = "we")
         self.calendar_from.bind("<Button-1>" , lambda e: StatisticsActions.show_calendar(self , "from" , e))
         
         self.calendar_to_label = CTkLabel(self.statistics_dates , text = 'Hasta:' , text_color = 'Lightblue4' , fg_color = 'transparent' , bg_color = 'transparent' , height = 10 , font = ("" , 12 , 'bold'))
         self.calendar_to_label.grid(row = 0 , column = 1 , padx = 5 , pady = 5, sticky = W)
 
-        self.calendar_to = CTkLabel(self.statistics_dates , textvariable = self.date_to  , fg_color = 'white' , corner_radius = 4 , font = ("" , 12 , 'bold') , text_color = "gray")
+        self.calendar_to = CTkLabel(self.statistics_dates , textvariable = self.statistics_date_to  , fg_color = 'white' , corner_radius = 4 , font = ("" , 12 , 'bold') , text_color = "gray")
         self.calendar_to.grid(row = 1 , column = 1 , padx = 5 ,pady = 5 , sticky = "we")
         self.calendar_to.bind("<Button-1>" , lambda e: StatisticsActions.show_calendar(self , "to" , e))
         
@@ -166,8 +178,8 @@ class StatisticsTab:
         self.clients = CTkButton(self.statistics_types , text = "Clientes (Todos)" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold'))
         self.clients.grid(row = 7 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
-        self.statistics_radiobuttons = CTkFrame(self.statistics_types)
-        self.statistics_radiobuttons.grid(row = 9 , column = 0 , sticky = 'nswe' , padx = 5) 
+        self.statistics_radiobuttons = CTkFrame(self.graphics_dashboard_frame)
+        self.statistics_radiobuttons.grid(row = 5 , column = 0 , sticky = 'nswe' , padx = 5 , pady = 5) 
         self.statistics_radiobuttons.grid_columnconfigure(0 , weight = 1)
         self.statistics_radiobuttons.grid_columnconfigure(1 , weight = 1)
         self.statistics_radiobuttons.grid_columnconfigure(2 , weight = 1)
@@ -182,9 +194,10 @@ class StatisticsTab:
         self.All.grid(row = 0 , column = 3 , sticky =  W+E , pady = 10)
 
         self.calculate_button = CTkButton(self.graphics_dashboard_frame , text = "Mostrar" , fg_color = "white" , corner_radius = 4 , border_color = 'Lightblue4' , border_width = 5 , text_color = 'Lightblue4' , font = ("" , 14 , 'bold') , height = 25 , command = lambda: Graphics.example(self))
-        self.calculate_button.grid(row = 5 , column = 0 , pady = 10 , sticky =  W+E , padx = 50)
+        self.calculate_button.grid(row = 6 , column = 0 , pady = 10 , sticky =  W+E , padx = 50)
                 
-        
+    
+    
         
         
     
