@@ -1,6 +1,6 @@
 
 # Tkinter
-Aplicación de Escritorio Utilizando Tkinter
+Aplicación de Escritorio Utilizando Tkinter (CRM).
 
 ## CRM Gestión de Clientes y Ventas.
 
