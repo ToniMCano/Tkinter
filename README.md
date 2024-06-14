@@ -22,36 +22,36 @@ La aplicación permite a los usuarios registrar y organizar datos de los cliente
 Lenguaje de Programación: Python
 Se ha optado por python por su flexibilidad y porque el proyecto trata de este.
 
-**Interfaz de Usuario:** *Tkinter* y *CustomTkinter*
+**Interfaz de Usuario:** *Tkinter* y *CustomTkinter*</br>
 
 Se ha usado Tkinter por su integración (viene preinstalado) y su sencillez para agilizar la entrega de este proyecto. Se ha usado CustomTkinter para la mejora de la interfaz.
 
-**Procesamiento de Imágenes:** *PIL (Pillow)*
+**Procesamiento de Imágenes:** *PIL (Pillow)*</br>
 Para poder manejar diferentes formatos de imagen ya que Tkinter solo soporta GIF y PPM/PGM de forma nativa.
 
-**Gestión de Fechas:** *datetime*
+**Gestión de Fechas:** *datetime*</br>
 Para ciertas funcionalidades que requerían trabajar con fechas.
 
-**Calendario:** tkcalendar
+**Calendario:** *tkcalendar*</br>
 Como complemento a datetime en las funcionalidades que implican fechas y manejo de tiempo.
 
-**Navegación Web:** *webbrowser*
+**Navegación Web:** *webbrowser*</br>
 Para algunas funcionalidades que requerían de abrir páginas web o el gestor de correo electrónico.
 
-**Manejo de Excel:** *openpyxl*
+**Manejo de Excel:** *openpyxl*</br>
 Para el manejo de ficheros excel, actualmente solo se necesita para cargar varias empresas, en futuras actualizaciones se usará para exportar datos.
 
-**ORM y Base de Datos:** *SQLAlchemy*
+**ORM y Base de Datos:** *SQLAlchemy*</br>
 ORM para facilitar la migración o implementación de otras bases de datos SQL.
 
-**Manipulación de Datos:** *pandas*
+**Manipulación de Datos:** *pandas*</br>
 Para crear un dataframe en un punto concreto de la aplicación que requería mostrar información de diversas fuentes.
 
-**Concurrencia:** threading
+**Concurrencia:** threading</br>
 Para programar que se revisen cambios en la base de datos de forma periódica.
 
-**Sistema Operativo:** os
-Para detectar en qué sistema operativo se está ejecutando la aplicación y evitar fallos de formato u otros.
+**Sistema Operativo:** os</br>
+Para detectar en qué sistema operativo se está ejecutando la aplicación y evitar fallos de formato u otros.</br>
 
 
 ## Alternativas Evaluadas:
