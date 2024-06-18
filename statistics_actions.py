@@ -65,7 +65,7 @@ class StatisticsDataFrame:
         return sum_total_orders , sum_total_products_sold
     
         
-    def statistics_dataframe(self):
+    def statistics_dataframe(self , e):
         
         all_products = db.session.query(Products).all()
         all_orders = db.session.query(Orders).all()
@@ -93,7 +93,7 @@ class StatisticsDataFrame:
             order_reference.append(order.id_order)
             order_product_reference.append(order.product_reference)
             order_product_name.append(db.session.get(Products , order.product_reference).product_name)
-            order_product_price.append(db.session.get(Products , order.product_reference).product_name)
+            order_product_price.append(db.session.get(Products , order.product_reference).price)
             order_product_units.append(order.product_units)
             order_date.append(order.order_date)
             order_client.append(order.order_client_id)
@@ -121,7 +121,9 @@ class StatisticsDataFrame:
         }
             
         orders_dataframe = pd.DataFrame(orders_dict)
-        
+        print('orders_dataframe\n\n')
+        print(orders_dataframe[0: int(self.statistics_number_views.get())])
+        # DEBE EJECUTARSE DESDE LA FUNCIÓN DE LOGIN SOLO.
         return orders_dataframe
     
     
@@ -151,14 +153,14 @@ class StatisticsValues:
 
         self.statistics_wich.set()
 
-
-    
     
 class Graphics:
     
     def example(self):
+    
+        sum_products = db.session.query(Orders.product_reference , func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(desc('total_units')).all()
         
-        sum_products = db.session.query(Orders.product_reference , func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(desc('total_units')).all()[0:30]
+        Graphics.get_number_of_products(self , len(sum_products))
         
         self.grapics_container = CTkFrame(self.view_graphics_frame)
         self.grapics_container.grid(row = 0 , column = 0 , sticky = "nswe")
@@ -169,7 +171,7 @@ class Graphics:
         self.grapics.grid(row = 0 , column = 0 , sticky = "nswe")
 
         
-        for i, product in enumerate(sum_products):
+        for i, product in enumerate(sum_products[0: self.number_of_products]):
             
             column_height = product[1] // 5
             
@@ -182,7 +184,14 @@ class Graphics:
             label_refernce = CTkButton(self.grapics , fg_color = "Lightblue4" , text = str(product[0]) , width = 30 , corner_radius = 4 , text_color = "white" , command = lambda reference = product[0]: DataGraphic.data_to_charge(self, reference))
             label_refernce.grid(row = 0 , column = i , padx = 10 , pady = 10 , sticky = 'we')
             
-            
+    
+    def get_number_of_products(self , len_products):
+        
+        if self.statistics_number_views.get() != "Todo" and len_products > int(self.statistics_number_views.get()):
+            self.number_of_products = int(self.statistics_number_views.get())
+                                          
+        else:
+            self.number_of_products = -1            
             
 class DataGraphic:
     

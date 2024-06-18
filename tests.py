@@ -519,4 +519,14 @@ def example():
     print(len(units))    
         
         
-example()
+def statistics_dataframe():
+        
+        all_products = db.session.query(Products).all()
+        all_orders = db.session.query(Orders).all()
+      
+        product_reference = list(product.reference for product in all_products)
+        product_stock = list(product.units for product in all_products)
+        product_price = list(product.price for product in all_products)
+        
+        print(product_reference)
+statistics_dataframe()

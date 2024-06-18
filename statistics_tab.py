@@ -1,7 +1,7 @@
 
 
 from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs  
-from statistics_actions import StatisticsActions , Graphics
+from statistics_actions import StatisticsActions , Graphics , StatisticsDataFrame
 import tkinter as tk
 from tkinter import ttk , filedialog
 from tkinter import *
@@ -12,6 +12,7 @@ from tkinter import messagebox as mb
 from customtkinter import *
 import pandas as pd
 
+generate_data_frame = [True]
 
 class StatisticsTab:
     
@@ -136,6 +137,7 @@ class StatisticsTab:
         self.statistics_number_views.current(newindex = 0)
         self.statistics_number_views.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W+E) 
         self.statistics_number_views.configure(background='lightblue')
+        self.statistics_number_views.bind("<<ComboboxSelected>>" , lambda e: StatisticsDataFrame.statistics_dataframe(self , e))
         
         ## SELECTIONS
         
