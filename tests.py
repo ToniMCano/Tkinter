@@ -14,7 +14,7 @@ from actions import GetInfo,LoadInfo , MyCalendar
 import pandas as pd
 import threading
 import time
-from tkinter import *
+from tkinter import * 
 from customtkinter import *
 import matplotlib.pyplot as plt
 import numpy as np
@@ -517,76 +517,48 @@ def example():
     units = db.session.query(Orders).filter(Orders.product_reference == product.reference).group_by(Orders.id_order).all()
     
     print(len(units))    
-        
 
+
+class Test:   
+        
+    def statistics_dataframe(self):
+            
+            all_products = db.session.query(Products).all()
+            all_orders = db.session.query(Orders).all()
+        
+            product_reference = list(product.reference for product in all_products)
+            product_stock = list(product.units for product in all_products)
+            
+            
+            
+            orders_id = [order.id_order for order in all_orders]
+            orders_product_reference = [order.product_reference for order in all_orders]
+            orders_product_name = [db.session.get(Products , order.product_reference).product_name for order in all_orders]
+            product_price = [db.session.get(Products , order.product_reference).price for order in all_orders] ###
+            orders_product_units = [order.product_units for order in all_orders]
+            orders_import = [order.total_import for order in all_orders]
+            product_catgory = [db.session.get(Products , order.product_reference).category for order in all_orders]
+            product_subcatgory = [db.session.get(Products , order.product_reference).subcategory for order in all_orders]
+            
+            
+            data = {
+                'orders_id' : orders_id ,
+                'orders_product_reference' : orders_product_reference ,
+                'orders_product_name' : orders_product_name ,
+                'product_price' : product_price ,
+                'orders_product_units' : orders_product_units ,
+                'orders_import' : orders_import ,
+                'product_catgory' : product_catgory ,
+                'product_subcatgory' : product_subcatgory 
+            }
+            
+            
+            data_frame = pd.DataFrame(data)
+            
+            data_frame['total_products_solded'] = data_frame.groupby('orders_product_reference')['orders_product_units'].sum()
+            
+
+                
 def series():
     
-    lista = [100 , 200 , 300]
-    etiquetas = ['Enero' , 'Febrero' , 'Marzo']
-    
-    lista_dos = [100 , 50 , 200]
-    etiquetas_dos = ['Enero' , 'Febrero' , 'Marzo']
-    
-    serie = pd.Series(data = lista , index = etiquetas)
-    
-    serie_dos = pd.Series(data = lista_dos , index = etiquetas_dos)
-    
-    total = serie.add(serie_dos)
-    print(total)
-    
-
-
-def pandas():
-    
-    array = np.random.uniform(-10 , 10 , size = [4,4])
-    
-    data_frame = pd.DataFrame(array , index = ['A' , 'B' , 'C' , 'D'], columns = ['W' , 'X' , 'Y' , 'Z'])
-    
-    data_frame['Total'] = data_frame['X'] + data_frame['Y']
-    
-    print(data_frame)
-    print(data_frame[(data_frame['X'] > 0) | (data_frame['Z'] > 3)])
-    print(data_frame[(data_frame['X'] > 0) | (data_frame['Z'] > 3)][['X','Z','Total']])
-    
-    
-    
-def pandas_dos():
-    
-    data_frame = pd.DataFrame({'Comercial' : ['Juan' , 'Pedro' , 'Antonio' , 'Jose' , 'Mariano' , 'Jacinto'] ,
-            'Empresa' : ['Vodafone' , 'Jazztel' , 'Movistar' , 'Digi' , 'Movistar' , 'Vodafone'] ,
-            'Comisiones' : [100 , 180 , 600 , 90 ,400 , 220] ,
-            'Sueldo' : [1000 , 1850 , 2600 , 2100 ,4000 , 2020] ,
-            
-            })
-
-    
-    data_frame.index = pd.date_range("6/18/2024" , periods = 6)
-    
-    print(data_frame)
-    empresa = data_frame.groupby("Comercial").describe().transpose()['Juan']
-     
-    print(empresa)
-    
-
-def pandas_dates():
-    
-    data_frame = pd.DataFrame(np.random.randn(20,4) , columns = ["A" , "B" , "C" , "D"])
-    data_frame.index = pd.date_range("6/18/2024" , periods = 20)
-    print(data_frame)
-
-
-def doblar(n):
-    
-    return n * 2
-    
-def pandas_others():
-    
-    data_frame = pd.DataFrame({
-        'enteros' : [100 , 200 , 300 , 400] ,
-        'decimales' : [3.14 , 2.72 , 5.96 , 3.14] ,
-        'cadenas' : ["hola" , "adiós" , "hola" , "adiós"]
-    })
-    
-    print(data_frame.index)
-    
-pandas_others()
+    serie = pd.series() 

@@ -46,17 +46,17 @@ class StatisticsActions:
         date = self.statistics_dates.calendar.get_date() 
 
         if self.place.get() == "from":
-            self.date_from.set(datetime.strptime(date,'%Y-%m-%d').strftime("%d %B %Y"))
+            self.statistics_date_from.set(datetime.strptime(date,'%Y-%m-%d').strftime("%d %B %Y"))
             
         else:
-            self.date_to.set(datetime.strptime(date,'%Y-%m-%d').strftime("%d %B %Y"))
+            self.statistics_date_to.set(datetime.strptime(date,'%Y-%m-%d').strftime("%d %B %Y"))
                
         StatisticsActions.forget_calendar(self , e)
         
-        print(self.date_from.get() , self.date_to.get())
+        print(f"Desde {self.statistics_date_from.get()} Hasta {self.statistics_date_to.get()}")
         
 
-class Statistics:
+class StatisticsDataFrame:
     
     def totals():
         sum_total_products_sold =  db.session.query(func.sum(Orders.product_units)).scalar()
@@ -65,7 +65,7 @@ class Statistics:
         return sum_total_orders , sum_total_products_sold
     
         
-    def statistics_dataframe(self):
+    def statistics_dataframe(self , e):
         
         all_products = db.session.query(Products).all()
         all_orders = db.session.query(Orders).all()
@@ -93,7 +93,7 @@ class Statistics:
             order_reference.append(order.id_order)
             order_product_reference.append(order.product_reference)
             order_product_name.append(db.session.get(Products , order.product_reference).product_name)
-            order_product_price.append(db.session.get(Products , order.product_reference).product_name)
+            order_product_price.append(db.session.get(Products , order.product_reference).price)
             order_product_units.append(order.product_units)
             order_date.append(order.order_date)
             order_client.append(order.order_client_id)
@@ -121,15 +121,66 @@ class Statistics:
         }
             
         orders_dataframe = pd.DataFrame(orders_dict)
-        
+        print('orders_dataframe\n\n')
+        print(orders_dataframe.head(int(self.statistics_number_views.get())))
+        # DEBE EJECUTARSE DESDE LA FUNCIÓN DE LOGIN SOLO.
         return orders_dataframe
     
+    
+class StatisticsValues:
+    
+    
+    def switch_dates_all(self):
+        
+        if self.statistics_dates_all.get():
+            self.all_time.set(True)
+            
+            self.statistics_date_from.set('All Time')
+        
+            self.statistics_date_to.set('All Time')
+            
+        else:
+            self.all_time.set(False)
+            
+            self.statistics_date_from.set(datetime.now().strftime("%d %B %Y")) 
+            
+            self.statistics_date_to.set(datetime.now().strftime("%d %B %Y")) 
+        
+        
+    def statistics_values(self):
+        
+        employee_company = self.statistics_employee.get()
+        
+        types = self.statistics_type.get()
+
+        quantity = int(self.statistics_number_views.get())
+
+        #quantity = self.statistics_wich.get()
+        
+        if not self.all_time.get():
+
+            date_from = self.statistics_date_from.get()
+        
+            date_to = self.statistics_date_to.get()
+            
+        else:
+            date_from = ""
+        
+            date_to = ""
+            
+            
+        values =  [date_from , date_to , types , quantity , employee_company]
+         
+        print(values)
+
     
 class Graphics:
     
     def example(self):
+    
+        sum_products = db.session.query(Orders.product_reference , func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(desc('total_units')).all()
         
-        sum_products = db.session.query(Orders.product_reference , func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(desc('total_units')).all()[0:30]
+        Graphics.get_number_of_products(self , len(sum_products))
         
         self.grapics_container = CTkFrame(self.view_graphics_frame)
         self.grapics_container.grid(row = 0 , column = 0 , sticky = "nswe")
@@ -140,23 +191,30 @@ class Graphics:
         self.grapics.grid(row = 0 , column = 0 , sticky = "nswe")
 
         
-        for i, product in enumerate(sum_products):
+        for i, product in enumerate(sum_products[0: self.number_of_products]):
+            
+            self.grapics.grid_columnconfigure(i , weight = 1)
             
             column_height = product[1] // 5
             
-            units_label = CTkLabel(self.grapics , fg_color = "transparent" , text = str(product[1]), width = 30 , corner_radius = 4)
-            units_label.grid(row = 1 , column = i , sticky = "s" , padx = 10)
+            units_label = CTkLabel(self.grapics , fg_color = "transparent" , text = str(product[1]), width = 40 , corner_radius = 4)
+            units_label.grid(row = 1 , column = i , sticky = "swe" , padx = 10)
             
-            row = CTkFrame(self.grapics , fg_color = "DeepSkyBlue2" , height = column_height , width = 30 , corner_radius = 4)
-            row.grid(row = 2 , column = i , sticky = "s" , padx = 10)
+            row = CTkFrame(self.grapics , fg_color = "DeepSkyBlue2" , height = column_height , width = 40 , corner_radius = 4)
+            row.grid(row = 2 , column = i , sticky = "swe" , padx = 10)
             
-            label_refernce = CTkButton(self.grapics , fg_color = "Lightblue4" , text = str(product[0]) , width = 30 , corner_radius = 4 , text_color = "white" , command = lambda reference = product[0]: DataGraphic.data_to_charge(self, reference))
-            label_refernce.grid(row = 0 , column = i , padx = 10 , pady = 10 , sticky = 'we')
-            
-            
-            
+            label_refernce = CTkButton(self.grapics , fg_color = "Lightblue4" , text = str(product[0]) , width = 40, corner_radius = 4 , text_color = "white" , command = lambda reference = product[0]: DataGraphic.data_to_charge(self, reference))
+            label_refernce.grid(row = 0 , column = i , padx = 10 , pady = 10 , sticky = 'swe')
             
     
+    def get_number_of_products(self , len_products):
+        
+        if self.statistics_number_views.get() != "Todo" and len_products > int(self.statistics_number_views.get()):
+            self.number_of_products = int(self.statistics_number_views.get())
+                                          
+        else:
+            self.number_of_products = -1            
+            
 class DataGraphic:
     
     
@@ -220,21 +278,11 @@ class DataGraphic:
    
         self.view_data_header.grid_columnconfigure(0, weight = 1)
         self.view_data_header.grid_columnconfigure(1, weight = 1)
-        #self.view_data_header.grid_columnconfigure(3, weight = 1)
-        #self.view_data_header.grid_columnconfigure(4, weight = 1)
-        #self.view_data_header.grid_columnconfigure(5, weight = 1)
-        #self.view_data_header.grid_columnconfigure(6, weight = 1)
-        #self.view_data_header.grid_columnconfigure(7, weight = 1)
-        #self.view_data_header.grid_columnconfigure(8, weight = 1)
-        #self.view_data_header.grid_rowconfigure(0, weight = 1)
         self.view_data_header.grid_rowconfigure(1, weight = 1)
         self.view_data_header.grid_rowconfigure(2, weight = 1)
         self.view_data_header.grid_rowconfigure(3, weight = 1)
         self.view_data_header.grid_rowconfigure(4, weight = 1)
         self.view_data_header.grid_rowconfigure(5, weight = 1)
-        #self.view_data_header.grid_rowconfigure(6, weight = 1)
-        #self.view_data_header.grid_rowconfigure(7, weight = 1)
-        #self.view_data_header.grid_rowconfigure(8, weight = 1)
         
         #Productos Más: referencia, nombre, precio, unidades, número de pedidos  pedido , media unidades ,  importe total , fecha
 
@@ -366,9 +414,8 @@ class DataGraphic:
         
         print(reference)
         
-        
-        
-        
+             
+
         
     
 # Productos Más: precio, unidades, importe total , número de pedidos , media unidades pedido
