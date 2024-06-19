@@ -122,7 +122,7 @@ class StatisticsDataFrame:
             
         orders_dataframe = pd.DataFrame(orders_dict)
         print('orders_dataframe\n\n')
-        print(orders_dataframe[0: int(self.statistics_number_views.get())])
+        print(orders_dataframe.head(int(self.statistics_number_views.get())))
         # DEBE EJECUTARSE DESDE LA FUNCIÓN DE LOGIN SOLO.
         return orders_dataframe
     
@@ -173,16 +173,18 @@ class Graphics:
         
         for i, product in enumerate(sum_products[0: self.number_of_products]):
             
+            self.grapics.grid_columnconfigure(i , weight = 1)
+            
             column_height = product[1] // 5
             
-            units_label = CTkLabel(self.grapics , fg_color = "transparent" , text = str(product[1]), width = 30 , corner_radius = 4)
-            units_label.grid(row = 1 , column = i , sticky = "s" , padx = 10)
+            units_label = CTkLabel(self.grapics , fg_color = "transparent" , text = str(product[1]), width = 40 , corner_radius = 4)
+            units_label.grid(row = 1 , column = i , sticky = "swe" , padx = 10)
             
-            row = CTkFrame(self.grapics , fg_color = "DeepSkyBlue2" , height = column_height , width = 30 , corner_radius = 4)
-            row.grid(row = 2 , column = i , sticky = "s" , padx = 10)
+            row = CTkFrame(self.grapics , fg_color = "DeepSkyBlue2" , height = column_height , width = 40 , corner_radius = 4)
+            row.grid(row = 2 , column = i , sticky = "swe" , padx = 10)
             
-            label_refernce = CTkButton(self.grapics , fg_color = "Lightblue4" , text = str(product[0]) , width = 30 , corner_radius = 4 , text_color = "white" , command = lambda reference = product[0]: DataGraphic.data_to_charge(self, reference))
-            label_refernce.grid(row = 0 , column = i , padx = 10 , pady = 10 , sticky = 'we')
+            label_refernce = CTkButton(self.grapics , fg_color = "Lightblue4" , text = str(product[0]) , width = 40, corner_radius = 4 , text_color = "white" , command = lambda reference = product[0]: DataGraphic.data_to_charge(self, reference))
+            label_refernce.grid(row = 0 , column = i , padx = 10 , pady = 10 , sticky = 'swe')
             
     
     def get_number_of_products(self , len_products):
@@ -256,21 +258,11 @@ class DataGraphic:
    
         self.view_data_header.grid_columnconfigure(0, weight = 1)
         self.view_data_header.grid_columnconfigure(1, weight = 1)
-        #self.view_data_header.grid_columnconfigure(3, weight = 1)
-        #self.view_data_header.grid_columnconfigure(4, weight = 1)
-        #self.view_data_header.grid_columnconfigure(5, weight = 1)
-        #self.view_data_header.grid_columnconfigure(6, weight = 1)
-        #self.view_data_header.grid_columnconfigure(7, weight = 1)
-        #self.view_data_header.grid_columnconfigure(8, weight = 1)
-        #self.view_data_header.grid_rowconfigure(0, weight = 1)
         self.view_data_header.grid_rowconfigure(1, weight = 1)
         self.view_data_header.grid_rowconfigure(2, weight = 1)
         self.view_data_header.grid_rowconfigure(3, weight = 1)
         self.view_data_header.grid_rowconfigure(4, weight = 1)
         self.view_data_header.grid_rowconfigure(5, weight = 1)
-        #self.view_data_header.grid_rowconfigure(6, weight = 1)
-        #self.view_data_header.grid_rowconfigure(7, weight = 1)
-        #self.view_data_header.grid_rowconfigure(8, weight = 1)
         
         #Productos Más: referencia, nombre, precio, unidades, número de pedidos  pedido , media unidades ,  importe total , fecha
 

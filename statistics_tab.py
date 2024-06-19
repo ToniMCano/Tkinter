@@ -133,7 +133,7 @@ class StatisticsTab:
         self.statistics_number_views_label = CTkLabel(self.statistics_number_views_frame , text = 'Número de productos a mostrar' , bg_color='transparent' , width = 18 , font = ("" , 16 , 'bold') , text_color = 'Lightblue4')
         self.statistics_number_views_label.grid(row = 0 , column = 0 , padx = 5 , pady = 5 , sticky = W+E) 
         
-        self.statistics_number_views = ttk.Combobox(self.statistics_number_views_frame , state = 'readonly' , values = [25 , 50 , 100 , 150 , 200 , "Todo"] )
+        self.statistics_number_views = ttk.Combobox(self.statistics_number_views_frame , state = 'readonly' , values = [10 , 25 , 50 , 100 , 150 , 200 , "Todo"] )
         self.statistics_number_views.current(newindex = 0)
         self.statistics_number_views.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W+E) 
         self.statistics_number_views.configure(background='lightblue')
