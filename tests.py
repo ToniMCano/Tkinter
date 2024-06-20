@@ -3,7 +3,7 @@ import openpyxl
 from openpyxl import Workbook
 import random
 import sqlalchemy
-from sqlalchemy import and_ , or_ , func
+from sqlalchemy import and_ , or_ , func ,asc , desc
 import db
 from models import Client , ContactPerson , Employee , Contact , Products , Orders
 from datetime import datetime , timedelta
@@ -560,5 +560,9 @@ class Test:
 
                 
 def series():
+        
+    query = db.session.query(func.sum(Orders.product_units).label('total_units') , Orders.seller_id  , Orders.product_reference ).filter(Orders.seller_id == 1).group_by('product_reference').order_by('seller_id').all()
     
-    serie = pd.series() 
+    for x in query:
+        print(x)
+series()

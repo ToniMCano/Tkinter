@@ -1,7 +1,7 @@
 
 
 from actions import LoadInfo , GetInfo , MyCalendar , Pops , Alerts , AddInfo , Logs , Update , Tabs  
-from statistics_actions import StatisticsActions , Graphics , StatisticsDataFrame , StatisticsValues
+from statistics_actions import StatisticsActions , Graphics , StatisticsDataFrame , StatisticsValues , StatisticsValuesColors
 import tkinter as tk
 from tkinter import ttk , filedialog
 from tkinter import *
@@ -138,7 +138,7 @@ class StatisticsTab:
         self.statistics_number_views.current(newindex = 0)
         self.statistics_number_views.grid(row = 1 , column = 0 , padx = 5 , pady = 5 , sticky = W+E) 
         self.statistics_number_views.configure(background='lightblue')
-        self.statistics_number_views.bind("<<ComboboxSelected>>" , lambda e: StatisticsDataFrame.statistics_dataframe(self , e))
+        #self.statistics_number_views.bind("<<ComboboxSelected>>" , lambda e: StatisticsDataFrame.statistics_dataframe(self , e))
         
         ## SELECTIONS
         
@@ -157,28 +157,28 @@ class StatisticsTab:
                                                     
         #self.statistics_types.grid_columnconfigure(1 , weight = 1)
         
-        self.products = CTkButton(self.statistics_types , text = "Productos" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: self.statistics_type.set('product'))
+        self.products = CTkButton(self.statistics_types , text = "Productos" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: StatisticsValuesColors.choosed_types(self , 'product'))
         self.products.grid(row = 0 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
-        self.price = CTkButton(self.statistics_types , text = "Precio" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: self.statistics_type.set('price'))
+        self.price = CTkButton(self.statistics_types , text = "Precio" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: StatisticsValuesColors.choosed_types(self , 'price'))
         self.price.grid(row = 1 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
-        self.category = CTkButton(self.statistics_types , text = "Categoría" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: self.statistics_type.set('category'))
+        self.category = CTkButton(self.statistics_types , text = "Categoría" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: StatisticsValuesColors.choosed_types(self , 'category'))
         self.category.grid(row = 2 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
-        self.subcategory = CTkButton(self.statistics_types , text = "Subcategoría" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: self.statistics_type.set('subcategory'))
+        self.subcategory = CTkButton(self.statistics_types , text = "Subcategoría" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: StatisticsValuesColors.choosed_types(self , 'subcategory'))
         self.subcategory.grid(row = 3 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
-        self.orders = CTkButton(self.statistics_types , text = "Pedidos" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: self.statistics_type.set('order'))
+        self.orders = CTkButton(self.statistics_types , text = "Pedidos" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: StatisticsValuesColors.choosed_types(self , 'order'))
         self.orders.grid(row = 4 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
-        self.orders_import = CTkButton(self.statistics_types , text = "Importe Pedido" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: self.statistics_type.set('order_import'))
+        self.orders_import = CTkButton(self.statistics_types , text = "Importe Pedido" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: StatisticsValuesColors.choosed_types(self , 'order_import'))
         self.orders_import.grid(row = 5 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
-        self.client = CTkButton(self.statistics_types , text = "Cliente" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: self.statistics_type.set('client'))
+        self.client = CTkButton(self.statistics_types , text = "Cliente" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: StatisticsValuesColors.choosed_types(self , 'client'))
         self.client.grid(row = 6 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
-        self.clients = CTkButton(self.statistics_types , text = "Clientes (Todos)" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: self.statistics_type.set('client_all'))
+        self.clients = CTkButton(self.statistics_types , text = "Clientes (Todos)" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: StatisticsValuesColors.choosed_types(self , 'client_all'))
         self.clients.grid(row = 7 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
         
         self.statistics_radiobuttons = CTkFrame(self.graphics_dashboard_frame)
@@ -187,14 +187,14 @@ class StatisticsTab:
         self.statistics_radiobuttons.grid_columnconfigure(1 , weight = 1)
         self.statistics_radiobuttons.grid_columnconfigure(2 , weight = 1)
 
-        self.more = CTkCheckBox(self.statistics_radiobuttons , text = 'Más Vendidos' , checkbox_height = 15 , checkbox_width = 15)
+        self.more = CTkCheckBox(self.statistics_radiobuttons , text = 'Más Vendidos' , checkbox_height = 15 , checkbox_width = 15 , command = lambda: StatisticsValues.switch_witch(self , "+"))
         self.more.grid(row = 0 , column = 1 , sticky =  W+E , pady = 10)
 
-        self.less = CTkCheckBox(self.statistics_radiobuttons , text = 'Menos Vendidos' , checkbox_height = 15 , checkbox_width = 15)
+        self.less = CTkCheckBox(self.statistics_radiobuttons , text = 'Menos Vendidos' , checkbox_height = 15 , checkbox_width = 15 , command = lambda: StatisticsValues.switch_witch(self , "-"))
         self.less.grid(row = 0 , column = 2 , sticky =  W+E , pady = 10)
         
-        self.All = CTkCheckBox(self.statistics_radiobuttons , text = 'Todos' , checkbox_height = 15 , checkbox_width = 15)
-        self.All.grid(row = 0 , column = 3 , sticky =  W+E , pady = 10)
+        self.all = CTkCheckBox(self.statistics_radiobuttons , text = 'Todos' , checkbox_height = 15 , checkbox_width = 15 , command = lambda: StatisticsValues.switch_witch(self , "all"))
+        self.all.grid(row = 0 , column = 3 , sticky =  W+E , pady = 10)
 
         self.calculate_button = CTkButton(self.graphics_dashboard_frame , text = "Mostrar" , fg_color = "white" , corner_radius = 4 , border_color = 'Lightblue4' , border_width = 5 , text_color = 'Lightblue4' , font = ("" , 14 , 'bold') , height = 25 , command = lambda: StatisticsValues.statistics_values(self))
         self.calculate_button.grid(row = 6 , column = 0 , pady = 10 , sticky =  W+E , padx = 50)
