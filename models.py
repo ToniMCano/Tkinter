@@ -168,6 +168,7 @@ class Products(Base):
     description = Column(String)
     discount = Column(Integer , nullable = False)
     
+    orders = relationship("Orders", order_by="Orders.id_order", back_populates="product")
     
     def __init__(self , reference , product_name , price , units , expiration , category , subcategory , description , discount = 0):
         
@@ -203,6 +204,10 @@ class Orders(Base):
     order_notes = Column(String)
     order_product_discount = Column(Integer)
     order_discount = Column(Integer)
+    
+    product = relationship("Products", back_populates="orders")
+
+    
     
     
     def __init__(self , id_order , product_reference , product_units , order_client_id , seller_id , buyer_id, order_date , total_import , order_notes = "" , order_discount = 0 , order_product_discount = 0):

@@ -2231,6 +2231,7 @@ class Tabs:
             Tabs.crm_view(self)
             Tabs.enabled_view_button(self.crm_view_button)
             Tabs.disabled_view_button(self.sales_view_button)
+            Tabs.disabled_view_button(self.statistics_view_button)
             self.view = 'crm'
         
         except Exception as e:
@@ -2321,7 +2322,7 @@ class Tabs:
         try:
             self.sales_frame.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
             Tabs.enabled_view_button(self.sales_view_button)
-            #Tabs.disabled_view_button(self.statistics_view_button)
+            Tabs.disabled_view_button(self.statistics_view_button)
             Tabs.disabled_view_button(self.crm_view_button)
   
         except AttributeError:
@@ -2361,13 +2362,13 @@ class Tabs:
         try:
             self.statistics_frame.grid(row = 2, column = 0 , rowspan = 2 , sticky = 'nswe')
             #Tabs.enabled_view_button(self.statistics_view_button)
-            Tabs.disabled_view_button(self.sales_view_button)
+            Tabs.enabled_view_button(self.statistics_view_button)
             Tabs.disabled_view_button(self.crm_view_button)
-
+            Tabs.disabled_view_button(self.sales_view_button)
+            
         except AttributeError:
             print('AttributeError: statistics')
-    
-        
+ 
         
     def forget_crm_header(self):
         

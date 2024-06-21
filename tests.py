@@ -560,9 +560,14 @@ class Test:
 
                 
 def series():
-        
-    query = db.session.query(func.sum(Orders.product_units).label('total_units') , Orders.seller_id  , Orders.product_reference ).filter(Orders.seller_id == 1).group_by('product_reference').order_by('seller_id').all()
+
+    time_now = datetime(2025,12,28) 
+    time_formated = time_now.strftime('%Y-%m-%d')
+    time_formated2 = datetime.strptime(time_formated , '%Y-%m-%d').strftime("%d %B %Y")
     
-    for x in query:
-        print(x)
+    print(time_now , type(time_now))
+    print(time_formated , type(time_formated))
+    print(time_formated2 , type(time_formated2))
+    
 series()
+

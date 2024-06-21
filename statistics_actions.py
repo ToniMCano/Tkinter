@@ -111,15 +111,15 @@ class StatisticsValues:
         wich =  StatisticsValues.switch_witch(self , "+") if self.statistics_wich.get() == "" else self.statistics_wich.get()
         
         if not self.all_time.get():
-
-            date_from = self.statistics_date_from.get()
+                                          
+            date_from = datetime.strptime(self.statistics_date_from.get(),"%d %B %Y").strftime('%Y-%m-%d')
         
-            date_to = self.statistics_date_to.get()
+            date_to = datetime.strptime(self.statistics_date_to.get(),"%d %B %Y").strftime('%Y-%m-%d')
             
         else:
-            date_from = ""
+            date_from = False
         
-            date_to = ""
+            date_to = False
             
         values =  [date_from , date_to , types , quantity , wich , employee_company]
         
@@ -196,35 +196,159 @@ class StatisticsValuesColors:
 
 class InfoDB:
     
-    def get_info_from_db(self, values):
+    def get_info_from_db(self, values): # values = [date_from , date_to , types , quantity , wich , employee_company]
         
-        employee = db.session.query(Employee).filter(Employee.employee_alias == values[-1]).first()
+        if values[-1] == 'Company':
+            if not values[0]: 
+                query = InfoDB.info_db_company_without_date(self, values)
+                
+            else:
+               query = InfoDB.info_db_company(self, values)
+               
+        else:                
+            try:
+                employee = db.session.query(Employee).filter(Employee.employee_alias == values[-1]).first().id_employee
             
+                if not values[0]:
+                    query = InfoDB.info_db_without_date(self, values , employee)
+                
+                else:
+                    if values[2] == 'product':
+                        print("IF [get_info_from_db]")
+                        
+                        query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).filter(and_(Orders.seller_id == employee , Orders.order_date > values[0] , Orders.order_date <= values[1])).group_by(Orders.seller_id, Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
+                    
+                    else:
+                        print("ELSE [get_info_from_db]")
+                        query = db.session.query(Orders.product_reference , func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(desc('total_units')).all()
+                
+            except Exception as e:
+                print(f"[get_info_from_db]: {e}")
+        
+        return query
+
+     
+    def info_db_without_date(self , values , employee_id):
+        
         try:
             if values[2] == 'product':
-                #result = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).filter(Orders.seller_id == employee.id_employee).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
-                print("IF")
+                print("IF [info_db_without_date]")
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).filter(Orders.seller_id == employee_id).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all() 
                 
-                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).filter(Orders.seller_id == employee.id_employee).group_by(Orders.seller_id, Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
-
+            elif values[2] == 'price':
+               query = db.session.query(Orders.product_reference , func.sum(Orders.product_units).label('total_units') , Products.price , func.sum(Orders.product_units).label('height')).join(Products , Orders.product_reference == Products.reference ).filter(Orders.seller_id == employee_id).group_by(Products.price).order_by(desc('total_units')).all()
+   
+            elif values[2] == 'category':
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).filter(Orders.seller_id == employee_id).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all() 
+                
+            elif values[2] == 'subcategory':
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).filter(Orders.seller_id == employee_id).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            elif values[2] == 'order':
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).filter(Orders.seller_id == employee_id).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            elif values[2] == 'order_import':
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).filter(Orders.seller_id == employee_id).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            elif values[2] == 'client':
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).filter(Orders.seller_id == employee_id).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
+                
             else:
-                print("ELSE")
+                print("ELSE [info_db_without_date]")
                 query = db.session.query(Orders.product_reference , func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(desc('total_units')).all()
         
         except Exception as e:
-            print(f"[generate_graphic]: {e}")
+            print(f"[info_db_without_date]: {e}")
         
         return query
         
     
-        #Graphics.generate_graphic(self , values) No funciona aún
+    def info_db_company_without_date(self , values):
+        
+        try:
+            if values[2] == 'product':
+                print("IF [info_db_company_without_date]")
+                
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
+
+            elif values[2] == 'price': 
+                query = db.session.query(Orders.product_reference , func.sum(Orders.product_units).label('total_units') , Products.price , func.sum(Orders.product_units).label('height')).join(Products , Orders.product_reference == Products.reference ).group_by(Products.price).order_by(desc('total_units')).all()
+  
+            elif values[2] == 'category':
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            elif values[2] == 'subcategory':
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            elif values[2] == 'order':
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            elif values[2] == 'order_import':
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            elif values[2] == 'client':
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            else:
+                print("ELSE [info_db_company_without_date]")
+                query = db.session.query(Orders.product_reference , func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(desc('total_units')).all()
+
+            return query
+        
+        except Exception as e:
+            print(f"[info_db_company]: {e}")
+        
+        
+            
+    
+    
+    def info_db_company(self , values):
+        
+        try:
+            if values[2] == 'product':
+                print("IF [info_db_company]")
+                
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).filter(and_(Orders.order_date > values[0] , Orders.order_date < values[1])).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            elif values[2] == 'price':
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units'),Products.price,func.sum(Orders.product_units).label('height')).join(Products, Orders.product_reference == Products.reference).filter(Orders.order_date >= '2024-05-21',Orders.order_date <= '2024-06-01').group_by(Products.price).order_by(desc('total_units')).all()
+           
+            elif values[2] == 'category':
+                print("[category]")
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).filter(and_(Orders.order_date > values[0] , Orders.order_date < values[1])).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            elif values[2] == 'subcategory':
+                print("[subcategory]")
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).filter(and_(Orders.order_date > values[0] , Orders.order_date < values[1])).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            elif values[2] == 'order':
+                print("[order]")
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).filter(and_(Orders.order_date > values[0] , Orders.order_date < values[1])).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            elif values[2] == 'order_import':
+                print("[order_import]")
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).filter(and_(Orders.order_date > values[0] , Orders.order_date < values[1])).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            elif values[2] == 'client':
+                print("[client]")
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).filter(and_(Orders.order_date > values[0] , Orders.order_date < values[1])).order_by(func.sum(Orders.product_units).desc()).all()
+                
+            else:
+                print("ELSE [info_db_company]")
+                query = db.session.query(Orders.product_reference , func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(desc('total_units')).all()
+        
+        except Exception as e:
+            print(f"[info_db_company]: {e}")
+
+        return query
+        
         
         
 class Graphics:
     
     def generate_graphic(self , values):  # values = [date_from , date_to , types , quantity , wich , employee_company]
         
-        query = InfoDB.get_info_from_db(self, values)
+        query = InfoDB.get_info_from_db(self, values) 
         
         self.grapics_container = CTkFrame(self.view_graphics_frame)
         self.grapics_container.grid(row = 0 , column = 0 , sticky = "nswe")
@@ -234,21 +358,30 @@ class Graphics:
         self.grapics = CTkScrollableFrame(self.grapics_container , orientation =  'horizontal' , fg_color = 'transparent')
         self.grapics.grid(row = 0 , column = 0 , sticky = "nswe")
         self.grapics.grid_rowconfigure(2 , weight = 1)
+  
+        try:
+            for i, product in enumerate(query[0:values[3]]): #query = db.session.query(func.sum(Orders.product_units).label('total_units') , Products.price , func.sum(Orders.product_units).label('height')).join(Products , Orders.product_reference == Products.reference ).group_by(Products.price).order_by(desc('total_units')).all()
+                
+                self.grapics.grid_columnconfigure(i , weight = 1)
 
-        for i, product in enumerate(query[0:values[3]]):
-            
-            self.grapics.grid_columnconfigure(i , weight = 1)
-        
-            column_height = product[-1] / 3
+                if len(product) > 3:
+                    column_height = product[-1] / 15
+                else:    
+                    column_height = product[-1] / 8
+                    
+                print(f'Altura: {column_height}')
 
-            units_label = CTkLabel(self.grapics , fg_color = "transparent" , text = str(product[-1]), width = 40 , corner_radius = 4)
-            units_label.grid(row = 1 , column = i , sticky = "swe" , padx = 10)
-            
-            row = CTkFrame(self.grapics , fg_color = "DeepSkyBlue2" , height = column_height , width = 40 , corner_radius = 4)
-            row.grid(row = 3 , column = i , sticky = "s" , padx = 10)
-            
-            label_refernce = CTkButton(self.grapics , fg_color = "Lightblue4" , text = str(product[-2]) , width = 40, corner_radius = 4 , text_color = "white" , command = lambda reference = product[-2]: DataGraphic.data_to_charge(self, reference))
-            label_refernce.grid(row = 0 , column = i , padx = 10 , pady = 10 , sticky = 'swe')
+                units_label = CTkLabel(self.grapics , fg_color = "transparent" , text = str(product[-1]), width = 40 , corner_radius = 4)
+                units_label.grid(row = 1 , column = i , sticky = "swe" , padx = 10)
+                
+                row = CTkFrame(self.grapics , fg_color = "DeepSkyBlue2" , height = column_height , width = 40 , corner_radius = 4)
+                row.grid(row = 3 , column = i , sticky = "s" , padx = 10)
+                
+                label_refernce = CTkButton(self.grapics , fg_color = "Lightblue4" , text = str(product[-2]) , width = 40, corner_radius = 4 , text_color = "white" , command = lambda reference = product[-2]: DataGraphic.data_to_charge(self, reference))
+                label_refernce.grid(row = 0 , column = i , padx = 10 , pady = 10 , sticky = 'swe')
+                
+        except Exception as e:
+            print(f"[generate_graphic]: {e}")
             
     
     def get_number_of_products(self):
@@ -275,39 +408,47 @@ class DataGraphic:
     
     def data_to_charge(self , reference):
         
-        product = db.session.get(Products , reference)
-        
-        self.units = db.session.query(Orders.product_reference , func.sum(Orders.product_units)).filter(Orders.product_reference == product.reference).first()[-1]
+        try:
+            product = db.session.get(Products , reference)
+            
+            self.units = db.session.query(Orders.product_reference , func.sum(Orders.product_units)).filter(Orders.product_reference == product.reference).first()[-1]
 
-        self.data_graphic_reference = product.reference
-        
-        self.data_graphic_name = product.product_name
-        
-        self.data_graphic_price = product.price
-        
-        self.order_count = db.session.query(Orders).filter(Orders.product_reference == product.reference).group_by(Orders.id_order).all()
+            self.data_graphic_reference = product.reference
+            
+            self.data_graphic_name = product.product_name
+            
+            self.data_graphic_price = product.price
+            
+            self.order_count = db.session.query(Orders).filter(Orders.product_reference == product.reference).group_by(Orders.id_order).all()
 
-        self.products_by_order = self.units // len(self.order_count)
+            self.products_by_order = self.units // len(self.order_count)
 
-        self.total_product_import = self.units * product.price
+            self.total_product_import = self.units * product.price
+            
+            self.order_periodicity = DataGraphic.peridicity(self , reference , len(self.order_count))
+            
+            data = {
+                'reference' : str(product.reference) ,
+                'name' : product.product_name ,
+                'units' : str(self.units) ,
+                'price' : str(self.data_graphic_price) ,
+                'orders' : str(len(self.order_count)) ,
+                'product_by_order' : str(self.products_by_order) ,
+                'total_import' : str(round(self.total_product_import , 2)) , 
+                'periodicity' : str(self.order_periodicity) ,
+                'category' : product.category ,
+                'subcategory' : product.subcategory 
+            }
+            
+            
+            DataGraphic.charge_data(self , data)
+            
+        except AttributeError:
+            pass
         
-        self.order_periodicity = DataGraphic.peridicity(self , reference , len(self.order_count))
-        
-        data = {
-            'reference' : str(product.reference) ,
-            'name' : product.product_name ,
-            'units' : str(self.units) ,
-            'price' : str(self.data_graphic_price) ,
-            'orders' : str(len(self.order_count)) ,
-            'product_by_order' : str(self.products_by_order) ,
-            'total_import' : str(round(self.total_product_import , 2)) , 
-            'periodicity' : str(self.order_periodicity) ,
-            'category' : product.category ,
-            'subcategory' : product.subcategory 
-        }
-        
-        
-        DataGraphic.charge_data(self , data)
+        except Exception as e:
+            print(f"[data_to_charge]{e}")
+            
     
     
     def peridicity(self , reference , len_orders):
