@@ -13,6 +13,10 @@ from tkinter import messagebox as mb
 from sqlalchemy.exc import IntegrityError , SQLAlchemyError 
 from customtkinter import *
 import pandas as pd
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 
 
 add_product_entry = []
@@ -68,20 +72,36 @@ class OrderFunctions:
             
             if product.units == 0:
                 font = 'font_red'
+                state = f"[{product.reference}] {product.product_name}: Agotado "
+                
+                if not product.without_stock_notify:
+                    Mail.whithout_stock_mail(state)
+                    
+                    product.without_stock_notify = True
                 
             if product.discount > 0:
                 font = "font_green"
                 
             if days < 20 and product.units > 0:
                 bg = "expiration"
+                state = f"[{product.reference}] {product.product_name}: {product.units} {product.expiration} - ({days}) "
+                
+                if not product.expiration_notify:
+                    Mail.expiration_date_mail(state) 
+                    product.expiration_notify = True        
                 
                 product.discount = 20
                 
-                db.session.commit()
-                
             if product.units < 25 and product.units != 0:
-                
                 font = "font_orange"
+                state = f"[{product.reference}] {product.product_name}: {product.units} "
+                
+                if not product.low_stock_notify:
+                    Mail.low_stock_mail(state)
+                    
+                    product.low_stock_notify = True
+                    
+            db.session.commit()
 
             self.products_tree.insert("" , 0 , text = product.reference , values = (product.product_name , product.price , product.units , product.category , product.subcategory , product.discount) , tags=(font , bg))
             
@@ -242,10 +262,13 @@ class OrderFunctions:
         else:
             try:
                 if id_order is not None and not self.modify_order_id[0]:
+                    print(f'(Send Order) self.modify_order_id: {self.modify_order_id} ANTES ID: {id_order}' )
+        
                     id_order = id_order.id_order + 1
                     self.modify_order_id[1] = id_order
+                    self.modify_order_id[0] = True
                     
-                    print(f'(Send Order) self.modify_order_id: {self.modify_order_id} Después ID: {id_order}' )
+                    print(f'(Send Order) self.modify_order_id: {self.modify_order_id} DESPUES ID: {id_order}' )
         
                 elif id_order is None and not self.modify_order_id[0]:    
                     id_order = 1 
@@ -253,10 +276,11 @@ class OrderFunctions:
 
                 elif self.modify_order_id[-1] == "modify":                     
                     id_order = self.modify_order_id[1]
+                    print(f'TAMBIEN {id_order}')
                     
                 else:
                     id_order = id_order.id_order
-                
+                    print(f'TAMBIEN (ELSE) {id_order}')
                 OrderFunctions.add_entry_order(self , id_order, buyer , add_product_entry)   
                 db.session.commit()
                 
@@ -679,4 +703,59 @@ class Stock:
                 
                 '''
   
-                
+class Mail:
+    
+    def send_mail(info , subject):
+
+        # Configuración del servidor SMTP de Gmail
+        smtp_server = 'smtp.gmail.com'
+        port = 587  # Puerto SMTP para TLS
+        user = 'provwork2015@gmail.com'
+        password = 'rdsq czly hvlg lcgs'    
+
+        # Crear el mensaje
+        message = MIMEMultipart()
+        message['From'] = 'provwork2015@gmail.com'
+        message['To'] = 'destinatario@example.com'
+        message['Subject'] = subject
+
+        # Cuerpo del mensaje
+        information = info
+        message.attach(MIMEText(information, 'plain'))
+
+        # Enviar el correo
+        try:
+            server = smtplib.SMTP(smtp_server, port)
+            server.starttls()  # Iniciar la conexión segura
+            server.login(user, password)
+            text = message.as_string()
+            server.sendmail(user, 'provwork2015@gmail.com' , text) # El destinatario es el miso que user porque es de prueba.
+            server.quit()
+            print("Correo enviado exitosamente")
+        except Exception as e:
+            print(f"Error al enviar el correo: {e}")
+
+    
+    def expiration_date_mail(state):
+
+        info = f'Estas referencias están cerca de la caducidad:  {state}'
+        subject = 'Caducidad Cercana'
+        
+        Mail.send_mail(info , subject)
+    
+    
+    def low_stock_mail(state):
+
+        info =  f'Quedan pocas existencias de: {state}'
+        subject = 'Stock Bajo'
+        
+        Mail.send_mail(info , subject)
+        
+    def whithout_stock_mail(state):
+        
+        info =  f'Sin Existencias: {state}'
+        subject = 'Producto Agotado'
+        
+        Mail.send_mail(info , subject)
+        
+        

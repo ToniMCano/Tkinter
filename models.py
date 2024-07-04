@@ -167,10 +167,13 @@ class Products(Base):
     subcategory = Column(String , nullable = False)
     description = Column(String)
     discount = Column(Integer , nullable = False)
+    expiration_notify = Column(Boolean) 
+    low_stock_notify  = Column(Boolean)
+    without_stock_notify = Column(Boolean)
     
     orders = relationship("Orders", order_by="Orders.id_order", back_populates="product")
     
-    def __init__(self , reference , product_name , price , units , expiration , category , subcategory , description , discount = 0):
+    def __init__(self , reference , product_name , price , units , expiration , category , subcategory , description , discount = 0 , expiration_notify = 0 , low_stock_notify = 0 , without_stock_notify = 0):
         
         self.reference = reference
         self.product_name = product_name
@@ -181,6 +184,9 @@ class Products(Base):
         self.subcategory = subcategory
         self.description = description
         self.discount = discount
+        self.expiration_notify  = expiration_notify 
+        self.low_stock_notify  =  low_stock_notify 
+        self.without_stock_notify = without_stock_notify
         
         
     def __str__(self):

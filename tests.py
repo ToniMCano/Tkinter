@@ -23,42 +23,49 @@ import numpy as np
 class Test:   
         
     def statistics_dataframe():
-            
-            all_products = db.session.query(Products).all()
-            all_orders = db.session.query(Orders).all()
-        
-            product_reference = list(product.reference for product in all_products)
-            product_stock = list(product.units for product in all_products)
-            
-            
-            
-            orders_id = [order.id_order for order in all_orders]
-            orders_product_reference = [order.product_reference for order in all_orders]
-            orders_product_name = [db.session.get(Products , order.product_reference).product_name for order in all_orders]
-            product_price = [db.session.get(Products , order.product_reference).price for order in all_orders] ###
-            orders_product_units = [order.product_units for order in all_orders]
-            orders_import = [order.total_import for order in all_orders]
-            product_catgory = [db.session.get(Products , order.product_reference).category for order in all_orders]
-            product_subcatgory = [db.session.get(Products , order.product_reference).subcategory for order in all_orders]
-            
-            
-            data = {
-                'orders_id' : orders_id ,
-                'orders_product_reference' : orders_product_reference ,
-                'orders_product_name' : orders_product_name ,
-                'product_price' : product_price ,
-                'orders_product_units' : orders_product_units ,
-                'orders_import' : orders_import ,
-                'product_catgory' : product_catgory ,
-                'product_subcatgory' : product_subcatgory 
-            }
-            
-            
-            data_frame = pd.DataFrame(data)
-            
-            data_frame['total_products_solded'] = data_frame.groupby('orders_product_reference')['orders_product_units'].transform('sum')
-            
-            return data_frame
+        # Consulta optimizada para obtener todos los datos necesarios en una sola consulta
+        query = db.session.query(
+            Orders.id_order,
+            Orders.product_reference,
+            Orders.product_units,
+            Orders.total_import,
+            Products.product_name,
+            Products.price,
+            Products.category,
+            Products.subcategory,
+            Orders.order_date
+        ).join(Products, Orders.product_reference == Products.reference)
+
+        result = query.all()
+
+        # Extracción de los datos de la consulta
+        orders_id = [row.id_order for row in result]
+        orders_product_reference = [row.product_reference for row in result]
+        orders_product_name = [row.product_name for row in result]
+        product_price = [row.price for row in result]
+        orders_product_units = [row.product_units for row in result]
+        orders_import = [row.total_import for row in result]
+        product_catgory = [row.category for row in result]
+        product_subcatgory = [row.subcategory for row in result]
+        orders_date = [row.order_date for row in result]
+
+        data = {
+            'orders_id': orders_id,
+            'orders_product_reference': orders_product_reference,
+            'orders_product_name': orders_product_name,
+            'product_price': product_price,
+            'orders_product_units': orders_product_units,
+            'orders_import': orders_import,
+            'product_catgory': product_catgory,
+            'product_subcatgory': product_subcatgory,
+            'orders_date' : orders_date
+        }
+
+        data_frame = pd.DataFrame(data)
+        data_frame['total_products_solded'] = data_frame.groupby('orders_product_reference')['orders_product_units'].transform('sum')
+
+        return data_frame
+
             
             
 
@@ -78,17 +85,33 @@ class Test:
             print('-----------------')
 
 
-    def product_units_df(): # devuelve el número de 
+    def product_dataframe(): # devuelve el número de 
         
         df = Test.statistics_dataframe()
-        print(df.head())
-        for i, x in enumerate(range(5)):
-            print('-----------------')
-            print(df.groupby('orders_product_reference')['orders_id'].count()) # devuelve el número de pedidos en los que se ha pedido cada producto.
-            print('-----------------')
-
-            print('-----------------')
-            print(df.groupby('orders_product_reference').agg({'orders_product_units': 'sum'  , 'orders_id': 'sum'})) # devuelve la cantidad de unidades que se ha vendido de ese producto.
-            print('-----------------')
-
-Test.product_units_df()
+        
+        
+        new_dataframe = df.groupby('orders_product_reference').agg({
+            'orders_product_units': 'sum',
+            'orders_id' : 'nunique',
+            'orders_product_name' : 'unique',
+            'product_price' : 'unique',
+            'orders_import' : 'sum',
+            #'product_catgory' : 'unique' ,
+            #'product_subcatgory' : 'unique' ,
+            
+        })
+        
+        new_dataframe['average_units_per_order'] = new_dataframe['orders_product_units'] / new_dataframe['orders_id']
+        new_dataframe['average_units_per_order'] = new_dataframe['orders_product_units'] / new_dataframe['orders_id']
+        new = df.loc[df['orders_product_reference'] == 1007 , ['orders_date']].sort_values(by = "orders_date").reset_index(drop=True)
+        print(new.loc[0])
+        newnew =new.sort_values(by = 'orders_date' , ascending = False).reset_index()
+        print(newnew.loc[0])
+        #print(new_dataframe)
+        #print(df.groupby('orders_product_reference')['orders_id'].count().head()) # devuelve el número de pedidos en los que se ha pedido cada producto.
+        #print('-----------------')
+        #print('-----------------')
+        #print(df.groupby('orders_product_reference').agg({'orders_product_units': 'sum'  , 'orders_id': 'count' , 'orders_id': 'nunique'}).head()) # devuelve la cantidad de unidades que se ha vendido de ese producto.
+        #print(f"-------{df['orders_import'].mean()}----------")
+        print(new_dataframe.columns)
+Test.product_dataframe()
