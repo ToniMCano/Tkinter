@@ -159,6 +159,7 @@ class StatisticsTab:
         
         self.products = CTkButton(self.statistics_types , text = "Productos" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: StatisticsValuesColors.choosed_types(self , 'product'))
         self.products.grid(row = 0 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
+        self.products.configure(fg_color = "deep sky blue" )
         
         self.price = CTkButton(self.statistics_types , text = "Precio" , fg_color = "Lightblue4" , text_color = 'white' , font = ("" , 16 , 'bold') , command = lambda: StatisticsValuesColors.choosed_types(self , 'price'))
         self.price.grid(row = 1 , column = 0 , sticky =  'nswe' , padx = 1 , pady = 1)
@@ -189,12 +190,13 @@ class StatisticsTab:
 
         self.more = CTkCheckBox(self.statistics_radiobuttons , text = 'Más Vendidos' , checkbox_height = 15 , checkbox_width = 15 , command = lambda: StatisticsValues.switch_witch(self , "+"))
         self.more.grid(row = 0 , column = 1 , sticky =  W+E , pady = 10)
+        self.more.select()
 
         self.less = CTkCheckBox(self.statistics_radiobuttons , text = 'Menos Vendidos' , checkbox_height = 15 , checkbox_width = 15 , command = lambda: StatisticsValues.switch_witch(self , "-"))
         self.less.grid(row = 0 , column = 2 , sticky =  W+E , pady = 10)
         
-        self.all = CTkCheckBox(self.statistics_radiobuttons , text = 'Todos' , checkbox_height = 15 , checkbox_width = 15 , command = lambda: StatisticsValues.switch_witch(self , "all"))
-        self.all.grid(row = 0 , column = 3 , sticky =  W+E , pady = 10)
+        #self.all = CTkCheckBox(self.statistics_radiobuttons , text = 'Todos' , checkbox_height = 15 , checkbox_width = 15 , command = lambda: StatisticsValues.switch_witch(self , "all"))
+        #self.all.grid(row = 0 , column = 3 , sticky =  W+E , pady = 10)
 
         self.calculate_button = CTkButton(self.graphics_dashboard_frame , text = "Mostrar" , fg_color = "white" , corner_radius = 4 , border_color = 'Lightblue4' , border_width = 5 , text_color = 'Lightblue4' , font = ("" , 14 , 'bold') , height = 25 , command = lambda: StatisticsValues.statistics_values(self))
         self.calculate_button.grid(row = 6 , column = 0 , pady = 10 , sticky =  W+E , padx = 50)

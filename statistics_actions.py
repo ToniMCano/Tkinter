@@ -65,20 +65,20 @@ class StatisticsValues:
         
         if value == "+":
             self.less.deselect()
-            self.all.deselect()
+            #self.all.deselect()
             
             self.statistics_wich.set("+")
             
         elif value == "-":
             self.more.deselect()
-            self.all.deselect()
+            #self.all.deselect()
             
             self.statistics_wich.set("-")
             
-        elif value == "all":
-            self.more.deselect()
-            self.less.deselect()
-            self.statistics_wich.set("all")
+        #elif value == "all":
+            #self.more.deselect()
+            #self.less.deselect()
+            #self.statistics_wich.set("all")
             
         return value
     
@@ -108,7 +108,7 @@ class StatisticsValues:
 
         quantity = Graphics.get_number_of_products(self)
 
-        wich =  StatisticsValues.switch_witch(self , "+") if self.statistics_wich.get() == "" else self.statistics_wich.get()
+        wich =  self.statistics_wich.get()
         
         if not self.all_time.get():
                                           
@@ -305,10 +305,11 @@ class InfoDB:
     def info_db_company(self , values):
         
         try:
+                
             if values[2] == 'product':
                 print("IF [info_db_company]")
                 
-                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).filter(and_(Orders.order_date > values[0] , Orders.order_date < values[1])).order_by(func.sum(Orders.product_units).desc()).all()
+                query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).filter(and_(Orders.order_date > values[0] , Orders.order_date < values[1]))
                 
             elif values[2] == 'price':
                 query = db.session.query(Orders.product_reference,func.sum(Orders.product_units).label('total_units'),Products.price,func.sum(Orders.product_units).label('height')).join(Products, Orders.product_reference == Products.reference).filter(Orders.order_date >= '2024-05-21',Orders.order_date <= '2024-06-01').group_by(Products.price).order_by(desc('total_units')).all()
@@ -336,7 +337,13 @@ class InfoDB:
             else:
                 print("ELSE [info_db_company]")
                 query = db.session.query(Orders.product_reference , func.sum(Orders.product_units).label('total_units')).group_by(Orders.product_reference).order_by(desc('total_units')).all()
-        
+            
+            if values[4] == "-":
+                query = query.order_by(func.sum(Orders.product_units)).all()
+                print('ASC')
+            else:
+                query = query.order_by(func.sum(Orders.product_units).desc()).all()
+                print('DESC')
         except Exception as e:
             print(f"[info_db_company]: {e}")
 
